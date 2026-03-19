@@ -56,7 +56,7 @@ struct HomeView: View {
                         VStack(spacing: 16) {
                             if !overdueTasks.isEmpty  { TaskSectionView(title: "期限超過", tasks: overdueTasks, style: .overdue) }
                             if !todayTasks.isEmpty    { TaskSectionView(title: "今日",     tasks: todayTasks,   style: .today) }
-                            if !upcomingTasks.isEmpty { TaskSectionView(title: "近日中",   tasks: upcomingTasks,style: .upcoming) }
+                            if !upcomingTasks.isEmpty { TaskSectionView(title: "近日中",   tasks: upcomingTasks, style: .upcoming) }
                         }
                         .padding(.horizontal)
                     }
@@ -70,6 +70,11 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $showAddTask) { AddTaskSheet(home: home) }
+            .task {
+                // アプリ起動時に全タスクの通知をスケジュール
+                let allTasks = home.rooms.flatMap { $0.tasks }
+                await NotificationManager.shared.scheduleAll(tasks: allTasks)
+            }
         }
     }
 }
@@ -78,9 +83,9 @@ struct SummaryCardsView: View {
     let overdueCount: Int; let todayCount: Int; let weeklyDone: Int
     var body: some View {
         HStack(spacing: 12) {
-            MetricCard(label: "期限超過",   value: "\(overdueCount)", valueColor: overdueCount > 0 ? .red : .secondary)
+            MetricCard(label: "期限超過",    value: "\(overdueCount)", valueColor: overdueCount > 0 ? .red : .secondary)
             MetricCard(label: "今日のタスク", value: "\(todayCount)",  valueColor: todayCount > 0  ? .orange : .secondary)
-            MetricCard(label: "今週完了",   value: "\(weeklyDone)",  valueColor: .teal)
+            MetricCard(label: "今週完了",    value: "\(weeklyDone)",  valueColor: .teal)
         }
     }
 }
@@ -234,6 +239,10 @@ struct CompleteTaskSheet: View {
                     Button("完了") {
                         let _ = task.markCompleted(duration: duration, memo: memo)
                         try? context.save()
+                        Task {
+                            // 完了後、次回日付が更新されたので通知を再スケジュール
+                            await NotificationManager.shared.scheduleNotifications(for: task)
+                        }
                         dismiss()
                     }.fontWeight(.semibold)
                 }
