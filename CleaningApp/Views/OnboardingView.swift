@@ -1,55 +1,66 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - FloorPlanPreset
+
 struct FloorPlanPreset: Identifiable {
-    let id: String; let name: String; let description: String; let slots: [RoomSlot]
+    let id: String
+    let name: String
+    let description: String
+    let slots: [RoomSlot]
 }
+
 struct RoomSlot: Identifiable {
-    let id: String; let defaultName: String; let defaultIcon: String; let isRequired: Bool
+    let id: String
+    let defaultName: String
+    let defaultIcon: String
+    let isRequired: Bool
 }
 
 extension FloorPlanPreset {
     static let presets: [FloorPlanPreset] = [
         FloorPlanPreset(id: "1r", name: "1R / 1K", description: "一人暮らし向けのシンプルな間取り", slots: [
-            RoomSlot(id: "living", defaultName: "リビング・寝室", defaultIcon: "sofa", isRequired: true),
-            RoomSlot(id: "kitchen", defaultName: "キッチン", defaultIcon: "fork.knife", isRequired: true),
-            RoomSlot(id: "bath", defaultName: "バスルーム", defaultIcon: "shower", isRequired: true),
-            RoomSlot(id: "toilet", defaultName: "トイレ", defaultIcon: "toilet", isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関", defaultIcon: "door.left.hand.open", isRequired: false),
+            RoomSlot(id: "living",   defaultName: "リビング・寝室", defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "kitchen",  defaultName: "キッチン",       defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultName: "バスルーム",     defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultName: "トイレ",         defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultName: "玄関",           defaultIcon: "door.left.hand.open", isRequired: false),
         ]),
         FloorPlanPreset(id: "1ldk", name: "1LDK", description: "一人暮らし〜カップル向け", slots: [
-            RoomSlot(id: "living", defaultName: "リビング", defaultIcon: "sofa", isRequired: true),
-            RoomSlot(id: "bedroom", defaultName: "寝室", defaultIcon: "bed.double", isRequired: true),
-            RoomSlot(id: "kitchen", defaultName: "キッチン", defaultIcon: "fork.knife", isRequired: true),
-            RoomSlot(id: "bath", defaultName: "バスルーム", defaultIcon: "shower", isRequired: true),
-            RoomSlot(id: "toilet", defaultName: "トイレ", defaultIcon: "toilet", isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関", defaultIcon: "door.left.hand.open", isRequired: false),
+            RoomSlot(id: "living",   defaultName: "リビング",   defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "bedroom",  defaultName: "寝室",       defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "kitchen",  defaultName: "キッチン",   defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultName: "バスルーム", defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultName: "トイレ",     defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultName: "玄関",       defaultIcon: "door.left.hand.open", isRequired: false),
         ]),
         FloorPlanPreset(id: "2ldk", name: "2LDK", description: "ファミリー・シェアハウス向け", slots: [
-            RoomSlot(id: "living", defaultName: "リビング", defaultIcon: "sofa", isRequired: true),
-            RoomSlot(id: "bedroom1", defaultName: "寝室1", defaultIcon: "bed.double", isRequired: true),
-            RoomSlot(id: "bedroom2", defaultName: "寝室2", defaultIcon: "bed.double", isRequired: true),
-            RoomSlot(id: "kitchen", defaultName: "キッチン", defaultIcon: "fork.knife", isRequired: true),
-            RoomSlot(id: "bath", defaultName: "バスルーム", defaultIcon: "shower", isRequired: true),
-            RoomSlot(id: "toilet", defaultName: "トイレ", defaultIcon: "toilet", isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関", defaultIcon: "door.left.hand.open", isRequired: false),
-            RoomSlot(id: "storage", defaultName: "収納", defaultIcon: "archivebox", isRequired: false),
+            RoomSlot(id: "living",   defaultName: "リビング",   defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "bedroom1", defaultName: "寝室1",      defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "bedroom2", defaultName: "寝室2",      defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "kitchen",  defaultName: "キッチン",   defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultName: "バスルーム", defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultName: "トイレ",     defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultName: "玄関",       defaultIcon: "door.left.hand.open", isRequired: false),
+            RoomSlot(id: "storage",  defaultName: "収納",       defaultIcon: "archivebox",          isRequired: false),
         ]),
         FloorPlanPreset(id: "3ldk", name: "3LDK以上", description: "大家族・広めの住まい向け", slots: [
-            RoomSlot(id: "living", defaultName: "リビング", defaultIcon: "sofa", isRequired: true),
-            RoomSlot(id: "dining", defaultName: "ダイニング", defaultIcon: "fork.knife", isRequired: true),
-            RoomSlot(id: "bedroom1", defaultName: "寝室1", defaultIcon: "bed.double", isRequired: true),
-            RoomSlot(id: "bedroom2", defaultName: "寝室2", defaultIcon: "bed.double", isRequired: true),
-            RoomSlot(id: "bedroom3", defaultName: "寝室3", defaultIcon: "bed.double", isRequired: false),
-            RoomSlot(id: "kitchen", defaultName: "キッチン", defaultIcon: "fork.knife", isRequired: true),
-            RoomSlot(id: "bath", defaultName: "バスルーム", defaultIcon: "shower", isRequired: true),
-            RoomSlot(id: "toilet", defaultName: "トイレ", defaultIcon: "toilet", isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関", defaultIcon: "door.left.hand.open", isRequired: false),
-            RoomSlot(id: "study", defaultName: "書斎", defaultIcon: "books.vertical", isRequired: false),
+            RoomSlot(id: "living",   defaultName: "リビング",   defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "dining",   defaultName: "ダイニング", defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bedroom1", defaultName: "寝室1",      defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "bedroom2", defaultName: "寝室2",      defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "bedroom3", defaultName: "寝室3",      defaultIcon: "bed.double",          isRequired: false),
+            RoomSlot(id: "kitchen",  defaultName: "キッチン",   defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultName: "バスルーム", defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultName: "トイレ",     defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultName: "玄関",       defaultIcon: "door.left.hand.open", isRequired: false),
+            RoomSlot(id: "study",    defaultName: "書斎",       defaultIcon: "books.vertical",      isRequired: false),
         ]),
         FloorPlanPreset(id: "custom", name: "カスタム", description: "自分で部屋をゼロから設定する", slots: []),
     ]
 }
+
+// MARK: - OnboardingView
 
 struct OnboardingView: View {
     @Environment(\.modelContext) private var context
@@ -131,9 +142,31 @@ private struct StepFloorPlanView: View {
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(FloorPlanPreset.presets) { preset in
-                        FloorPlanPresetCard(preset: preset, isSelected: selectedPreset?.id == preset.id) {
+                        Button {
                             selectedPreset = preset
+                        } label: {
+                            HStack(spacing: 14) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(preset.name).font(.headline).foregroundStyle(selectedPreset?.id == preset.id ? .teal : .primary)
+                                    Text(preset.description).font(.subheadline).foregroundStyle(.secondary)
+                                    if !preset.slots.isEmpty {
+                                        Text(preset.slots.filter { $0.isRequired }.map { $0.defaultName }.joined(separator: "・"))
+                                            .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                    }
+                                }
+                                Spacer()
+                                if selectedPreset?.id == preset.id {
+                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.teal).font(.title3)
+                                }
+                            }
+                            .padding(16)
+                            .background(selectedPreset?.id == preset.id ? Color.teal.opacity(0.08) : Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14)
+                                .stroke(selectedPreset?.id == preset.id ? Color.teal : Color(.systemGray4),
+                                        lineWidth: selectedPreset?.id == preset.id ? 1.5 : 0.5))
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 20).padding(.vertical, 12)
@@ -151,36 +184,10 @@ private struct StepFloorPlanView: View {
     }
 }
 
-private struct FloorPlanPresetCard: View {
-    let preset: FloorPlanPreset; let isSelected: Bool; let onTap: () -> Void
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 14) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(preset.name).font(.headline).foregroundStyle(isSelected ? .teal : .primary)
-                    Text(preset.description).font(.subheadline).foregroundStyle(.secondary)
-                    if !preset.slots.isEmpty {
-                        Text(preset.slots.filter { $0.isRequired }.map { $0.defaultName }.joined(separator: "・"))
-                            .font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                    }
-                }
-                Spacer()
-                if isSelected { Image(systemName: "checkmark.circle.fill").foregroundStyle(.teal).font(.title3) }
-            }
-            .padding(16)
-            .background(isSelected ? Color.teal.opacity(0.08) : Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14)
-                .stroke(isSelected ? Color.teal : Color(.systemGray4), lineWidth: isSelected ? 1.5 : 0.5))
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 private struct StepRoomAssignView: View {
     let preset: FloorPlanPreset
-    @Binding var slotNames: [String: String]
-    @Binding var slotIcons: [String: String]
+    @Binding var slotNames:   [String: String]
+    @Binding var slotIcons:   [String: String]
     @Binding var slotEnabled: [String: Bool]
     let onDone: () -> Void
     let onBack: () -> Void
@@ -188,7 +195,9 @@ private struct StepRoomAssignView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            OnboardingHeader(icon: "pencil.and.list.clipboard", title: "部屋を設定してください", subtitle: "タップして名前・アイコンを変更できます")
+            OnboardingHeader(icon: "pencil.and.list.clipboard",
+                             title: "部屋を設定してください",
+                             subtitle: "タップして名前・アイコンを変更できます")
             List {
                 let required = preset.slots.filter { $0.isRequired }
                 let optional = preset.slots.filter { !$0.isRequired }
@@ -213,7 +222,9 @@ private struct StepRoomAssignView: View {
                     }
                 }
                 Section {
-                    Color.clear.frame(height: 72).listRowBackground(Color.clear).listRowSeparator(.hidden)
+                    Color.clear.frame(height: 72)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                 }
             }
             .listStyle(.insetGrouped)
@@ -222,7 +233,8 @@ private struct StepRoomAssignView: View {
                     .padding(.horizontal, 24).padding(.bottom, 32)
                     .background(LinearGradient(
                         colors: [Color(.systemGroupedBackground).opacity(0), Color(.systemGroupedBackground)],
-                        startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.4)))
+                        startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.4)
+                    ))
             }
         }
         .navigationBarBackButtonHidden()
@@ -235,7 +247,8 @@ private struct StepRoomAssignView: View {
             RoomEditSheet(
                 name: Binding(get: { slotNames[slot.id] ?? slot.defaultName }, set: { slotNames[slot.id] = $0 }),
                 icon: Binding(get: { slotIcons[slot.id] ?? slot.defaultIcon }, set: { slotIcons[slot.id] = $0 }),
-                title: slotNames[slot.id] ?? slot.defaultName)
+                title: slotNames[slot.id] ?? slot.defaultName
+            )
         }
     }
 }
@@ -246,14 +259,19 @@ private struct RoomSlotRow: View {
     let onEdit: () -> Void
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: icon).font(.title3).foregroundStyle(isEnabled ? .teal : .secondary).frame(width: 28)
-            Text(name).font(.subheadline).fontWeight(.medium).foregroundStyle(isEnabled ? .primary : .secondary)
+            Image(systemName: icon).font(.title3)
+                .foregroundStyle(isEnabled ? .teal : .secondary).frame(width: 28)
+            Text(name).font(.subheadline).fontWeight(.medium)
+                .foregroundStyle(isEnabled ? .primary : .secondary)
             Spacer()
             if canToggle {
-                Toggle("", isOn: Binding(get: { isEnabled }, set: { onToggle?($0) })).labelsHidden().tint(.teal)
+                Toggle("", isOn: Binding(get: { isEnabled }, set: { onToggle?($0) }))
+                    .labelsHidden().tint(.teal)
             }
             if isEnabled {
-                Button { onEdit() } label: { Image(systemName: "pencil").font(.caption).foregroundStyle(.secondary) }.buttonStyle(.plain)
+                Button { onEdit() } label: {
+                    Image(systemName: "pencil").font(.caption).foregroundStyle(.secondary)
+                }.buttonStyle(.plain)
             }
         }
     }
@@ -262,7 +280,11 @@ private struct RoomSlotRow: View {
 struct RoomEditSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var name: String; @Binding var icon: String; let title: String
-    private let iconOptions = ["sofa","fork.knife","bed.double","shower","door.left.hand.open","toilet","books.vertical","drop","washer","refrigerator","stove","window.horizontal","archivebox","figure.walk","tv","music.note"]
+    private let iconOptions = [
+        "sofa","fork.knife","bed.double","shower","door.left.hand.open","toilet",
+        "books.vertical","drop","washer","refrigerator","stove","window.horizontal",
+        "archivebox","figure.walk","tv","music.note",
+    ]
     var body: some View {
         NavigationStack {
             Form {
@@ -281,7 +303,11 @@ struct RoomEditSheet: View {
                 }
             }
             .navigationTitle(title).navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完了") { dismiss() }.fontWeight(.semibold) } }
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完了") { dismiss() }.fontWeight(.semibold)
+                }
+            }
         }
         .presentationDetents([.medium])
     }
@@ -293,7 +319,8 @@ struct OnboardingHeader: View {
         VStack(spacing: 10) {
             Image(systemName: icon).font(.system(size: 44)).foregroundStyle(.teal).padding(.top, 40)
             Text(title).font(.title2).fontWeight(.semibold)
-            Text(subtitle).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center).padding(.horizontal, 32)
+            Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
+                .multilineTextAlignment(.center).padding(.horizontal, 32)
         }.padding(.bottom, 8)
     }
 }
