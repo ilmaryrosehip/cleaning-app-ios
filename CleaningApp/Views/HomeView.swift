@@ -7,7 +7,9 @@ struct HomeView: View {
     @State private var showAddTask = false
 
     private var filteredTasks: [CleaningTask] {
-        let tasks = selectedRoom == nil ? home.rooms.flatMap { $0.tasks } : (selectedRoom?.tasks ?? [])
+        let tasks = selectedRoom == nil
+            ? home.rooms.flatMap { $0.tasks }
+            : (selectedRoom?.tasks ?? [])
         return tasks.filter { $0.isActive }.sorted {
             if $0.isOverdue != $1.isOverdue { return $0.isOverdue }
             if $0.isDueToday != $1.isDueToday { return $0.isDueToday }
@@ -21,35 +23,45 @@ struct HomeView: View {
 
     private var completedThisWeek: Int {
         let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now)!
-        return home.rooms.flatMap { $0.tasks }.flatMap { $0.logs }.filter { $0.completedAt >= weekAgo }.count
+        return home.rooms.flatMap { $0.tasks }.flatMap { $0.logs }
+            .filter { $0.completedAt >= weekAgo }.count
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    SummaryCardsView(overdueCount: overdueTasks.count, todayCount: todayTasks.count, weeklyDone: completedThisWeek)
+                    SummaryCardsView(overdueCount: overdueTasks.count,
+                                     todayCount: todayTasks.count,
+                                     weeklyDone: completedThisWeek)
                         .padding(.horizontal)
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            RoomFilterChip(name: "すべて", icon: "square.grid.2x2", isSelected: selectedRoom == nil) { selectedRoom = nil }
+                            RoomFilterChip(name: "すべて", icon: "square.grid.2x2", isSelected: selectedRoom == nil) {
+                                selectedRoom = nil
+                            }
                             ForEach(home.rooms.sorted { $0.sortOrder < $1.sortOrder }) { room in
                                 RoomFilterChip(name: room.name, icon: room.icon, isSelected: selectedRoom == room) {
                                     selectedRoom = selectedRoom == room ? nil : room
                                 }
                             }
-                        }.padding(.horizontal)
+                        }
+                        .padding(.horizontal)
                     }
+
                     if overdueTasks.isEmpty && todayTasks.isEmpty && upcomingTasks.isEmpty {
                         EmptyTasksView().padding(.horizontal)
                     } else {
                         VStack(spacing: 16) {
-                            if !overdueTasks.isEmpty { TaskSectionView(title: "期限超過", tasks: overdueTasks, style: .overdue) }
-                            if !todayTasks.isEmpty { TaskSectionView(title: "今日", tasks: todayTasks, style: .today) }
-                            if !upcomingTasks.isEmpty { TaskSectionView(title: "近日中", tasks: upcomingTasks, style: .upcoming) }
-                        }.padding(.horizontal)
+                            if !overdueTasks.isEmpty  { TaskSectionView(title: "期限超過", tasks: overdueTasks, style: .overdue) }
+                            if !todayTasks.isEmpty    { TaskSectionView(title: "今日",     tasks: todayTasks,   style: .today) }
+                            if !upcomingTasks.isEmpty { TaskSectionView(title: "近日中",   tasks: upcomingTasks,style: .upcoming) }
+                        }
+                        .padding(.horizontal)
                     }
-                }.padding(.vertical)
+                }
+                .padding(.vertical)
             }
             .navigationTitle(home.name)
             .toolbar {
@@ -66,22 +78,25 @@ struct SummaryCardsView: View {
     let overdueCount: Int; let todayCount: Int; let weeklyDone: Int
     var body: some View {
         HStack(spacing: 12) {
-            MetricCard(label: "期限超過", value: "\(overdueCount)", valueColor: overdueCount > 0 ? .red : .secondary)
-            MetricCard(label: "今日のタスク", value: "\(todayCount)", valueColor: todayCount > 0 ? .orange : .secondary)
-            MetricCard(label: "今週完了", value: "\(weeklyDone)", valueColor: .teal)
+            MetricCard(label: "期限超過",   value: "\(overdueCount)", valueColor: overdueCount > 0 ? .red : .secondary)
+            MetricCard(label: "今日のタスク", value: "\(todayCount)",  valueColor: todayCount > 0  ? .orange : .secondary)
+            MetricCard(label: "今週完了",   value: "\(weeklyDone)",  valueColor: .teal)
         }
     }
 }
 
 struct MetricCard: View {
-    let label: String; let value: String; var valueColor: Color = .primary
+    let label: String; let value: String
+    var valueColor: Color = .primary
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label).font(.caption).foregroundStyle(.secondary)
             Text(value).font(.title2).fontWeight(.semibold).foregroundStyle(valueColor)
         }
-        .frame(maxWidth: .infinity, alignment: .leading).padding(12)
-        .background(Color(.systemGray6)).clipShape(RoundedRectangle(cornerRadius: 10))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -92,9 +107,11 @@ struct RoomFilterChip: View {
             Label(name, systemImage: icon).font(.subheadline)
                 .padding(.horizontal, 14).padding(.vertical, 7)
                 .background(isSelected ? Color.teal.opacity(0.12) : Color(.systemGray6))
-                .foregroundStyle(isSelected ? .teal : .secondary).clipShape(Capsule())
+                .foregroundStyle(isSelected ? .teal : .secondary)
+                .clipShape(Capsule())
                 .overlay(Capsule().stroke(isSelected ? Color.teal : Color.clear, lineWidth: 1.5))
-        }.buttonStyle(.plain)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -102,7 +119,13 @@ enum TaskSectionStyle { case overdue, today, upcoming }
 
 struct TaskSectionView: View {
     let title: String; let tasks: [CleaningTask]; let style: TaskSectionStyle
-    var accentColor: Color { switch style { case .overdue: return .red; case .today: return .orange; case .upcoming: return .secondary } }
+    var accentColor: Color {
+        switch style {
+        case .overdue:  return .red
+        case .today:    return .orange
+        case .upcoming: return .secondary
+        }
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title).font(.footnote).fontWeight(.semibold).foregroundStyle(accentColor)
@@ -119,9 +142,14 @@ struct TaskCardView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Button { showComplete = true } label: {
-                Circle().stroke(Color.teal.opacity(0.6), lineWidth: 1.5).frame(width: 24, height: 24)
-                    .overlay(Image(systemName: "checkmark").font(.system(size: 10, weight: .semibold)).foregroundStyle(.teal).opacity(0.4))
-            }.buttonStyle(.plain)
+                Circle().stroke(Color.teal.opacity(0.6), lineWidth: 1.5)
+                    .frame(width: 24, height: 24)
+                    .overlay(Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.teal).opacity(0.4))
+            }
+            .buttonStyle(.plain)
+
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(task.room?.name ?? "").font(.caption).foregroundStyle(.secondary)
@@ -129,23 +157,32 @@ struct TaskCardView: View {
                     StatusBadge(task: task)
                 }
                 Text(task.title).font(.subheadline).fontWeight(.medium)
+
                 if !task.fixtures.isEmpty || !task.supplies.isEmpty {
                     HStack(spacing: 4) {
                         ForEach(Array(task.fixtures.prefix(2))) { fixture in
-                            Label(fixture.name, systemImage: fixture.icon).font(.caption2)
+                            Label(fixture.name, systemImage: fixture.icon)
+                                .font(.caption2)
                                 .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(Color.teal.opacity(0.1)).clipShape(RoundedRectangle(cornerRadius: 4)).foregroundStyle(.teal)
+                                .background(Color.teal.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .foregroundStyle(.teal)
                         }
                         ForEach(Array(task.supplies.prefix(2))) { supply in
-                            Text(supply.name).font(.caption2)
+                            Text(supply.name)
+                                .font(.caption2)
                                 .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(Color(.systemGray5)).clipShape(RoundedRectangle(cornerRadius: 4)).foregroundStyle(.secondary)
+                                .background(Color(.systemGray5))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
             }
         }
-        .padding(12).background(Color(.systemBackground)).clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(12)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray5), lineWidth: 0.5))
         .sheet(isPresented: $showComplete) { CompleteTaskSheet(task: task) }
     }
@@ -165,7 +202,9 @@ struct StatusBadge: View {
                 Text("\(days)日後").foregroundStyle(.secondary).background(Color(.systemGray6))
             }
         }
-        .font(.caption2).fontWeight(.medium).padding(.horizontal, 6).padding(.vertical, 2).clipShape(RoundedRectangle(cornerRadius: 4))
+        .font(.caption2).fontWeight(.medium)
+        .padding(.horizontal, 6).padding(.vertical, 2)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
 
@@ -175,6 +214,7 @@ struct CompleteTaskSheet: View {
     @Bindable var task: CleaningTask
     @State private var duration = 15
     @State private var memo = ""
+
     var body: some View {
         NavigationStack {
             Form {
@@ -191,10 +231,15 @@ struct CompleteTaskSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完了") { let _ = task.markCompleted(duration: duration, memo: memo); try? context.save(); dismiss() }.fontWeight(.semibold)
+                    Button("完了") {
+                        let _ = task.markCompleted(duration: duration, memo: memo)
+                        try? context.save()
+                        dismiss()
+                    }.fontWeight(.semibold)
                 }
             }
-        }.presentationDetents([.medium])
+        }
+        .presentationDetents([.medium])
     }
 }
 
@@ -203,7 +248,9 @@ struct EmptyTasksView: View {
         VStack(spacing: 12) {
             Image(systemName: "checkmark.circle").font(.system(size: 48)).foregroundStyle(.teal.opacity(0.5))
             Text("タスクがありません").font(.headline)
-            Text("右上の＋ボタンでタスクを追加しましょう").font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
-        }.frame(maxWidth: .infinity).padding(.top, 60)
+            Text("右上の＋ボタンでタスクを追加しましょう").font(.subheadline).foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity).padding(.top, 60)
     }
 }
