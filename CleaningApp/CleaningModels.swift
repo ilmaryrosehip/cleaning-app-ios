@@ -135,11 +135,11 @@ final class CleaningTask {
 // MARK: - Frequency（繰り返し種別）
 
 enum Frequency: String, Codable, CaseIterable {
-    case daily    = "毎日"
-    case weekly   = "毎週"
+    case daily   = "毎日"
+    case weekly  = "毎週"
     case biweekly = "隔週"
-    case monthly  = "毎月"
-    case custom   = "カスタム"
+    case monthly = "毎月"
+    case custom  = "カスタム"
 
     func nextDate(from base: Date, intervalDays: Int, weekdays: [Int] = []) -> Date {
         let cal = Calendar.current
@@ -187,7 +187,7 @@ final class TaskLog {
     }
 }
 
-// MARK: - Supply
+// MARK: - Supply（掃除用品）
 
 @Model
 final class Supply {
@@ -214,11 +214,11 @@ final class Supply {
 }
 
 enum SupplyCategory: String, Codable, CaseIterable {
-    case tool       = "電動工具"
-    case cloth      = "クロス・布"
-    case chemical   = "洗剤・薬剤"
-    case disposable = "消耗品"
-    case other      = "その他"
+    case tool        = "電動工具"
+    case cloth       = "クロス・布"
+    case chemical    = "洗剤・薬剤"
+    case disposable  = "消耗品"
+    case other       = "その他"
 }
 
 enum StockStatus: String, Codable, CaseIterable {
@@ -266,6 +266,7 @@ final class Fixture {
     var installedAt: Date?
     var makerName: String
     var modelNumber: String
+
     var room: Room?
 
     @Relationship(deleteRule: .cascade)
@@ -299,6 +300,7 @@ final class ConsumablePart {
     var unitPrice: Int
     var stockCount: Int
     var memo: String
+
     var fixture: Fixture?
 
     @Relationship(deleteRule: .cascade)
@@ -332,6 +334,8 @@ final class ConsumablePart {
         return .ok
     }
 }
+
+// MARK: - ReplacementStatus
 
 enum ReplacementStatus {
     case ok, soon, overdue, unknown
@@ -373,59 +377,74 @@ final class PurchaseRecord {
 // MARK: - FixturePreset
 
 struct FixturePreset: Identifiable {
-    let id: String; let name: String; let icon: String; let parts: [PartPreset]
+    let id: String
+    let name: String
+    let icon: String
+    let parts: [PartPreset]
 }
+
 struct PartPreset: Identifiable {
-    let id: String; let name: String; let replacementMonths: Int; let memo: String
+    let id: String
+    let name: String
+    let replacementMonths: Int
+    let memo: String
 }
 
 extension FixturePreset {
     static let byRoomIcon: [String: [FixturePreset]] = [
-        "shower": bathroomPresets, "drop": bathroomPresets,
-        "fork.knife": kitchenPresets, "washer": laundryPresets,
-        "sofa": livingPresets, "bed.double": bedroomPresets,
+        "shower": bathroomPresets,
+        "drop":   bathroomPresets,
+        "fork.knife": kitchenPresets,
+        "washer": laundryPresets,
+        "sofa":   livingPresets,
+        "bed.double": bedroomPresets,
     ]
+
     static let bathroomPresets: [FixturePreset] = [
         FixturePreset(id: "bath_dryer", name: "浴室乾燥機", icon: "wind", parts: [
             PartPreset(id: "exhaust_filter", name: "排気フィルター", replacementMonths: 6, memo: "目詰まりで乾燥効率低下"),
-            PartPreset(id: "intake_filter", name: "吸気グリルフィルター", replacementMonths: 3, memo: "月1回掃除推奨"),
+            PartPreset(id: "intake_filter",  name: "吸気グリルフィルター", replacementMonths: 3, memo: "月1回掃除推奨"),
         ]),
         FixturePreset(id: "water_heater", name: "給湯器", icon: "flame", parts: [
             PartPreset(id: "heater_filter", name: "給水フィルター", replacementMonths: 12, memo: "年1回点検"),
         ]),
     ]
+
     static let kitchenPresets: [FixturePreset] = [
         FixturePreset(id: "range_hood", name: "レンジフード・換気扇", icon: "arrow.up.to.line", parts: [
-            PartPreset(id: "grease_filter", name: "グリスフィルター", replacementMonths: 3, memo: "油汚れが溜まりやすい"),
+            PartPreset(id: "grease_filter",   name: "グリスフィルター",        replacementMonths: 3, memo: "油汚れが溜まりやすい"),
             PartPreset(id: "charcoal_filter", name: "整流板・活性炭フィルター", replacementMonths: 6, memo: "脱臭効果が落ちたら交換"),
         ]),
         FixturePreset(id: "dishwasher", name: "食洗機", icon: "drop.triangle", parts: [
             PartPreset(id: "mesh_filter", name: "残菜フィルター", replacementMonths: 0, memo: "毎回使用後に清掃"),
-            PartPreset(id: "rinse_aid", name: "リンス剤", replacementMonths: 1, memo: "なくなったら補充"),
+            PartPreset(id: "rinse_aid",   name: "リンス剤",       replacementMonths: 1, memo: "なくなったら補充"),
         ]),
         FixturePreset(id: "refrigerator", name: "冷蔵庫", icon: "refrigerator", parts: [
-            PartPreset(id: "deodorizer", name: "脱臭剤", replacementMonths: 12, memo: "1〜2年で交換"),
-            PartPreset(id: "water_filter", name: "浄水フィルター", replacementMonths: 6, memo: "製氷機付きの場合"),
+            PartPreset(id: "deodorizer",   name: "脱臭剤",         replacementMonths: 12, memo: "1〜2年で交換"),
+            PartPreset(id: "water_filter", name: "浄水フィルター", replacementMonths: 6,  memo: "製氷機付きの場合"),
         ]),
     ]
+
     static let laundryPresets: [FixturePreset] = [
         FixturePreset(id: "washer_dryer", name: "洗濯乾燥機", icon: "washer", parts: [
-            PartPreset(id: "lint_filter", name: "糸くずフィルター", replacementMonths: 0, memo: "毎回使用後に清掃"),
-            PartPreset(id: "dry_filter", name: "乾燥フィルター", replacementMonths: 0, memo: "乾燥後に清掃"),
-            PartPreset(id: "drum_cleaner", name: "槽洗浄剤", replacementMonths: 1, memo: "月1回の槽クリーン"),
+            PartPreset(id: "lint_filter",  name: "糸くずフィルター", replacementMonths: 0, memo: "毎回使用後に清掃"),
+            PartPreset(id: "dry_filter",   name: "乾燥フィルター",   replacementMonths: 0, memo: "乾燥後に清掃"),
+            PartPreset(id: "drum_cleaner", name: "槽洗浄剤",         replacementMonths: 1, memo: "月1回の槽クリーン"),
         ]),
     ]
+
     static let livingPresets: [FixturePreset] = [
         FixturePreset(id: "aircon", name: "エアコン", icon: "air.conditioner.horizontal", parts: [
-            PartPreset(id: "aircon_filter", name: "フィルター", replacementMonths: 0, memo: "2週間に1回清掃推奨"),
+            PartPreset(id: "aircon_filter",    name: "フィルター",     replacementMonths: 0,  memo: "2週間に1回清掃推奨"),
             PartPreset(id: "aircon_deodorize", name: "脱臭フィルター", replacementMonths: 12, memo: "年1回交換"),
         ]),
         FixturePreset(id: "air_purifier", name: "空気清浄機", icon: "aqi.medium", parts: [
-            PartPreset(id: "hepa_filter", name: "HEPAフィルター", replacementMonths: 24, memo: "2年に1回が目安"),
-            PartPreset(id: "deodor_filter2", name: "脱臭フィルター", replacementMonths: 12, memo: "年1回交換"),
-            PartPreset(id: "prefilter", name: "プレフィルター", replacementMonths: 0, memo: "2週間に1回清掃"),
+            PartPreset(id: "hepa_filter",    name: "HEPAフィルター",  replacementMonths: 24, memo: "2年に1回が目安"),
+            PartPreset(id: "deodor_filter2", name: "脱臭フィルター",  replacementMonths: 12, memo: "年1回交換"),
+            PartPreset(id: "prefilter",      name: "プレフィルター",  replacementMonths: 0,  memo: "2週間に1回清掃"),
         ]),
     ]
+
     static let bedroomPresets: [FixturePreset] = [
         FixturePreset(id: "aircon_bed", name: "エアコン", icon: "air.conditioner.horizontal", parts: [
             PartPreset(id: "aircon_filter2", name: "フィルター", replacementMonths: 0, memo: "2週間に1回清掃推奨"),
