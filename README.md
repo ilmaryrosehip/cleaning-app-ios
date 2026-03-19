@@ -1,2 +1,16 @@
-# cleaning-app-ios
-iOS掃除管理アプリ — SwiftUI + SwiftData
+# CleaningApp iOS
+
+SwiftUI + SwiftData で構築した家の掃除管理アプリです。
+
+## 機能
+- 間取り設定（1R〜3LDK以上のプリセット対応）
+- 部屋ごとの掃除タスク管理（曜日・頻度指定）
+- 設備・器具管理（フィルター等の消耗品・購入履歴）
+- 掃除用品の在庫管理・購入メモ
+- タスク実施履歴
+- タスクと設備の紐づけ
+
+## 技術スタック
+- Swift 6.0 / SwiftUI / SwiftData
+- iOS 26.0+
+- Xcode 26.3
