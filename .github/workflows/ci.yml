@@ -15,11 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16
-        run: sudo xcode-select -s /Applications/Xcode_16.3.app
-
       - name: Xcode version
         run: xcodebuild -version
+
+      - name: Show simulators
+        run: xcrun simctl list devices available | grep iPhone
 
       - name: Build
         run: |
@@ -28,7 +28,8 @@ jobs:
             -scheme CleaningApp \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
 
       - name: Test
         run: |
@@ -37,4 +38,5 @@ jobs:
             -scheme CleaningAppTests \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
