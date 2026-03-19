@@ -21,9 +21,6 @@ jobs:
       - name: Xcode version
         run: xcodebuild -version
 
-      - name: Show simulators
-        run: xcrun simctl list devices available | grep iPhone
-
       - name: Build
         run: |
           xcodebuild build \
