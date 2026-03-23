@@ -71,7 +71,6 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showAddTask) { AddTaskSheet(home: home) }
             .task {
-                // アプリ起動時に全タスクの通知をスケジュール
                 let allTasks = home.rooms.flatMap { $0.tasks }
                 await NotificationManager.shared.scheduleAll(tasks: allTasks)
             }
@@ -213,12 +212,20 @@ struct StatusBadge: View {
     }
 }
 
+// MARK: - CompleteTaskSheet（二重完了ワーニング付き）
+
 struct CompleteTaskSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Bindable var task: CleaningTask
     @State private var duration = 15
     @State private var memo = ""
+    @State private var showDuplicateWarning = false
+
+    /// 今日すでに完了済みかどうか
+    private var completedTodayCount: Int {
+        task.logs.filter { Calendar.current.isDateInToday($0.completedAt) }.count
+    }
 
     var body: some View {
         NavigationStack {
@@ -227,6 +234,25 @@ struct CompleteTaskSheet: View {
                     LabeledContent("部屋", value: task.room?.name ?? "-")
                     LabeledContent("内容", value: task.title)
                 }
+
+                // 今日すでに完了している場合に警告バナーを表示
+                if completedTodayCount > 0 {
+                    Section {
+                        HStack(spacing: 10) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("本日 \(completedTodayCount) 回完了済み")
+                                    .font(.subheadline).fontWeight(.semibold)
+                                    .foregroundStyle(.orange)
+                                Text("本日すでに完了が記録されています。続けて記録しますか？")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+
                 Section("記録") {
                     Stepper("所要時間: \(duration)分", value: $duration, in: 1...180, step: 5)
                     TextField("メモ（任意）", text: $memo, axis: .vertical).lineLimit(3)
@@ -237,18 +263,32 @@ struct CompleteTaskSheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("完了") {
-                        let _ = task.markCompleted(duration: duration, memo: memo)
-                        try? context.save()
-                        Task {
-                            // 完了後、次回日付が更新されたので通知を再スケジュール
-                            await NotificationManager.shared.scheduleNotifications(for: task)
+                        if completedTodayCount > 0 {
+                            // 二重完了の場合は確認アラートを表示
+                            showDuplicateWarning = true
+                        } else {
+                            saveCompletion()
                         }
-                        dismiss()
                     }.fontWeight(.semibold)
                 }
             }
+            .alert("二重完了の確認", isPresented: $showDuplicateWarning) {
+                Button("キャンセル", role: .cancel) {}
+                Button("それでも記録する", role: .destructive) { saveCompletion() }
+            } message: {
+                Text("本日すでに \(completedTodayCount) 回完了が記録されています。\nもう一度記録してよいですか？")
+            }
         }
         .presentationDetents([.medium])
+    }
+
+    private func saveCompletion() {
+        let _ = task.markCompleted(duration: duration, memo: memo)
+        try? context.save()
+        Task {
+            await NotificationManager.shared.scheduleNotifications(for: task)
+        }
+        dismiss()
     }
 }
 
