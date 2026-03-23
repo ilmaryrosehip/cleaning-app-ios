@@ -24,14 +24,10 @@ final class NotificationManager {
 
     // MARK: - 全タスクの通知をスケジュール
 
-    /// 既存の通知を全削除してから登録し直す
     func scheduleAll(tasks: [CleaningTask]) async {
-        // まず全削除
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-
         let granted = await requestAuthorization()
         guard granted else { return }
-
         for task in tasks where task.isActive {
             await scheduleNotifications(for: task)
         }
@@ -41,125 +37,93 @@ final class NotificationManager {
 
     func scheduleNotifications(for task: CleaningTask) async {
         guard task.isActive else { return }
-
         let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: notificationIDs(for: task))
 
-        // このタスクの既存通知を削除
-        let existingIDs = notificationIDs(for: task)
-        center.removePendingNotificationRequests(withIdentifiers: existingIDs)
+        // タスクのデータをMainActor上でコピーしてからスケジュール
+        let taskID      = task.id.uuidString
+        let taskTitle   = task.title
+        let roomName    = task.room?.name ?? ""
+        let frequency   = task.frequency
+        let weekdays    = task.weekdays
+        let nextDueDate = task.nextDueDate
 
-        switch task.frequency {
-        case .daily:
-            await scheduleDailyNotification(for: task)
-
-        case .weekly:
-            await scheduleWeekdayNotifications(for: task, weekMultiplier: 1)
-
-        case .biweekly:
-            await scheduleWeekdayNotifications(for: task, weekMultiplier: 2)
-
-        case .monthly:
-            await scheduleMonthlyNotification(for: task)
-
-        case .custom:
-            await scheduleCustomNotification(for: task)
-        }
+        await scheduleRequests(
+            taskID: taskID,
+            taskTitle: taskTitle,
+            roomName: roomName,
+            frequency: frequency,
+            weekdays: weekdays,
+            nextDueDate: nextDueDate
+        )
     }
 
     // MARK: - タスク通知削除
 
     func cancelNotifications(for task: CleaningTask) {
-        let ids = notificationIDs(for: task)
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: notificationIDs(for: task))
     }
 
     // MARK: - Private helpers
 
     private func notificationIDs(for task: CleaningTask) -> [String] {
-        // 曜日ごとのIDを7つ生成（余分なものは登録されない）
         (0..<7).map { "task-\(task.id.uuidString)-weekday-\($0)" }
-        + ["task-\(task.id.uuidString)-single"]
+            + ["task-\(task.id.uuidString)-single"]
     }
 
-    private func content(for task: CleaningTask) -> UNMutableNotificationContent {
-        let content = UNMutableNotificationContent()
-        content.title = "掃除の時間です 🏠"
-        let roomName = task.room?.name ?? ""
-        content.body = roomName.isEmpty ? task.title : "\(roomName)：\(task.title)"
-        content.sound = .default
-        content.badge = 1
-        return content
-    }
+    /// MainActorから切り離してスケジュール（Sendable な値型のみ受け取る）
+    private nonisolated func scheduleRequests(
+        taskID: String,
+        taskTitle: String,
+        roomName: String,
+        frequency: Frequency,
+        weekdays: [Int],
+        nextDueDate: Date
+    ) async {
+        let body = roomName.isEmpty ? taskTitle : "\(roomName)：\(taskTitle)"
+        let center = UNUserNotificationCenter.current()
 
-    /// 毎日 午前9時に通知
-    private func scheduleDailyNotification(for task: CleaningTask) async {
-        var trigger = DateComponents()
-        trigger.hour = 9
-        trigger.minute = 0
-
-        let request = UNNotificationRequest(
-            identifier: "task-\(task.id.uuidString)-single",
-            content: content(for: task),
-            trigger: UNCalendarNotificationTrigger(dateMatching: trigger, repeats: true)
-        )
-        try? await UNUserNotificationCenter.current().add(request)
-    }
-
-    /// 毎週 or 隔週: 指定曜日に 午前9時に通知
-    private func scheduleWeekdayNotifications(for task: CleaningTask, weekMultiplier: Int) async {
-        let weekdays = task.weekdays.isEmpty
-            ? [Calendar.current.component(.weekday, from: task.nextDueDate) - 1]
-            : task.weekdays
-
-        for weekdayRaw in weekdays {
-            // UNCalendarNotificationTrigger の weekday は 1=日〜7=土
-            let calWeekday = weekdayRaw + 1
-
-            var trigger = DateComponents()
-            trigger.weekday = calWeekday
-            trigger.hour = 9
-            trigger.minute = 0
-
-            let identifier = "task-\(task.id.uuidString)-weekday-\(weekdayRaw)"
-            let request = UNNotificationRequest(
-                identifier: identifier,
-                content: content(for: task),
-                trigger: UNCalendarNotificationTrigger(dateMatching: trigger, repeats: true)
-            )
-            try? await UNUserNotificationCenter.current().add(request)
+        func makeContent() -> UNMutableNotificationContent {
+            let c = UNMutableNotificationContent()
+            c.title = "掃除の時間です 🏠"
+            c.body  = body
+            c.sound = .default
+            c.badge = 1
+            return c
         }
-    }
 
-    /// 毎月: nextDueDate の日付(日)に 午前9時に通知
-    private func scheduleMonthlyNotification(for task: CleaningTask) async {
-        let day = Calendar.current.component(.day, from: task.nextDueDate)
+        func addRequest(identifier: String, components: DateComponents, repeats: Bool) async {
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: repeats)
+            let req = UNNotificationRequest(identifier: identifier, content: makeContent(), trigger: trigger)
+            try? await center.add(req)
+        }
 
-        var trigger = DateComponents()
-        trigger.day = day
-        trigger.hour = 9
-        trigger.minute = 0
+        switch frequency {
+        case .daily:
+            var comps = DateComponents(); comps.hour = 9; comps.minute = 0
+            await addRequest(identifier: "task-\(taskID)-single", components: comps, repeats: true)
 
-        let request = UNNotificationRequest(
-            identifier: "task-\(task.id.uuidString)-single",
-            content: content(for: task),
-            trigger: UNCalendarNotificationTrigger(dateMatching: trigger, repeats: true)
-        )
-        try? await UNUserNotificationCenter.current().add(request)
-    }
+        case .weekly, .biweekly:
+            let days = weekdays.isEmpty
+                ? [Calendar.current.component(.weekday, from: nextDueDate) - 1]
+                : weekdays
+            for wd in days {
+                var comps = DateComponents()
+                comps.weekday = wd + 1; comps.hour = 9; comps.minute = 0
+                await addRequest(identifier: "task-\(taskID)-weekday-\(wd)", components: comps, repeats: true)
+            }
 
-    /// カスタム: nextDueDate に一度だけ通知
-    private func scheduleCustomNotification(for task: CleaningTask) async {
-        guard task.nextDueDate > .now else { return }
+        case .monthly:
+            let day = Calendar.current.component(.day, from: nextDueDate)
+            var comps = DateComponents(); comps.day = day; comps.hour = 9; comps.minute = 0
+            await addRequest(identifier: "task-\(taskID)-single", components: comps, repeats: true)
 
-        var comps = Calendar.current.dateComponents([.year, .month, .day], from: task.nextDueDate)
-        comps.hour = 9
-        comps.minute = 0
-
-        let request = UNNotificationRequest(
-            identifier: "task-\(task.id.uuidString)-single",
-            content: content(for: task),
-            trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
-        )
-        try? await UNUserNotificationCenter.current().add(request)
+        case .custom:
+            guard nextDueDate > .now else { return }
+            var comps = Calendar.current.dateComponents([.year, .month, .day], from: nextDueDate)
+            comps.hour = 9; comps.minute = 0
+            await addRequest(identifier: "task-\(taskID)-single", components: comps, repeats: false)
+        }
     }
 }
