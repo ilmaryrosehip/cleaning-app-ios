@@ -18,6 +18,8 @@
 		B009 = {isa = PBXBuildFile; fileRef = A010; };
 		B010 = {isa = PBXBuildFile; fileRef = A002; };
 		B011 = {isa = PBXBuildFile; fileRef = A012; };
+		B012 = {isa = PBXBuildFile; fileRef = A013; };
+		B013 = {isa = PBXBuildFile; fileRef = A014; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +35,8 @@
 		A010 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningAppTests.swift; sourceTree = "<group>"; };
 		A011 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CleaningAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureViews.swift; sourceTree = "<group>"; };
+		A013 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		A014 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +79,7 @@
 				A001,
 				A002,
 				A003,
+				A014,
 				VIEWSGROUP,
 				A008,
 			);
@@ -89,6 +94,7 @@
 				A006,
 				A007,
 				A012,
+				A013,
 			);
 			name = Views;
 			path = Views;
@@ -198,6 +204,8 @@
 				B006,
 				B007,
 				B011,
+				B012,
+				B013,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
