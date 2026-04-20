@@ -178,12 +178,35 @@ final class TaskLog {
     var memo: String
     var task: CleaningTask?
 
+    /// このタスク実行時に使用したパーツの記録
+    @Relationship(deleteRule: .cascade)
+    var partUsages: [TaskPartUsage] = []
+
     init(task: CleaningTask? = nil, durationMinutes: Int = 0, memo: String = "") {
         self.id = UUID()
         self.completedAt = .now
         self.durationMinutes = durationMinutes
         self.memo = memo
         self.task = task
+    }
+}
+
+// MARK: - TaskPartUsage（タスク実行時のパーツ使用記録）
+
+/// タスクを完了したときに消耗品パーツを何個使ったかを記録する
+@Model
+final class TaskPartUsage {
+    var id: UUID
+    var usedCount: Int          // 使用数
+    var partName: String        // パーツ名（パーツが削除されても履歴を残すためコピー）
+    var log: TaskLog?
+    var part: ConsumablePart?   // 元のパーツ（在庫差し引き用）
+
+    init(part: ConsumablePart, usedCount: Int) {
+        self.id = UUID()
+        self.usedCount = usedCount
+        self.partName = part.name
+        self.part = part
     }
 }
 
@@ -197,6 +220,8 @@ final class Supply {
     var stockStatus: StockStatus
     var lastUsedAt: Date?
     var memo: String
+    var purchaseStoreName: String   // 購入先名称
+    var purchaseURL: String         // 購入先URL
 
     @Relationship(deleteRule: .cascade)
     var purchaseItems: [PurchaseItem] = []
@@ -204,12 +229,15 @@ final class Supply {
     @Relationship(inverse: \CleaningTask.supplies)
     var tasks: [CleaningTask] = []
 
-    init(name: String, category: SupplyCategory = .tool, memo: String = "") {
+    init(name: String, category: SupplyCategory = .tool, memo: String = "",
+         purchaseStoreName: String = "", purchaseURL: String = "") {
         self.id = UUID()
         self.name = name
         self.category = category
         self.stockStatus = .ok
         self.memo = memo
+        self.purchaseStoreName = purchaseStoreName
+        self.purchaseURL = purchaseURL
     }
 }
 
@@ -459,6 +487,7 @@ extension ModelContainer {
     static let cleaningApp: ModelContainer = {
         let schema = Schema([
             Home.self, Room.self, CleaningTask.self, TaskLog.self,
+            TaskPartUsage.self,
             Supply.self, PurchaseItem.self,
             Fixture.self, ConsumablePart.self, PurchaseRecord.self,
         ])
