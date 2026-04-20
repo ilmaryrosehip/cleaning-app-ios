@@ -75,6 +75,11 @@ struct SupplyRow: View {
                     }
                 }
                 .font(.caption).foregroundStyle(.secondary)
+                // 購入先名が登録されている場合は表示
+                if !supply.purchaseStoreName.isEmpty {
+                    Label(supply.purchaseStoreName, systemImage: "cart")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
             }
             Spacer()
             Text(supply.stockStatus.rawValue).font(.caption).fontWeight(.medium)
@@ -85,10 +90,13 @@ struct SupplyRow: View {
     }
 }
 
+// MARK: - SupplyDetailView
+
 struct SupplyDetailView: View {
     @Bindable var supply: Supply
     @Environment(\.modelContext) private var context
     @State private var showAddPurchase = false
+    @State private var showEdit = false
 
     var body: some View {
         List {
@@ -102,6 +110,35 @@ struct SupplyDetailView: View {
                     LabeledContent("最終使用", value: used.formatted(date: .abbreviated, time: .omitted))
                 }
             }
+
+            // 購入先情報セクション
+            Section("購入先") {
+                if supply.purchaseStoreName.isEmpty && supply.purchaseURL.isEmpty {
+                    Text("購入先が未登録です")
+                        .font(.subheadline).foregroundStyle(.tertiary)
+                } else {
+                    if !supply.purchaseStoreName.isEmpty {
+                        LabeledContent("店名", value: supply.purchaseStoreName)
+                    }
+                    if !supply.purchaseURL.isEmpty,
+                       let url = URL(string: supply.purchaseURL) {
+                        Link(destination: url) {
+                            HStack {
+                                Image(systemName: "arrow.up.right.square")
+                                    .foregroundStyle(.teal)
+                                Text("購入ページを開く")
+                                    .foregroundStyle(.teal)
+                                Spacer()
+                                Text(supply.purchaseStoreName.isEmpty ? supply.purchaseURL : supply.purchaseStoreName)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+                }
+            }
+
             Section("使用しているタスク") {
                 if supply.tasks.isEmpty {
                     Text("紐づいたタスクがありません").foregroundStyle(.tertiary).font(.subheadline)
@@ -114,18 +151,79 @@ struct SupplyDetailView: View {
                     }
                 }
             }
+
             Section("購入メモ") {
                 ForEach(supply.purchaseItems.sorted { $0.isPurchased == false && $1.isPurchased }) { item in
                     PurchaseItemRow(item: item)
                 }
                 Button { showAddPurchase = true } label: { Label("購入メモを追加", systemImage: "plus") }
             }
+
             if !supply.memo.isEmpty {
                 Section("メモ") { Text(supply.memo).foregroundStyle(.secondary).font(.subheadline) }
             }
         }
         .navigationTitle(supply.name)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("編集") { showEdit = true }
+            }
+        }
         .sheet(isPresented: $showAddPurchase) { AddPurchaseItemSheet(supply: supply) }
+        .sheet(isPresented: $showEdit) { EditSupplySheet(supply: supply) }
+    }
+}
+
+// MARK: - EditSupplySheet（購入先・URL編集）
+
+struct EditSupplySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
+    @Bindable var supply: Supply
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("用品名") {
+                    TextField("用品名", text: $supply.name)
+                }
+                Section("カテゴリ") {
+                    Picker("カテゴリ", selection: $supply.category) {
+                        ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                Section("購入先") {
+                    TextField("店名（例: Amazon、ヨドバシ）", text: $supply.purchaseStoreName)
+                    TextField("購入URL（任意）", text: $supply.purchaseURL)
+                        .keyboardType(.URL)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                    // URLプレビュー
+                    if !supply.purchaseURL.isEmpty,
+                       let url = URL(string: supply.purchaseURL) {
+                        Link(destination: url) {
+                            Label("リンクを確認", systemImage: "arrow.up.right.square")
+                                .font(.caption).foregroundStyle(.teal)
+                        }
+                    }
+                }
+                Section("メモ") {
+                    TextField("任意", text: $supply.memo, axis: .vertical).lineLimit(3)
+                }
+            }
+            .navigationTitle("用品を編集").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        try? context.save()
+                        dismiss()
+                    }.fontWeight(.semibold)
+                }
+            }
+        }
+        .presentationDetents([.large])
     }
 }
 
@@ -152,12 +250,17 @@ struct PurchaseItemRow: View {
     }
 }
 
+// MARK: - AddSupplySheet
+
 struct AddSupplySheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @State private var name = ""
     @State private var category: SupplyCategory = .tool
+    @State private var purchaseStoreName = ""
+    @State private var purchaseURL = ""
     @State private var memo = ""
+
     var body: some View {
         NavigationStack {
             Form {
@@ -168,6 +271,13 @@ struct AddSupplySheet: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                Section("購入先（任意）") {
+                    TextField("店名（例: Amazon）", text: $purchaseStoreName)
+                    TextField("購入URL", text: $purchaseURL)
+                        .keyboardType(.URL)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                }
                 Section("メモ") { TextField("任意", text: $memo, axis: .vertical).lineLimit(3) }
             }
             .navigationTitle("用品を追加").navigationBarTitleDisplayMode(.inline)
@@ -175,14 +285,15 @@ struct AddSupplySheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("追加") {
-                        let s = Supply(name: name, category: category, memo: memo)
+                        let s = Supply(name: name, category: category, memo: memo,
+                                       purchaseStoreName: purchaseStoreName, purchaseURL: purchaseURL)
                         context.insert(s); try? context.save(); dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty).fontWeight(.semibold)
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
     }
 }
 
@@ -253,13 +364,13 @@ struct PurchaseListSheet: View {
     }
 }
 
-// MARK: - HistoryView（タスク絞り込み検索付き）
+// MARK: - HistoryView
 
 struct HistoryView: View {
     let home: Home
     @State private var selectedPeriod: HistoryPeriod = .week
     @State private var searchText = ""
-    @State private var selectedTaskID: UUID? = nil   // nil = すべて
+    @State private var selectedTaskID: UUID? = nil
 
     enum HistoryPeriod: String, CaseIterable {
         case week = "今週", month = "今月", all = "すべて"
@@ -273,21 +384,15 @@ struct HistoryView: View {
         }
     }
 
-    /// 全タスク一覧（プルダウン用）
     private var allTasks: [CleaningTask] {
         home.rooms.flatMap { $0.tasks }.sorted { $0.title < $1.title }
     }
 
-    /// フィルタ済みログ
     private var logs: [TaskLog] {
         home.rooms.flatMap { $0.tasks }.flatMap { $0.logs }
             .filter { log in
                 guard log.completedAt >= selectedPeriod.startDate else { return false }
-                // タスク絞り込み
-                if let id = selectedTaskID {
-                    guard log.task?.id == id else { return false }
-                }
-                // テキスト検索（タスク名・部屋名・メモ）
+                if let id = selectedTaskID { guard log.task?.id == id else { return false } }
                 if !searchText.isEmpty {
                     let q = searchText.lowercased()
                     let titleMatch = (log.task?.title ?? "").lowercased().contains(q)
@@ -310,33 +415,20 @@ struct HistoryView: View {
         return grouped.sorted { $0.key > $1.key }
     }
 
-    /// 選択中タスク名（ピッカー表示用）
-    private var selectedTaskName: String {
-        guard let id = selectedTaskID else { return "すべて" }
-        return allTasks.first(where: { $0.id == id })?.title ?? "すべて"
-    }
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // 期間ピッカー
                 Picker("期間", selection: $selectedPeriod) {
                     ForEach(HistoryPeriod.allCases, id: \.self) { p in Text(p.rawValue).tag(p) }
                 }
                 .pickerStyle(.segmented).padding(.horizontal).padding(.top, 12)
 
-                // タスク絞り込み
                 if !allTasks.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            TaskFilterChip(name: "すべて", isSelected: selectedTaskID == nil) {
-                                selectedTaskID = nil
-                            }
+                            TaskFilterChip(name: "すべて", isSelected: selectedTaskID == nil) { selectedTaskID = nil }
                             ForEach(allTasks) { task in
-                                TaskFilterChip(
-                                    name: task.title,
-                                    isSelected: selectedTaskID == task.id
-                                ) {
+                                TaskFilterChip(name: task.title, isSelected: selectedTaskID == task.id) {
                                     selectedTaskID = selectedTaskID == task.id ? nil : task.id
                                 }
                             }
@@ -345,14 +437,12 @@ struct HistoryView: View {
                     }
                 }
 
-                // サマリー
                 HStack(spacing: 12) {
                     MetricCard(label: "完了タスク", value: "\(logs.count)", valueColor: .teal)
                     MetricCard(label: "合計時間",   value: "\(totalMinutes)分", valueColor: .teal)
                 }
                 .padding(.horizontal).padding(.bottom, 8)
 
-                // ログ一覧
                 if logs.isEmpty {
                     ContentUnavailableView("記録がありません", systemImage: "clock",
                                            description: Text("タスクを完了すると履歴が表示されます"))
@@ -371,17 +461,11 @@ struct HistoryView: View {
     }
 }
 
-// MARK: - TaskFilterChip（履歴画面のタスク絞り込みチップ）
-
 struct TaskFilterChip: View {
-    let name: String
-    let isSelected: Bool
-    let onTap: () -> Void
-
+    let name: String; let isSelected: Bool; let onTap: () -> Void
     var body: some View {
         Button(action: onTap) {
-            Text(name)
-                .font(.caption).fontWeight(isSelected ? .semibold : .regular)
+            Text(name).font(.caption).fontWeight(isSelected ? .semibold : .regular)
                 .padding(.horizontal, 12).padding(.vertical, 6)
                 .background(isSelected ? Color.teal.opacity(0.15) : Color(.systemGray6))
                 .foregroundStyle(isSelected ? .teal : .secondary)
@@ -404,6 +488,19 @@ struct HistoryLogRow: View {
                 if !log.memo.isEmpty {
                     Text(log.memo).font(.caption).foregroundStyle(.secondary).italic()
                 }
+                // 使用したパーツの記録
+                if !log.partUsages.isEmpty {
+                    HStack(spacing: 4) {
+                        ForEach(log.partUsages) { usage in
+                            Text("\(usage.partName) ×\(usage.usedCount)")
+                                .font(.caption2)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Color.orange.opacity(0.1))
+                                .foregroundStyle(.orange)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                        }
+                    }
+                }
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
@@ -420,25 +517,21 @@ struct HistoryLogRow: View {
     }
 }
 
-// MARK: - ConsumablePartStockView（消耗品在庫管理）
+// MARK: - ConsumablePartStockView
 
 struct ConsumablePartStockView: View {
     @Query private var fixtures: [Fixture]
     @Environment(\.modelContext) private var context
     @State private var showAddRecord: ConsumablePart? = nil
 
-    /// 全消耗品パーツをフラットに取得
     private var allParts: [ConsumablePart] {
         fixtures.flatMap { $0.parts }.sorted { $0.name < $1.name }
     }
-
-    /// 在庫なし・少ないものを先に表示
     private var sortedParts: [ConsumablePart] {
         allParts.sorted {
             let s0 = $0.stockCount == 0 ? 0 : ($0.stockCount <= 1 ? 1 : 2)
             let s1 = $1.stockCount == 0 ? 0 : ($1.stockCount <= 1 ? 1 : 2)
-            if s0 != s1 { return s0 < s1 }
-            return $0.name < $1.name
+            return s0 != s1 ? s0 < s1 : $0.name < $1.name
         }
     }
 
@@ -449,67 +542,41 @@ struct ConsumablePartStockView: View {
                                        description: Text("設備画面からパーツを追加できます"))
                     .listRowBackground(Color.clear)
             } else {
-                // 在庫なし・残り少セクション
                 let lowStock = sortedParts.filter { $0.stockCount <= 1 }
                 if !lowStock.isEmpty {
                     Section {
-                        ForEach(lowStock) { part in
-                            PartStockRow(part: part) { showAddRecord = part }
-                        }
+                        ForEach(lowStock) { part in PartStockRow(part: part) { showAddRecord = part } }
                     } header: {
-                        Label("在庫少・なし", systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(.orange)
+                        Label("在庫少・なし", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
                     }
                 }
-
-                // 通常在庫セクション
                 let normalStock = sortedParts.filter { $0.stockCount > 1 }
                 if !normalStock.isEmpty {
                     Section("在庫あり") {
-                        ForEach(normalStock) { part in
-                            PartStockRow(part: part) { showAddRecord = part }
-                        }
+                        ForEach(normalStock) { part in PartStockRow(part: part) { showAddRecord = part } }
                     }
                 }
             }
         }
-        .navigationTitle("消耗品在庫")
-        .navigationBarTitleDisplayMode(.large)
-        .sheet(item: $showAddRecord) { part in
-            QuickStockAddSheet(part: part)
-        }
+        .navigationTitle("消耗品在庫").navigationBarTitleDisplayMode(.large)
+        .sheet(item: $showAddRecord) { part in QuickStockAddSheet(part: part) }
     }
 }
 
-// MARK: - PartStockRow
-
 struct PartStockRow: View {
-    let part: ConsumablePart
-    let onAddStock: () -> Void
-
+    let part: ConsumablePart; let onAddStock: () -> Void
     private var stockColor: Color {
-        if part.stockCount == 0 { return .red }
-        if part.stockCount <= 1 { return .orange }
-        return .teal
+        part.stockCount == 0 ? .red : (part.stockCount <= 1 ? .orange : .teal)
     }
-
     var body: some View {
         HStack(spacing: 12) {
-            // 在庫数バッジ
             ZStack {
-                Circle()
-                    .fill(stockColor.opacity(0.12))
-                    .frame(width: 40, height: 40)
+                Circle().fill(stockColor.opacity(0.12)).frame(width: 40, height: 40)
                 VStack(spacing: 0) {
-                    Text("\(part.stockCount)")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(stockColor)
-                    Text("個")
-                        .font(.system(size: 9))
-                        .foregroundStyle(stockColor.opacity(0.8))
+                    Text("\(part.stockCount)").font(.system(size: 16, weight: .bold)).foregroundStyle(stockColor)
+                    Text("個").font(.system(size: 9)).foregroundStyle(stockColor.opacity(0.8))
                 }
             }
-
             VStack(alignment: .leading, spacing: 2) {
                 Text(part.name).font(.subheadline).fontWeight(.medium)
                 if let fixtureName = part.fixture?.name {
@@ -517,23 +584,13 @@ struct PartStockRow: View {
                 }
                 if let next = part.nextReplacementDate {
                     let days = Calendar.current.dateComponents([.day], from: .now, to: next).day ?? 0
-                    if days < 0 {
-                        Text("交換期限 \(abs(days))日超過").font(.caption).foregroundStyle(.red)
-                    } else if days <= 30 {
-                        Text("交換まで \(days)日").font(.caption).foregroundStyle(.orange)
-                    }
+                    if days < 0 { Text("交換期限 \(abs(days))日超過").font(.caption).foregroundStyle(.red) }
+                    else if days <= 30 { Text("交換まで \(days)日").font(.caption).foregroundStyle(.orange) }
                 }
             }
-
             Spacer()
-
-            // 在庫を追加するボタン
-            Button {
-                onAddStock()
-            } label: {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.teal)
+            Button { onAddStock() } label: {
+                Image(systemName: "plus.circle.fill").font(.title2).foregroundStyle(.teal)
             }
             .buttonStyle(.plain)
         }
@@ -541,13 +598,10 @@ struct PartStockRow: View {
     }
 }
 
-// MARK: - QuickStockAddSheet（まとめ購入・在庫追加シート）
-
 struct QuickStockAddSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Bindable var part: ConsumablePart
-
     @State private var quantity = 1
     @State private var unitPrice: Int
     @State private var storeName: String
@@ -565,8 +619,7 @@ struct QuickStockAddSheet: View {
             Form {
                 Section {
                     HStack {
-                        Image(systemName: "shippingbox.fill")
-                            .font(.title2).foregroundStyle(.teal)
+                        Image(systemName: "shippingbox.fill").font(.title2).foregroundStyle(.teal)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(part.name).font(.headline)
                             if let fixtureName = part.fixture?.name {
@@ -574,18 +627,15 @@ struct QuickStockAddSheet: View {
                             }
                         }
                         Spacer()
-                        Text("現在 \(part.stockCount)個")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                        Text("現在 \(part.stockCount)個").font(.subheadline).foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 }
-
                 Section("購入数量") {
                     Stepper("購入数: \(quantity)個", value: $quantity, in: 1...99)
                     Text("購入後の在庫: \(part.stockCount + quantity)個")
                         .font(.caption).foregroundStyle(.teal)
                 }
-
                 Section("購入情報") {
                     DatePicker("購入日", selection: $purchasedAt, displayedComponents: .date)
                     TextField("購入店名（例: Amazon）", text: $storeName)
@@ -593,11 +643,8 @@ struct QuickStockAddSheet: View {
                         TextField("円", value: $unitPrice, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
-                    if unitPrice > 0 {
-                        LabeledContent("合計", value: "¥\((unitPrice * quantity).formatted())")
-                    }
+                    if unitPrice > 0 { LabeledContent("合計", value: "¥\((unitPrice * quantity).formatted())") }
                 }
-
                 Section {
                     Toggle("今回購入分を交換済みとして記録", isOn: $markAsReplaced).tint(.teal)
                     if markAsReplaced {
@@ -618,25 +665,14 @@ struct QuickStockAddSheet: View {
     }
 
     private func saveStock() {
-        // 在庫を増やす
         part.stockCount += quantity
-
-        // 購入履歴を記録
-        let record = PurchaseRecord(
-            quantity: quantity,
-            unitPrice: unitPrice,
-            storeName: storeName,
-            memo: "在庫補充"
-        )
+        let record = PurchaseRecord(quantity: quantity, unitPrice: unitPrice, storeName: storeName, memo: "在庫補充")
         record.purchasedAt = purchasedAt
         record.part = part
         context.insert(record)
-
-        // 購入先情報を更新
         if !storeName.isEmpty { part.purchaseStoreName = storeName }
         if unitPrice > 0 { part.unitPrice = unitPrice }
         if markAsReplaced { part.lastReplacedAt = purchasedAt }
-
         try? context.save()
         dismiss()
     }
