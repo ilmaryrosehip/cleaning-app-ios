@@ -212,7 +212,7 @@ struct StatusBadge: View {
     }
 }
 
-// MARK: - CompleteTaskSheet（二重完了ワーニング付き）
+// MARK: - CompleteTaskSheet（二重完了ワーニング＋パーツ使用数記録付き）
 
 struct CompleteTaskSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -222,7 +222,14 @@ struct CompleteTaskSheet: View {
     @State private var memo = ""
     @State private var showDuplicateWarning = false
 
-    /// 今日すでに完了済みかどうか
+    /// タスクに紐づいた設備のパーツ一覧（在庫管理対象）
+    private var availableParts: [ConsumablePart] {
+        task.fixtures.flatMap { $0.parts }.sorted { $0.name < $1.name }
+    }
+
+    /// パーツID → 使用数のマップ（0 = 使用しない）
+    @State private var partUsageMap: [UUID: Int] = [:]
+
     private var completedTodayCount: Int {
         task.logs.filter { Calendar.current.isDateInToday($0.completedAt) }.count
     }
@@ -235,21 +242,74 @@ struct CompleteTaskSheet: View {
                     LabeledContent("内容", value: task.title)
                 }
 
-                // 今日すでに完了している場合に警告バナーを表示
+                // 二重完了ワーニング
                 if completedTodayCount > 0 {
                     Section {
                         HStack(spacing: 10) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.orange)
+                            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("本日 \(completedTodayCount) 回完了済み")
-                                    .font(.subheadline).fontWeight(.semibold)
-                                    .foregroundStyle(.orange)
+                                    .font(.subheadline).fontWeight(.semibold).foregroundStyle(.orange)
                                 Text("本日すでに完了が記録されています。続けて記録しますか？")
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                         }
                         .padding(.vertical, 4)
+                    }
+                }
+
+                // 消耗品パーツ使用数セクション
+                if !availableParts.isEmpty {
+                    Section {
+                        ForEach(availableParts) { part in
+                            let usedCount = partUsageMap[part.id] ?? 0
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(part.name).font(.subheadline).fontWeight(.medium)
+                                    HStack(spacing: 6) {
+                                        if let fixtureName = part.fixture?.name {
+                                            Text(fixtureName).font(.caption).foregroundStyle(.secondary)
+                                        }
+                                        // 在庫数表示
+                                        Text("在庫 \(part.stockCount)個")
+                                            .font(.caption)
+                                            .foregroundStyle(part.stockCount == 0 ? .red : .secondary)
+                                    }
+                                }
+                                Spacer()
+                                // 使用数ステッパー
+                                HStack(spacing: 8) {
+                                    Button {
+                                        let current = partUsageMap[part.id] ?? 0
+                                        if current > 0 { partUsageMap[part.id] = current - 1 }
+                                    } label: {
+                                        Image(systemName: "minus.circle")
+                                            .foregroundStyle(usedCount > 0 ? .teal : Color(.systemGray3))
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    Text("\(usedCount)個")
+                                        .font(.subheadline).fontWeight(.semibold)
+                                        .frame(minWidth: 36)
+                                        .foregroundStyle(usedCount > 0 ? .teal : .secondary)
+
+                                    Button {
+                                        let current = partUsageMap[part.id] ?? 0
+                                        partUsageMap[part.id] = current + 1
+                                    } label: {
+                                        Image(systemName: "plus.circle")
+                                            .foregroundStyle(.teal)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    } header: {
+                        Text("消耗品パーツの使用数")
+                    } footer: {
+                        Text("使用した分だけ在庫から差し引かれます")
+                            .font(.caption)
                     }
                 }
 
@@ -264,7 +324,6 @@ struct CompleteTaskSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("完了") {
                         if completedTodayCount > 0 {
-                            // 二重完了の場合は確認アラートを表示
                             showDuplicateWarning = true
                         } else {
                             saveCompletion()
@@ -279,11 +338,32 @@ struct CompleteTaskSheet: View {
                 Text("本日すでに \(completedTodayCount) 回完了が記録されています。\nもう一度記録してよいですか？")
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
+        .onAppear {
+            // 初期化：全パーツの使用数を0に設定
+            for part in availableParts {
+                partUsageMap[part.id] = 0
+            }
+        }
     }
 
     private func saveCompletion() {
-        let _ = task.markCompleted(duration: duration, memo: memo)
+        let log = task.markCompleted(duration: duration, memo: memo)
+
+        // パーツ使用数を記録して在庫を差し引く
+        for part in availableParts {
+            let used = partUsageMap[part.id] ?? 0
+            guard used > 0 else { continue }
+
+            // 使用記録を作成
+            let usage = TaskPartUsage(part: part, usedCount: used)
+            usage.log = log
+            context.insert(usage)
+
+            // 在庫から差し引く（0未満にはならない）
+            part.stockCount = max(0, part.stockCount - used)
+        }
+
         try? context.save()
         Task {
             await NotificationManager.shared.scheduleNotifications(for: task)
