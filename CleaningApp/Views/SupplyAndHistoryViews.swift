@@ -75,7 +75,6 @@ struct SupplyRow: View {
                     }
                 }
                 .font(.caption).foregroundStyle(.secondary)
-                // 購入先名が登録されている場合は表示
                 if !supply.purchaseStoreName.isEmpty {
                     Label(supply.purchaseStoreName, systemImage: "cart")
                         .font(.caption2).foregroundStyle(.secondary)
@@ -111,7 +110,6 @@ struct SupplyDetailView: View {
                 }
             }
 
-            // 購入先情報セクション
             Section("購入先") {
                 if supply.purchaseStoreName.isEmpty && supply.purchaseURL.isEmpty {
                     Text("購入先が未登録です")
@@ -124,15 +122,11 @@ struct SupplyDetailView: View {
                        let url = URL(string: supply.purchaseURL) {
                         Link(destination: url) {
                             HStack {
-                                Image(systemName: "arrow.up.right.square")
-                                    .foregroundStyle(.teal)
-                                Text("購入ページを開く")
-                                    .foregroundStyle(.teal)
+                                Image(systemName: "arrow.up.right.square").foregroundStyle(.teal)
+                                Text("購入ページを開く").foregroundStyle(.teal)
                                 Spacer()
                                 Text(supply.purchaseStoreName.isEmpty ? supply.purchaseURL : supply.purchaseStoreName)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
+                                    .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                             }
                         }
                     }
@@ -174,7 +168,7 @@ struct SupplyDetailView: View {
     }
 }
 
-// MARK: - EditSupplySheet（購入先・URL編集）
+// MARK: - EditSupplySheet
 
 struct EditSupplySheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -184,9 +178,7 @@ struct EditSupplySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("用品名") {
-                    TextField("用品名", text: $supply.name)
-                }
+                Section("用品名") { TextField("用品名", text: $supply.name) }
                 Section("カテゴリ") {
                     Picker("カテゴリ", selection: $supply.category) {
                         ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
@@ -196,30 +188,21 @@ struct EditSupplySheet: View {
                 Section("購入先") {
                     TextField("店名（例: Amazon、ヨドバシ）", text: $supply.purchaseStoreName)
                     TextField("購入URL（任意）", text: $supply.purchaseURL)
-                        .keyboardType(.URL)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                    // URLプレビュー
-                    if !supply.purchaseURL.isEmpty,
-                       let url = URL(string: supply.purchaseURL) {
+                        .keyboardType(.URL).autocorrectionDisabled().textInputAutocapitalization(.never)
+                    if !supply.purchaseURL.isEmpty, let url = URL(string: supply.purchaseURL) {
                         Link(destination: url) {
                             Label("リンクを確認", systemImage: "arrow.up.right.square")
                                 .font(.caption).foregroundStyle(.teal)
                         }
                     }
                 }
-                Section("メモ") {
-                    TextField("任意", text: $supply.memo, axis: .vertical).lineLimit(3)
-                }
+                Section("メモ") { TextField("任意", text: $supply.memo, axis: .vertical).lineLimit(3) }
             }
             .navigationTitle("用品を編集").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") {
-                        try? context.save()
-                        dismiss()
-                    }.fontWeight(.semibold)
+                    Button("保存") { try? context.save(); dismiss() }.fontWeight(.semibold)
                 }
             }
         }
@@ -233,8 +216,7 @@ struct PurchaseItemRow: View {
     var body: some View {
         HStack {
             Button {
-                item.markAsPurchased()
-                try? context.save()
+                item.markAsPurchased(); try? context.save()
             } label: {
                 Image(systemName: item.isPurchased ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(item.isPurchased ? .teal : .secondary)
@@ -274,9 +256,7 @@ struct AddSupplySheet: View {
                 Section("購入先（任意）") {
                     TextField("店名（例: Amazon）", text: $purchaseStoreName)
                     TextField("購入URL", text: $purchaseURL)
-                        .keyboardType(.URL)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL).autocorrectionDisabled().textInputAutocapitalization(.never)
                 }
                 Section("メモ") { TextField("任意", text: $memo, axis: .vertical).lineLimit(3) }
             }
@@ -488,7 +468,6 @@ struct HistoryLogRow: View {
                 if !log.memo.isEmpty {
                     Text(log.memo).font(.caption).foregroundStyle(.secondary).italic()
                 }
-                // 使用したパーツの記録
                 if !log.partUsages.isEmpty {
                     HStack(spacing: 4) {
                         ForEach(log.partUsages) { usage in
@@ -538,9 +517,21 @@ struct ConsumablePartStockView: View {
     var body: some View {
         List {
             if allParts.isEmpty {
-                ContentUnavailableView("消耗品パーツがありません", systemImage: "shippingbox",
-                                       description: Text("設備画面からパーツを追加できます"))
-                    .listRowBackground(Color.clear)
+                // メッセージをより具体的な案内に変更
+                Section {
+                    VStack(spacing: 12) {
+                        Image(systemName: "shippingbox")
+                            .font(.system(size: 40)).foregroundStyle(.secondary)
+                        Text("消耗品パーツがありません")
+                            .font(.headline)
+                        Text("パーツを追加するには：\n「間取り」タブ → 部屋を選択 →「設備・器具」タブ → 設備を選択 → パーツを追加")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+                }
+                .listRowBackground(Color.clear)
             } else {
                 let lowStock = sortedParts.filter { $0.stockCount <= 1 }
                 if !lowStock.isEmpty {
