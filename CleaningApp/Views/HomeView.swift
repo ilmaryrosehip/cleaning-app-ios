@@ -1,16 +1,19 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct HomeView: View {
     let home: Home
     @State private var selectedRoom: Room? = nil
     @State private var showAddTask = false
 
+    private var allTasks: [CleaningTask] {
+        home.rooms.flatMap { $0.tasks }.filter { $0.isActive }
+    }
+
     private var filteredTasks: [CleaningTask] {
-        let tasks = selectedRoom == nil
-            ? home.rooms.flatMap { $0.tasks }
-            : (selectedRoom?.tasks ?? [])
-        return tasks.filter { $0.isActive }.sorted {
+        let tasks = selectedRoom == nil ? allTasks : (selectedRoom?.tasks.filter { $0.isActive } ?? [])
+        return tasks.sorted {
             if $0.isOverdue != $1.isOverdue { return $0.isOverdue }
             if $0.isDueToday != $1.isDueToday { return $0.isDueToday }
             return $0.nextDueDate < $1.nextDueDate
@@ -23,8 +26,7 @@ struct HomeView: View {
 
     private var completedThisWeek: Int {
         let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now)!
-        return home.rooms.flatMap { $0.tasks }.flatMap { $0.logs }
-            .filter { $0.completedAt >= weekAgo }.count
+        return allTasks.flatMap { $0.logs }.filter { $0.completedAt >= weekAgo }.count
     }
 
     var body: some View {
@@ -71,10 +73,68 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showAddTask) { AddTaskSheet(home: home) }
             .task {
-                let allTasks = home.rooms.flatMap { $0.tasks }
                 await NotificationManager.shared.scheduleAll(tasks: allTasks)
+                updateWidgetData()
             }
+            .onChange(of: allTasks.count) { _, _ in updateWidgetData() }
         }
+    }
+
+    // MARK: - ウィジェットデータ更新
+    private func updateWidgetData() {
+        let cal = Calendar.current
+        let weekAgo = cal.date(byAdding: .day, value: -7, to: .now)!
+
+        func dueDateText(_ task: CleaningTask) -> String {
+            if task.isOverdue {
+                let days = cal.dateComponents([.day], from: task.nextDueDate, to: .now).day ?? 0
+                return "\(days)日超過"
+            }
+            if task.isDueToday { return "今日" }
+            let days = cal.dateComponents([.day], from: .now, to: task.nextDueDate).day ?? 0
+            if days == 1 { return "明日" }
+            return "\(days)日後"
+        }
+
+        func toWidgetEntry(_ task: CleaningTask) -> WidgetTaskEntry {
+            WidgetTaskEntry(
+                id: task.id,
+                title: task.title,
+                roomName: task.room?.name ?? "",
+                isOverdue: task.isOverdue,
+                isDueToday: task.isDueToday,
+                nextDueDateText: dueDateText(task)
+            )
+        }
+
+        let overdue  = allTasks.filter { $0.isOverdue }.map { toWidgetEntry($0) }
+        let today    = allTasks.filter { $0.isDueToday }.map { toWidgetEntry($0) }
+        let upcoming = allTasks.filter { !$0.isOverdue && !$0.isDueToday }
+            .sorted { $0.nextDueDate < $1.nextDueDate }
+            .first.map { toWidgetEntry($0) }
+
+        // 在庫不足パーツ
+        let lowStock: [WidgetPartEntry] = home.rooms
+            .flatMap { $0.fixtures }
+            .flatMap { $0.parts }
+            .filter { $0.stockCount <= 1 }
+            .sorted { $0.stockCount < $1.stockCount }
+            .map { WidgetPartEntry(id: $0.id, name: $0.name, fixtureName: $0.fixture?.name ?? "", stockCount: $0.stockCount) }
+
+        // 週間達成数
+        let weeklyDone = allTasks.flatMap { $0.logs }.filter { $0.completedAt >= weekAgo }.count
+
+        let data = WidgetSharedData(
+            todayTasks: today,
+            overdueTasks: overdue,
+            upcomingTask: upcoming,
+            lowStockParts: lowStock,
+            weeklyDoneCount: weeklyDone,
+            weeklyTotalCount: allTasks.count,
+            updatedAt: .now
+        )
+        WidgetDataStore.save(data)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 
@@ -212,7 +272,7 @@ struct StatusBadge: View {
     }
 }
 
-// MARK: - CompleteTaskSheet（二重完了ワーニング＋パーツ使用数記録付き）
+// MARK: - CompleteTaskSheet
 
 struct CompleteTaskSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -221,14 +281,11 @@ struct CompleteTaskSheet: View {
     @State private var duration = 15
     @State private var memo = ""
     @State private var showDuplicateWarning = false
+    @State private var partUsageMap: [UUID: Int] = [:]
 
-    /// タスクに紐づいた設備のパーツ一覧（在庫管理対象）
     private var availableParts: [ConsumablePart] {
         task.fixtures.flatMap { $0.parts }.sorted { $0.name < $1.name }
     }
-
-    /// パーツID → 使用数のマップ（0 = 使用しない）
-    @State private var partUsageMap: [UUID: Int] = [:]
 
     private var completedTodayCount: Int {
         task.logs.filter { Calendar.current.isDateInToday($0.completedAt) }.count
@@ -241,8 +298,6 @@ struct CompleteTaskSheet: View {
                     LabeledContent("部屋", value: task.room?.name ?? "-")
                     LabeledContent("内容", value: task.title)
                 }
-
-                // 二重完了ワーニング
                 if completedTodayCount > 0 {
                     Section {
                         HStack(spacing: 10) {
@@ -257,8 +312,6 @@ struct CompleteTaskSheet: View {
                         .padding(.vertical, 4)
                     }
                 }
-
-                // 消耗品パーツ使用数セクション
                 if !availableParts.isEmpty {
                     Section {
                         ForEach(availableParts) { part in
@@ -270,49 +323,36 @@ struct CompleteTaskSheet: View {
                                         if let fixtureName = part.fixture?.name {
                                             Text(fixtureName).font(.caption).foregroundStyle(.secondary)
                                         }
-                                        // 在庫数表示
                                         Text("在庫 \(part.stockCount)個")
                                             .font(.caption)
                                             .foregroundStyle(part.stockCount == 0 ? .red : .secondary)
                                     }
                                 }
                                 Spacer()
-                                // 使用数ステッパー
                                 HStack(spacing: 8) {
                                     Button {
-                                        let current = partUsageMap[part.id] ?? 0
-                                        if current > 0 { partUsageMap[part.id] = current - 1 }
+                                        let c = partUsageMap[part.id] ?? 0
+                                        if c > 0 { partUsageMap[part.id] = c - 1 }
                                     } label: {
                                         Image(systemName: "minus.circle")
                                             .foregroundStyle(usedCount > 0 ? .teal : Color(.systemGray3))
-                                    }
-                                    .buttonStyle(.plain)
-
+                                    }.buttonStyle(.plain)
                                     Text("\(usedCount)個")
                                         .font(.subheadline).fontWeight(.semibold)
                                         .frame(minWidth: 36)
                                         .foregroundStyle(usedCount > 0 ? .teal : .secondary)
-
                                     Button {
-                                        let current = partUsageMap[part.id] ?? 0
-                                        partUsageMap[part.id] = current + 1
+                                        partUsageMap[part.id] = (partUsageMap[part.id] ?? 0) + 1
                                     } label: {
-                                        Image(systemName: "plus.circle")
-                                            .foregroundStyle(.teal)
-                                    }
-                                    .buttonStyle(.plain)
+                                        Image(systemName: "plus.circle").foregroundStyle(.teal)
+                                    }.buttonStyle(.plain)
                                 }
                             }
                             .padding(.vertical, 2)
                         }
-                    } header: {
-                        Text("消耗品パーツの使用数")
-                    } footer: {
-                        Text("使用した分だけ在庫から差し引かれます")
-                            .font(.caption)
-                    }
+                    } header: { Text("消耗品パーツの使用数") }
+                    footer: { Text("使用した分だけ在庫から差し引かれます").font(.caption) }
                 }
-
                 Section("記録") {
                     Stepper("所要時間: \(duration)分", value: $duration, in: 1...180, step: 5)
                     TextField("メモ（任意）", text: $memo, axis: .vertical).lineLimit(3)
@@ -323,11 +363,8 @@ struct CompleteTaskSheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("完了") {
-                        if completedTodayCount > 0 {
-                            showDuplicateWarning = true
-                        } else {
-                            saveCompletion()
-                        }
+                        if completedTodayCount > 0 { showDuplicateWarning = true }
+                        else { saveCompletion() }
                     }.fontWeight(.semibold)
                 }
             }
@@ -339,35 +376,22 @@ struct CompleteTaskSheet: View {
             }
         }
         .presentationDetents([.large])
-        .onAppear {
-            // 初期化：全パーツの使用数を0に設定
-            for part in availableParts {
-                partUsageMap[part.id] = 0
-            }
-        }
+        .onAppear { for part in availableParts { partUsageMap[part.id] = 0 } }
     }
 
     private func saveCompletion() {
         let log = task.markCompleted(duration: duration, memo: memo)
-
-        // パーツ使用数を記録して在庫を差し引く
         for part in availableParts {
             let used = partUsageMap[part.id] ?? 0
             guard used > 0 else { continue }
-
-            // 使用記録を作成
             let usage = TaskPartUsage(part: part, usedCount: used)
             usage.log = log
             context.insert(usage)
-
-            // 在庫から差し引く（0未満にはならない）
             part.stockCount = max(0, part.stockCount - used)
         }
-
         try? context.save()
-        Task {
-            await NotificationManager.shared.scheduleNotifications(for: task)
-        }
+        Task { await NotificationManager.shared.scheduleNotifications(for: task) }
+        WidgetCenter.shared.reloadAllTimelines()
         dismiss()
     }
 }
