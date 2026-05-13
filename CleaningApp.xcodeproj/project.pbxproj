@@ -3,11 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		769B89762FB29EA20001CCB2 /* WidgetSharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 769B89752FB29EA20001CCB2 /* WidgetSharedData.swift */; };
+		769CD6BD2FB5341F00B21E63 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 769CD6BC2FB5341F00B21E63 /* WidgetKit.framework */; };
+		769CD6BF2FB5341F00B21E63 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 769CD6BE2FB5341F00B21E63 /* SwiftUI.framework */; };
+		769CD6D12FB5342000B21E63 /* PikariWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 769CD6BA2FB5341F00B21E63 /* PikariWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B001 /* CleaningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A001 /* CleaningApp.swift */; };
 		B002 /* CleaningModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A002 /* CleaningModels.swift */; };
 		B003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A003 /* ContentView.swift */; };
@@ -31,10 +34,34 @@
 			remoteGlobalIDString = TARGET1;
 			remoteInfo = CleaningApp;
 		};
+		769CD6CE2FB5342000B21E63 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = PROJECT /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 769CD6B92FB5341F00B21E63;
+			remoteInfo = PikariWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		769CD6D02FB5342000B21E63 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				769CD6D12FB5342000B21E63 /* PikariWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		769B89752FB29EA20001CCB2 /* WidgetSharedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSharedData.swift; sourceTree = "<group>"; };
+		769CD6BA2FB5341F00B21E63 /* PikariWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PikariWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		769CD6BC2FB5341F00B21E63 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		769CD6BE2FB5341F00B21E63 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		A001 /* CleaningApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningApp.swift; sourceTree = "<group>"; };
 		A002 /* CleaningModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningModels.swift; sourceTree = "<group>"; };
 		A003 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -51,7 +78,30 @@
 		A014 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		769CD6D42FB5342000B21E63 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 769CD6B92FB5341F00B21E63 /* PikariWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		769CD6C02FB5341F00B21E63 /* PikariWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (769CD6D42FB5342000B21E63 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = PikariWidget; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		769CD6B72FB5341F00B21E63 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				769CD6BF2FB5341F00B21E63 /* SwiftUI.framework in Frameworks */,
+				769CD6BD2FB5341F00B21E63 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C003 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -69,6 +119,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		769CD6BB2FB5341F00B21E63 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				769CD6BC2FB5341F00B21E63 /* WidgetKit.framework */,
+				769CD6BE2FB5341F00B21E63 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		APPGROUP /* CleaningApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -88,6 +147,7 @@
 			children = (
 				A009 /* CleaningApp.app */,
 				A011 /* CleaningAppTests.xctest */,
+				769CD6BA2FB5341F00B21E63 /* PikariWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -97,6 +157,8 @@
 			children = (
 				APPGROUP /* CleaningApp */,
 				TESTGROUP /* CleaningAppTests */,
+				769CD6C02FB5341F00B21E63 /* PikariWidget */,
+				769CD6BB2FB5341F00B21E63 /* Frameworks */,
 				PRODUCTS /* Products */,
 			);
 			sourceTree = "<group>";
@@ -125,6 +187,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		769CD6B92FB5341F00B21E63 /* PikariWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 769CD6D52FB5342000B21E63 /* Build configuration list for PBXNativeTarget "PikariWidgetExtension" */;
+			buildPhases = (
+				769CD6B62FB5341F00B21E63 /* Sources */,
+				769CD6B72FB5341F00B21E63 /* Frameworks */,
+				769CD6B82FB5341F00B21E63 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				769CD6C02FB5341F00B21E63 /* PikariWidget */,
+			);
+			name = PikariWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = PikariWidgetExtension;
+			productReference = 769CD6BA2FB5341F00B21E63 /* PikariWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		TARGET1 /* CleaningApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BUILDCONFLIST /* Build configuration list for PBXNativeTarget "CleaningApp" */;
@@ -132,10 +216,12 @@
 				C001 /* Sources */,
 				C002 /* Resources */,
 				C003 /* Frameworks */,
+				769CD6D02FB5342000B21E63 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				769CD6CF2FB5342000B21E63 /* PBXTargetDependency */,
 			);
 			name = CleaningApp;
 			productName = CleaningApp;
@@ -166,9 +252,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					769CD6B92FB5341F00B21E63 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
 					TARGET1 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -193,11 +282,19 @@
 			targets = (
 				TARGET1 /* CleaningApp */,
 				TARGET2 /* CleaningAppTests */,
+				769CD6B92FB5341F00B21E63 /* PikariWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		769CD6B82FB5341F00B21E63 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C002 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -209,6 +306,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		769CD6B62FB5341F00B21E63 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -239,6 +343,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		769CD6CF2FB5342000B21E63 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 769CD6B92FB5341F00B21E63 /* PikariWidgetExtension */;
+			targetProxy = 769CD6CE2FB5342000B21E63 /* PBXContainerItemProxy */;
+		};
 		TESTDEP /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = TARGET1 /* CleaningApp */;
@@ -247,6 +356,137 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		769CD6D22FB5342000B21E63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PikariWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PikariWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hiroki.CleaningApp.PikariWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		769CD6D32FB5342000B21E63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PikariWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PikariWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hiroki.CleaningApp.PikariWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		DEBUG1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -412,6 +652,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		769CD6D52FB5342000B21E63 /* Build configuration list for PBXNativeTarget "PikariWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				769CD6D22FB5342000B21E63 /* Debug */,
+				769CD6D32FB5342000B21E63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BUILDCONFLIST /* Build configuration list for PBXNativeTarget "CleaningApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
