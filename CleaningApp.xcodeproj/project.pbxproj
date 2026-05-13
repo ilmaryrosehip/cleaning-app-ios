@@ -62,6 +62,8 @@
 		769CD6BA2FB5341F00B21E63 /* PikariWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PikariWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		769CD6BC2FB5341F00B21E63 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		769CD6BE2FB5341F00B21E63 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		769CD6D82FB537E300B21E63 /* CleaningApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CleaningApp.entitlements; sourceTree = "<group>"; };
+		769CD6D92FB5381C00B21E63 /* PikariWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PikariWidgetExtension.entitlements; sourceTree = "<group>"; };
 		A001 /* CleaningApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningApp.swift; sourceTree = "<group>"; };
 		A002 /* CleaningModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningModels.swift; sourceTree = "<group>"; };
 		A003 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 		APPGROUP /* CleaningApp */ = {
 			isa = PBXGroup;
 			children = (
+				769CD6D82FB537E300B21E63 /* CleaningApp.entitlements */,
 				769B89752FB29EA20001CCB2 /* WidgetSharedData.swift */,
 				A001 /* CleaningApp.swift */,
 				A002 /* CleaningModels.swift */,
@@ -155,6 +158,7 @@
 		ROOT = {
 			isa = PBXGroup;
 			children = (
+				769CD6D92FB5381C00B21E63 /* PikariWidgetExtension.entitlements */,
 				APPGROUP /* CleaningApp */,
 				TESTGROUP /* CleaningAppTests */,
 				769CD6C02FB5341F00B21E63 /* PikariWidget */,
@@ -388,10 +392,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = PikariWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4VBCU2M332;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -453,10 +458,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = PikariWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4VBCU2M332;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -544,10 +550,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CleaningApp/CleaningApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4VBCU2M332;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Pikari;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -624,10 +631,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CleaningApp/CleaningApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4VBCU2M332;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Pikari;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
