@@ -35,6 +35,9 @@ struct MainTabView: View {
             }
             .tabItem { Label("消耗品在庫", systemImage: "shippingbox") }
 
+            ReportView(home: home)
+                .tabItem { Label("レポート", systemImage: "chart.bar.fill") }
+
             HistoryView(home: home)
                 .tabItem { Label("履歴", systemImage: "clock") }
         }
