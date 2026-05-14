@@ -135,11 +135,11 @@ final class CleaningTask {
 // MARK: - Frequency（繰り返し種別）
 
 enum Frequency: String, Codable, CaseIterable {
-    case daily   = "毎日"
-    case weekly  = "毎週"
+    case daily    = "毎日"
+    case weekly   = "毎週"
     case biweekly = "隔週"
-    case monthly = "毎月"
-    case custom  = "カスタム"
+    case monthly  = "毎月"
+    case custom   = "カスタム"
 
     func nextDate(from base: Date, intervalDays: Int, weekdays: [Int] = []) -> Date {
         let cal = Calendar.current
@@ -178,9 +178,12 @@ final class TaskLog {
     var memo: String
     var task: CleaningTask?
 
-    /// このタスク実行時に使用したパーツの記録
+    /// タスク実行時のパーツ使用記録
     @Relationship(deleteRule: .cascade)
     var partUsages: [TaskPartUsage] = []
+
+    /// 写真記録（JPEG Data の配列）
+    var photoDataList: [Data] = []
 
     init(task: CleaningTask? = nil, durationMinutes: Int = 0, memo: String = "") {
         self.id = UUID()
@@ -193,14 +196,13 @@ final class TaskLog {
 
 // MARK: - TaskPartUsage（タスク実行時のパーツ使用記録）
 
-/// タスクを完了したときに消耗品パーツを何個使ったかを記録する
 @Model
 final class TaskPartUsage {
     var id: UUID
-    var usedCount: Int          // 使用数
-    var partName: String        // パーツ名（パーツが削除されても履歴を残すためコピー）
+    var usedCount: Int
+    var partName: String
     var log: TaskLog?
-    var part: ConsumablePart?   // 元のパーツ（在庫差し引き用）
+    var part: ConsumablePart?
 
     init(part: ConsumablePart, usedCount: Int) {
         self.id = UUID()
@@ -220,8 +222,8 @@ final class Supply {
     var stockStatus: StockStatus
     var lastUsedAt: Date?
     var memo: String
-    var purchaseStoreName: String   // 購入先名称
-    var purchaseURL: String         // 購入先URL
+    var purchaseStoreName: String
+    var purchaseURL: String
 
     @Relationship(deleteRule: .cascade)
     var purchaseItems: [PurchaseItem] = []
@@ -242,11 +244,11 @@ final class Supply {
 }
 
 enum SupplyCategory: String, Codable, CaseIterable {
-    case tool        = "電動工具"
-    case cloth       = "クロス・布"
-    case chemical    = "洗剤・薬剤"
-    case disposable  = "消耗品"
-    case other       = "その他"
+    case tool       = "電動工具"
+    case cloth      = "クロス・布"
+    case chemical   = "洗剤・薬剤"
+    case disposable = "消耗品"
+    case other      = "その他"
 }
 
 enum StockStatus: String, Codable, CaseIterable {
@@ -420,18 +422,18 @@ struct PartPreset: Identifiable {
 
 extension FixturePreset {
     static let byRoomIcon: [String: [FixturePreset]] = [
-        "shower": bathroomPresets,
-        "drop":   bathroomPresets,
+        "shower":     bathroomPresets,
+        "drop":       bathroomPresets,
         "fork.knife": kitchenPresets,
-        "washer": laundryPresets,
-        "sofa":   livingPresets,
+        "washer":     laundryPresets,
+        "sofa":       livingPresets,
         "bed.double": bedroomPresets,
     ]
 
     static let bathroomPresets: [FixturePreset] = [
         FixturePreset(id: "bath_dryer", name: "浴室乾燥機", icon: "wind", parts: [
-            PartPreset(id: "exhaust_filter", name: "排気フィルター", replacementMonths: 6, memo: "目詰まりで乾燥効率低下"),
-            PartPreset(id: "intake_filter",  name: "吸気グリルフィルター", replacementMonths: 3, memo: "月1回掃除推奨"),
+            PartPreset(id: "exhaust_filter", name: "排気フィルター",      replacementMonths: 6,  memo: "目詰まりで乾燥効率低下"),
+            PartPreset(id: "intake_filter",  name: "吸気グリルフィルター", replacementMonths: 3,  memo: "月1回掃除推奨"),
         ]),
         FixturePreset(id: "water_heater", name: "給湯器", icon: "flame", parts: [
             PartPreset(id: "heater_filter", name: "給水フィルター", replacementMonths: 12, memo: "年1回点検"),
@@ -467,9 +469,9 @@ extension FixturePreset {
             PartPreset(id: "aircon_deodorize", name: "脱臭フィルター", replacementMonths: 12, memo: "年1回交換"),
         ]),
         FixturePreset(id: "air_purifier", name: "空気清浄機", icon: "aqi.medium", parts: [
-            PartPreset(id: "hepa_filter",    name: "HEPAフィルター",  replacementMonths: 24, memo: "2年に1回が目安"),
-            PartPreset(id: "deodor_filter2", name: "脱臭フィルター",  replacementMonths: 12, memo: "年1回交換"),
-            PartPreset(id: "prefilter",      name: "プレフィルター",  replacementMonths: 0,  memo: "2週間に1回清掃"),
+            PartPreset(id: "hepa_filter",    name: "HEPAフィルター", replacementMonths: 24, memo: "2年に1回が目安"),
+            PartPreset(id: "deodor_filter2", name: "脱臭フィルター", replacementMonths: 12, memo: "年1回交換"),
+            PartPreset(id: "prefilter",      name: "プレフィルター", replacementMonths: 0,  memo: "2週間に1回清掃"),
         ]),
     ]
 
@@ -480,7 +482,7 @@ extension FixturePreset {
     ]
 }
 
-// MARK: - ModelContainer
+// MARK: - ModelContainer（iCloud同期対応）
 
 extension ModelContainer {
     @MainActor
@@ -491,11 +493,25 @@ extension ModelContainer {
             Supply.self, PurchaseItem.self,
             Fixture.self, ConsumablePart.self, PurchaseRecord.self,
         ])
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        // iCloud同期を試みる。失敗した場合はローカルにフォールバック
+        let cloudConfig = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .private("iCloud.com.hiroki.CleaningApp")
+        )
+
         do {
-            return try ModelContainer(for: schema, configurations: config)
+            return try ModelContainer(for: schema, configurations: cloudConfig)
         } catch {
-            fatalError("ModelContainer の初期化に失敗しました: \(error)")
+            // iCloud未設定・未ログインの場合はローカルで動作
+            print("iCloud sync unavailable, falling back to local: \(error)")
+            let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            do {
+                return try ModelContainer(for: schema, configurations: localConfig)
+            } catch {
+                fatalError("ModelContainer の初期化に失敗しました: \(error)")
+            }
         }
     }()
 }
