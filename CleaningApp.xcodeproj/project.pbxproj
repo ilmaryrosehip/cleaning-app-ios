@@ -24,6 +24,8 @@
 		B011 /* FixtureViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A012 /* FixtureViews.swift */; };
 		B012 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A013 /* SplashView.swift */; };
 		B013 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014 /* NotificationManager.swift */; };
+		B014 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A015 /* ReportView.swift */; };
+		B015 /* PhotoRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A016 /* PhotoRecordView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +80,8 @@
 		A012 /* FixtureViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureViews.swift; sourceTree = "<group>"; };
 		A013 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		A014 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		A015 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
+		A016 /* PhotoRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRecordView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -184,6 +188,8 @@
 				A007 /* SupplyAndHistoryViews.swift */,
 				A012 /* FixtureViews.swift */,
 				A013 /* SplashView.swift */,
+				A015 /* ReportView.swift */,
+				A016 /* PhotoRecordView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -332,6 +338,8 @@
 				B011 /* FixtureViews.swift in Sources */,
 				B012 /* SplashView.swift in Sources */,
 				B013 /* NotificationManager.swift in Sources */,
+				B014 /* ReportView.swift in Sources */,
+				B015 /* PhotoRecordView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -406,7 +414,7 @@
 				INFOPLIST_FILE = PikariWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PikariWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -472,7 +480,7 @@
 				INFOPLIST_FILE = PikariWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PikariWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
