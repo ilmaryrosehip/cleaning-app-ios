@@ -429,7 +429,13 @@ struct HistoryView: View {
                 } else {
                     List {
                         ForEach(groupedLogs, id: \.0) { date, dayLogs in
-                            Section(date) { ForEach(dayLogs) { log in HistoryLogRow(log: log) } }
+                            Section(date) {
+                                ForEach(dayLogs) { log in
+                                    NavigationLink(destination: HistoryLogDetailView(log: log)) {
+                                        HistoryLogRow(log: log)
+                                    }
+                                }
+                            }
                         }
                     }
                     .listStyle(.insetGrouped)
@@ -437,6 +443,93 @@ struct HistoryView: View {
             }
             .navigationTitle("履歴")
             .searchable(text: $searchText, prompt: "タスク名・部屋名・メモで検索")
+        }
+    }
+}
+
+// MARK: - HistoryLogDetailView（履歴詳細・写真記録）
+
+struct HistoryLogDetailView: View {
+    @Bindable var log: TaskLog
+    @State private var showPhotoRecord = false
+
+    var body: some View {
+        List {
+            // 基本情報
+            Section("完了情報") {
+                LabeledContent("タスク", value: log.task?.title ?? "-")
+                LabeledContent("部屋",   value: log.task?.room?.name ?? "-")
+                LabeledContent("完了日時", value: log.completedAt.formatted(date: .abbreviated, time: .shortened))
+                if log.durationMinutes > 0 {
+                    LabeledContent("所要時間", value: "\(log.durationMinutes)分")
+                }
+                if !log.memo.isEmpty {
+                    Text(log.memo).font(.subheadline).foregroundStyle(.secondary)
+                }
+            }
+
+            // 使用パーツ
+            if !log.partUsages.isEmpty {
+                Section("使用した消耗品") {
+                    ForEach(log.partUsages) { usage in
+                        HStack {
+                            Text(usage.partName).font(.subheadline)
+                            Spacer()
+                            Text("×\(usage.usedCount)個")
+                                .font(.subheadline).fontWeight(.semibold)
+                                .foregroundStyle(.orange)
+                        }
+                    }
+                }
+            }
+
+            // 写真セクション
+            Section {
+                if log.photoDataList.isEmpty {
+                    // 写真未登録
+                    Button {
+                        showPhotoRecord = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "camera.fill")
+                                .font(.title3).foregroundStyle(.teal)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("写真を追加する")
+                                    .font(.subheadline).fontWeight(.medium)
+                                    .foregroundStyle(.teal)
+                                Text("掃除前後の写真を記録できます")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    // 写真一覧表示
+                    PhotoGalleryView(log: log)
+                        .frame(height: 90)
+                    Button {
+                        showPhotoRecord = true
+                    } label: {
+                        Label("写真を追加", systemImage: "plus")
+                            .font(.subheadline).foregroundStyle(.teal)
+                    }
+                    .buttonStyle(.plain)
+                }
+            } header: {
+                HStack {
+                    Text("写真記録")
+                    Spacer()
+                    if !log.photoDataList.isEmpty {
+                        Text("\(log.photoDataList.count)枚")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .navigationTitle(log.task?.title ?? "完了記録")
+        .navigationBarTitleDisplayMode(.large)
+        .sheet(isPresented: $showPhotoRecord) {
+            PhotoRecordSheet(log: log)
         }
     }
 }
@@ -468,6 +561,7 @@ struct HistoryLogRow: View {
                 if !log.memo.isEmpty {
                     Text(log.memo).font(.caption).foregroundStyle(.secondary).italic()
                 }
+                // パーツ使用タグ
                 if !log.partUsages.isEmpty {
                     HStack(spacing: 4) {
                         ForEach(log.partUsages) { usage in
@@ -479,6 +573,11 @@ struct HistoryLogRow: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                         }
                     }
+                }
+                // 写真枚数バッジ
+                if !log.photoDataList.isEmpty {
+                    Label("\(log.photoDataList.count)枚の写真", systemImage: "photo")
+                        .font(.caption2).foregroundStyle(.blue)
                 }
             }
             Spacer()
@@ -517,19 +616,16 @@ struct ConsumablePartStockView: View {
     var body: some View {
         List {
             if allParts.isEmpty {
-                // メッセージをより具体的な案内に変更
                 Section {
                     VStack(spacing: 12) {
                         Image(systemName: "shippingbox")
                             .font(.system(size: 40)).foregroundStyle(.secondary)
-                        Text("消耗品パーツがありません")
-                            .font(.headline)
+                        Text("消耗品パーツがありません").font(.headline)
                         Text("パーツを追加するには：\n「間取り」タブ → 部屋を選択 →「設備・器具」タブ → 設備を選択 → パーツを追加")
                             .font(.subheadline).foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 24)
+                    .frame(maxWidth: .infinity).padding(.vertical, 24)
                 }
                 .listRowBackground(Color.clear)
             } else {
