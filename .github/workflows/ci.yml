@@ -29,7 +29,7 @@ jobs:
           xcodebuild build \
             -project CleaningApp.xcodeproj \
             -scheme CleaningApp \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
@@ -39,7 +39,7 @@ jobs:
           xcodebuild test \
             -project CleaningApp.xcodeproj \
             -scheme CleaningAppTests \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
