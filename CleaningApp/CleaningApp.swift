@@ -4,14 +4,14 @@ import SwiftData
 @main
 struct CleaningApp: App {
     @State private var showSplash = true
-    @State private var purchaseManager = PurchaseManager.shared
+    @State private var premium = PremiumManager.shared
 
     var body: some Scene {
         WindowGroup {
             ZStack {
                 ContentView()
                     .opacity(showSplash ? 0 : 1)
-                    .environment(purchaseManager)
+                    .environment(premium)
 
                 if showSplash {
                     SplashView {
@@ -25,7 +25,7 @@ struct CleaningApp: App {
             }
             .animation(.easeIn(duration: 0.3), value: showSplash)
             .task {
-                await purchaseManager.initialize()
+                await premium.initialize()
             }
         }
         .modelContainer(ModelContainer.cleaningApp)
