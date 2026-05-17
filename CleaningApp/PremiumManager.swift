@@ -2,14 +2,11 @@ import Foundation
 import StoreKit
 import SwiftUI
 
-// MARK: - 商品ID定義
+// MARK: - 商品ID定義（買い切り）
 enum PremiumProduct {
-    /// 月額サブスクリプション
-    static let monthlyID = "com.hiroki.CleaningApp.premium.monthly"
-    /// 年額サブスクリプション
-    static let yearlyID  = "com.hiroki.CleaningApp.premium.yearly"
-
-    static let allIDs: Set<String> = [monthlyID, yearlyID]
+    /// 買い切りプレミアム
+    static let premiumID = "com.hiroki.CleaningApp.premium"
+    static let allIDs: Set<String> = [premiumID]
 }
 
 // MARK: - PremiumManager
@@ -20,36 +17,18 @@ final class PremiumManager {
     static let shared = PremiumManager()
     private init() {}
 
-    /// プレミアム有効フラグ
     var isPremium: Bool = false
-
-    /// 購入済み商品
-    var purchasedSubscriptions: [Transaction] = []
-
-    /// 月額商品
-    var monthlyProduct: Product? = nil
-    /// 年額商品
-    var yearlyProduct: Product?  = nil
-
-    /// 購入処理中フラグ
+    var premiumProduct: Product? = nil
     var isPurchasing: Bool = false
-
-    /// エラーメッセージ
     var errorMessage: String? = nil
 
-    /// トランザクション監視タスク
     private var updateListenerTask: Task<Void, Never>? = nil
 
-    // MARK: - 初期化（アプリ起動時に呼ぶ）
+    // MARK: - 初期化
 
     func initialize() async {
-        // トランザクション監視開始
         updateListenerTask = listenForTransactions()
-
-        // 商品情報を取得
         await loadProducts()
-
-        // 購入状態を更新
         await updatePurchasedProducts()
     }
 
@@ -58,13 +37,7 @@ final class PremiumManager {
     func loadProducts() async {
         do {
             let products = try await Product.products(for: PremiumProduct.allIDs)
-            for product in products {
-                switch product.id {
-                case PremiumProduct.monthlyID: monthlyProduct = product
-                case PremiumProduct.yearlyID:  yearlyProduct  = product
-                default: break
-                }
-            }
+            premiumProduct = products.first
         } catch {
             errorMessage = "商品情報の取得に失敗しました: \(error.localizedDescription)"
         }
@@ -72,7 +45,11 @@ final class PremiumManager {
 
     // MARK: - 購入
 
-    func purchase(_ product: Product) async -> Bool {
+    func purchase() async -> Bool {
+        guard let product = premiumProduct else {
+            errorMessage = "商品情報を読み込み中です。しばらくお待ちください。"
+            return false
+        }
         isPurchasing = true
         errorMessage = nil
         defer { isPurchasing = false }
@@ -112,22 +89,19 @@ final class PremiumManager {
         }
     }
 
-    // MARK: - 購入状態の更新
+    // MARK: - 購入状態更新
 
     func updatePurchasedProducts() async {
-        var purchased: [Transaction] = []
+        var hasPremium = false
         for await result in Transaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
                 if PremiumProduct.allIDs.contains(transaction.productID) {
-                    purchased.append(transaction)
+                    hasPremium = true
                 }
-            } catch {
-                // 無効なトランザクションは無視
-            }
+            } catch {}
         }
-        purchasedSubscriptions = purchased
-        isPremium = !purchased.isEmpty
+        isPremium = hasPremium
     }
 
     // MARK: - トランザクション監視
@@ -139,14 +113,10 @@ final class PremiumManager {
                     let transaction = try self?.checkVerified(result)
                     await self?.updatePurchasedProducts()
                     await transaction?.finish()
-                } catch {
-                    // 検証失敗は無視
-                }
+                } catch {}
             }
         }
     }
-
-    // MARK: - 検証ヘルパー
 
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
