@@ -18,6 +18,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Select Xcode 16.2
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
       - name: Xcode version
         run: xcodebuild -version
 
@@ -26,7 +29,7 @@ jobs:
           xcodebuild build \
             -project CleaningApp.xcodeproj \
             -scheme CleaningApp \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
@@ -36,7 +39,7 @@ jobs:
           xcodebuild test \
             -project CleaningApp.xcodeproj \
             -scheme CleaningAppTests \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
