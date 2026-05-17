@@ -26,6 +26,8 @@
 		B013 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014 /* NotificationManager.swift */; };
 		B014 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A015 /* ReportView.swift */; };
 		B015 /* PhotoRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A016 /* PhotoRecordView.swift */; };
+		B016 /* PremiumManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A017 /* PremiumManager.swift */; };
+		B017 /* PremiumGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A018 /* PremiumGateView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +84,8 @@
 		A014 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		A015 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		A016 /* PhotoRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRecordView.swift; sourceTree = "<group>"; };
+		A017 /* PremiumManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumManager.swift; sourceTree = "<group>"; };
+		A018 /* PremiumGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumGateView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -143,6 +147,7 @@
 				A002 /* CleaningModels.swift */,
 				A003 /* ContentView.swift */,
 				A014 /* NotificationManager.swift */,
+				A017 /* PremiumManager.swift */,
 				VIEWSGROUP /* Views */,
 				A008 /* Assets.xcassets */,
 			);
@@ -190,6 +195,7 @@
 				A013 /* SplashView.swift */,
 				A015 /* ReportView.swift */,
 				A016 /* PhotoRecordView.swift */,
+				A018 /* PremiumGateView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -340,6 +346,8 @@
 				B013 /* NotificationManager.swift in Sources */,
 				B014 /* ReportView.swift in Sources */,
 				B015 /* PhotoRecordView.swift in Sources */,
+				B016 /* PremiumManager.swift in Sources */,
+				B017 /* PremiumGateView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
