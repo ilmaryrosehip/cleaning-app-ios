@@ -35,9 +35,18 @@ struct MainTabView: View {
             }
             .tabItem { Label("消耗品在庫", systemImage: "shippingbox") }
 
-            ReportView(home: home)
-                .tabItem { Label("レポート", systemImage: "chart.bar.fill") }
+            // プレミアム機能: レポート
+            NavigationStack {
+                ReportView(home: home)
+                    .premiumGated(
+                        featureName: "掃除レポート",
+                        description: "統計グラフで掃除の成果を視覚化します",
+                        icon: "chart.bar.fill"
+                    )
+            }
+            .tabItem { Label("レポート", systemImage: "chart.bar.fill") }
 
+            // プレミアム機能: 履歴（履歴自体は無料、写真記録はプレミアム）
             HistoryView(home: home)
                 .tabItem { Label("履歴", systemImage: "clock") }
         }
