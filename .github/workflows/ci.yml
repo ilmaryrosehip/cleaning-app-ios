@@ -26,7 +26,7 @@ jobs:
           xcodebuild build \
             -project CleaningApp.xcodeproj \
             -scheme CleaningApp \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
+            -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=26.2' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
@@ -36,7 +36,7 @@ jobs:
           xcodebuild test \
             -project CleaningApp.xcodeproj \
             -scheme CleaningAppTests \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
+            -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=26.2' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
