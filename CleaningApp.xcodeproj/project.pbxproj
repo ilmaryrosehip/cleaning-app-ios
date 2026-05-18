@@ -29,6 +29,7 @@
 		B016 /* PremiumManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A017 /* PremiumManager.swift */; };
 		B017 /* PremiumGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A018 /* PremiumGateView.swift */; };
 		B018 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A019 /* CalendarView.swift */; };
+		B019 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A020 /* ExportView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,7 @@
 		A017 /* PremiumManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumManager.swift; sourceTree = "<group>"; };
 		A018 /* PremiumGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumGateView.swift; sourceTree = "<group>"; };
 		A019 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		A020 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -199,6 +201,7 @@
 				A016 /* PhotoRecordView.swift */,
 				A018 /* PremiumGateView.swift */,
 				A019 /* CalendarView.swift */,
+				A020 /* ExportView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -352,6 +355,7 @@
 				B016 /* PremiumManager.swift in Sources */,
 				B017 /* PremiumGateView.swift in Sources */,
 				B018 /* CalendarView.swift in Sources */,
+				B019 /* ExportView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
