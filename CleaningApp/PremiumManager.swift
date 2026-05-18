@@ -4,7 +4,6 @@ import SwiftUI
 
 // MARK: - 商品ID定義（買い切り）
 enum PremiumProduct {
-    /// 買い切りプレミアム
     static let premiumID = "com.hiroki.CleaningApp.premium"
     static let allIDs: Set<String> = [premiumID]
 }
@@ -104,19 +103,25 @@ final class PremiumManager {
         isPremium = hasPremium
     }
 
-    // MARK: - トランザクション監視
+    // MARK: - トランザクション監視（nonisolatedで切り離し）
 
-    private func listenForTransactions() -> Task<Void, Never> {
-        Task.detached { [weak self] in
+    private nonisolated func listenForTransactions() -> Task<Void, Never> {
+        Task { [weak self] in
             for await result in Transaction.updates {
-                do {
-                    let transaction = try self?.checkVerified(result)
-                    await self?.updatePurchasedProducts()
-                    await transaction?.finish()
-                } catch {}
+                // VerificationResultから直接verified caseを処理
+                if case .verified(let transaction) = result {
+                    await self?.finishAndRefresh(transaction)
+                }
             }
         }
     }
+
+    private func finishAndRefresh(_ transaction: Transaction) async {
+        await transaction.finish()
+        await updatePurchasedProducts()
+    }
+
+    // MARK: - 検証ヘルパー
 
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
