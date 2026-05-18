@@ -112,14 +112,12 @@ struct SupplyDetailView: View {
 
             Section("購入先") {
                 if supply.purchaseStoreName.isEmpty && supply.purchaseURL.isEmpty {
-                    Text("購入先が未登録です")
-                        .font(.subheadline).foregroundStyle(.tertiary)
+                    Text("購入先が未登録です").font(.subheadline).foregroundStyle(.tertiary)
                 } else {
                     if !supply.purchaseStoreName.isEmpty {
                         LabeledContent("店名", value: supply.purchaseStoreName)
                     }
-                    if !supply.purchaseURL.isEmpty,
-                       let url = URL(string: supply.purchaseURL) {
+                    if !supply.purchaseURL.isEmpty, let url = URL(string: supply.purchaseURL) {
                         Link(destination: url) {
                             HStack {
                                 Image(systemName: "arrow.up.right.square").foregroundStyle(.teal)
@@ -159,9 +157,7 @@ struct SupplyDetailView: View {
         }
         .navigationTitle(supply.name)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("編集") { showEdit = true }
-            }
+            ToolbarItem(placement: .primaryAction) { Button("編集") { showEdit = true } }
         }
         .sheet(isPresented: $showAddPurchase) { AddPurchaseItemSheet(supply: supply) }
         .sheet(isPresented: $showEdit) { EditSupplySheet(supply: supply) }
@@ -351,6 +347,7 @@ struct HistoryView: View {
     @State private var selectedPeriod: HistoryPeriod = .week
     @State private var searchText = ""
     @State private var selectedTaskID: UUID? = nil
+    @State private var showExport = false  // ← エクスポートシート
 
     enum HistoryPeriod: String, CaseIterable {
         case week = "今週", month = "今月", all = "すべて"
@@ -442,7 +439,22 @@ struct HistoryView: View {
                 }
             }
             .navigationTitle("履歴")
+            .toolbar {
+                // エクスポートボタン（プレミアム機能）
+                ToolbarItem(placement: .primaryAction) {
+                    if PremiumManager.shared.isPremium {
+                        Button {
+                            showExport = true
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                    }
+                }
+            }
             .searchable(text: $searchText, prompt: "タスク名・部屋名・メモで検索")
+            .sheet(isPresented: $showExport) {
+                ExportView(home: home)
+            }
         }
     }
 }
@@ -455,7 +467,6 @@ struct HistoryLogDetailView: View {
 
     var body: some View {
         List {
-            // 基本情報
             Section("完了情報") {
                 LabeledContent("タスク", value: log.task?.title ?? "-")
                 LabeledContent("部屋",   value: log.task?.room?.name ?? "-")
@@ -468,50 +479,34 @@ struct HistoryLogDetailView: View {
                 }
             }
 
-            // 使用パーツ
             if !log.partUsages.isEmpty {
                 Section("使用した消耗品") {
                     ForEach(log.partUsages) { usage in
                         HStack {
                             Text(usage.partName).font(.subheadline)
                             Spacer()
-                            Text("×\(usage.usedCount)個")
-                                .font(.subheadline).fontWeight(.semibold)
-                                .foregroundStyle(.orange)
+                            Text("×\(usage.usedCount)個").font(.subheadline).fontWeight(.semibold).foregroundStyle(.orange)
                         }
                     }
                 }
             }
 
-            // 写真セクション
             Section {
                 if log.photoDataList.isEmpty {
-                    // 写真未登録
-                    Button {
-                        showPhotoRecord = true
-                    } label: {
+                    Button { showPhotoRecord = true } label: {
                         HStack(spacing: 12) {
-                            Image(systemName: "camera.fill")
-                                .font(.title3).foregroundStyle(.teal)
+                            Image(systemName: "camera.fill").font(.title3).foregroundStyle(.teal)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("写真を追加する")
-                                    .font(.subheadline).fontWeight(.medium)
-                                    .foregroundStyle(.teal)
-                                Text("掃除前後の写真を記録できます")
-                                    .font(.caption).foregroundStyle(.secondary)
+                                Text("写真を追加する").font(.subheadline).fontWeight(.medium).foregroundStyle(.teal)
+                                Text("掃除前後の写真を記録できます").font(.caption).foregroundStyle(.secondary)
                             }
                         }
                     }
                     .buttonStyle(.plain)
                 } else {
-                    // 写真一覧表示
-                    PhotoGalleryView(log: log)
-                        .frame(height: 90)
-                    Button {
-                        showPhotoRecord = true
-                    } label: {
-                        Label("写真を追加", systemImage: "plus")
-                            .font(.subheadline).foregroundStyle(.teal)
+                    PhotoGalleryView(log: log).frame(height: 90)
+                    Button { showPhotoRecord = true } label: {
+                        Label("写真を追加", systemImage: "plus").font(.subheadline).foregroundStyle(.teal)
                     }
                     .buttonStyle(.plain)
                 }
@@ -520,17 +515,14 @@ struct HistoryLogDetailView: View {
                     Text("写真記録")
                     Spacer()
                     if !log.photoDataList.isEmpty {
-                        Text("\(log.photoDataList.count)枚")
-                            .font(.caption).foregroundStyle(.secondary)
+                        Text("\(log.photoDataList.count)枚").font(.caption).foregroundStyle(.secondary)
                     }
                 }
             }
         }
         .navigationTitle(log.task?.title ?? "完了記録")
         .navigationBarTitleDisplayMode(.large)
-        .sheet(isPresented: $showPhotoRecord) {
-            PhotoRecordSheet(log: log)
-        }
+        .sheet(isPresented: $showPhotoRecord) { PhotoRecordSheet(log: log) }
     }
 }
 
@@ -561,7 +553,6 @@ struct HistoryLogRow: View {
                 if !log.memo.isEmpty {
                     Text(log.memo).font(.caption).foregroundStyle(.secondary).italic()
                 }
-                // パーツ使用タグ
                 if !log.partUsages.isEmpty {
                     HStack(spacing: 4) {
                         ForEach(log.partUsages) { usage in
@@ -574,7 +565,6 @@ struct HistoryLogRow: View {
                         }
                     }
                 }
-                // 写真枚数バッジ
                 if !log.photoDataList.isEmpty {
                     Label("\(log.photoDataList.count)枚の写真", systemImage: "photo")
                         .font(.caption2).foregroundStyle(.blue)
@@ -618,12 +608,10 @@ struct ConsumablePartStockView: View {
             if allParts.isEmpty {
                 Section {
                     VStack(spacing: 12) {
-                        Image(systemName: "shippingbox")
-                            .font(.system(size: 40)).foregroundStyle(.secondary)
+                        Image(systemName: "shippingbox").font(.system(size: 40)).foregroundStyle(.secondary)
                         Text("消耗品パーツがありません").font(.headline)
                         Text("パーツを追加するには：\n「間取り」タブ → 部屋を選択 →「設備・器具」タブ → 設備を選択 → パーツを追加")
-                            .font(.subheadline).foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
+                            .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 24)
                 }
@@ -720,8 +708,7 @@ struct QuickStockAddSheet: View {
                 }
                 Section("購入数量") {
                     Stepper("購入数: \(quantity)個", value: $quantity, in: 1...99)
-                    Text("購入後の在庫: \(part.stockCount + quantity)個")
-                        .font(.caption).foregroundStyle(.teal)
+                    Text("購入後の在庫: \(part.stockCount + quantity)個").font(.caption).foregroundStyle(.teal)
                 }
                 Section("購入情報") {
                     DatePicker("購入日", selection: $purchasedAt, displayedComponents: .date)
