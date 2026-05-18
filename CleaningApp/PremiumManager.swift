@@ -2,6 +2,9 @@ import Foundation
 import StoreKit
 import SwiftUI
 
+// Swift 6でTransaction型が曖昧になるため型エイリアスを定義
+private typealias SKTransaction = StoreKit.Transaction
+
 // MARK: - 商品ID定義（買い切り）
 enum PremiumProduct {
     static let premiumID = "com.hiroki.CleaningApp.premium"
@@ -92,7 +95,7 @@ final class PremiumManager {
 
     func updatePurchasedProducts() async {
         var hasPremium = false
-        for await result in Transaction.currentEntitlements {
+        for await result in SKTransaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
                 if PremiumProduct.allIDs.contains(transaction.productID) {
@@ -103,12 +106,11 @@ final class PremiumManager {
         isPremium = hasPremium
     }
 
-    // MARK: - トランザクション監視（nonisolatedで切り離し）
+    // MARK: - トランザクション監視
 
     private nonisolated func listenForTransactions() -> Task<Void, Never> {
         Task { [weak self] in
-            for await result in Transaction.updates {
-                // VerificationResultから直接verified caseを処理
+            for await result in SKTransaction.updates {
                 if case .verified(let transaction) = result {
                     await self?.finishAndRefresh(transaction)
                 }
@@ -116,7 +118,7 @@ final class PremiumManager {
         }
     }
 
-    private func finishAndRefresh(_ transaction: Transaction) async {
+    private func finishAndRefresh(_ transaction: SKTransaction) async {
         await transaction.finish()
         await updatePurchasedProducts()
     }
