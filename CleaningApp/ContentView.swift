@@ -21,18 +21,34 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
+            // ホーム（無料）
             HomeView(home: home)
                 .tabItem { Label("ホーム", systemImage: "square.grid.2x2") }
 
+            // 間取り（無料）
             FloorPlanView(home: home)
                 .tabItem { Label("間取り", systemImage: "house") }
 
+            // カレンダー（プレミアム）
+            PremiumLockedView(
+                featureName: "カレンダー表示",
+                featureDescription: "月間カレンダーでタスクを\n一目で確認できます",
+                featureIcon: "calendar"
+            ) {
+                CalendarView(home: home)
+            }
+            .tabItem { Label("カレンダー", systemImage: "calendar") }
+            .overlay(alignment: .topTrailing) {
+                if !PremiumManager.shared.isPremium {
+                    PremiumBadge().padding(.top, 8).padding(.trailing, 8)
+                }
+            }
+
+            // 用品（無料）
             SupplyListView()
                 .tabItem { Label("用品", systemImage: "bag") }
 
-            NavigationStack { ConsumablePartStockView() }
-                .tabItem { Label("消耗品在庫", systemImage: "shippingbox") }
-
+            // レポート（プレミアム）
             PremiumLockedView(
                 featureName: "掃除レポート",
                 featureDescription: "日別・曜日別・部屋別の統計を\nグラフで見える化します",
@@ -47,6 +63,7 @@ struct MainTabView: View {
                 }
             }
 
+            // 履歴（無料）
             HistoryView(home: home)
                 .tabItem { Label("履歴", systemImage: "clock") }
         }
