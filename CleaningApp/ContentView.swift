@@ -3,6 +3,7 @@ import SwiftData
 
 struct ContentView: View {
     @Query private var homes: [Home]
+    @State private var localization = LocalizationManager.shared
 
     var body: some View {
         Group {
@@ -18,54 +19,56 @@ struct ContentView: View {
 
 struct MainTabView: View {
     let home: Home
+    @State private var localization = LocalizationManager.shared
 
     var body: some View {
         TabView {
-            // ホーム（無料）
             HomeView(home: home)
-                .tabItem { Label("ホーム", systemImage: "square.grid.2x2") }
+                .tabItem { Label(L(.tabHome), systemImage: "square.grid.2x2") }
 
-            // 間取り（無料）
             FloorPlanView(home: home)
-                .tabItem { Label("間取り", systemImage: "house") }
+                .tabItem { Label(L(.tabFloorPlan), systemImage: "house") }
 
-            // カレンダー（プレミアム）
             PremiumLockedView(
-                featureName: "カレンダー表示",
-                featureDescription: "月間カレンダーでタスクを\n一目で確認できます",
+                featureName: L(.tabCalendar),
+                featureDescription: localization.language == .japanese
+                    ? "月間カレンダーでタスクを\n一目で確認できます"
+                    : "View your tasks on a monthly calendar",
                 featureIcon: "calendar"
             ) {
                 CalendarView(home: home)
             }
-            .tabItem { Label("カレンダー", systemImage: "calendar") }
+            .tabItem { Label(L(.tabCalendar), systemImage: "calendar") }
             .overlay(alignment: .topTrailing) {
                 if !PremiumManager.shared.isPremium {
                     PremiumBadge().padding(.top, 8).padding(.trailing, 8)
                 }
             }
 
-            // 用品（無料）
             SupplyListView()
-                .tabItem { Label("用品", systemImage: "bag") }
+                .tabItem { Label(L(.tabSupply), systemImage: "bag") }
 
-            // レポート（プレミアム）
             PremiumLockedView(
-                featureName: "掃除レポート",
-                featureDescription: "日別・曜日別・部屋別の統計を\nグラフで見える化します",
+                featureName: L(.tabReport),
+                featureDescription: localization.language == .japanese
+                    ? "日別・曜日別・部屋別の統計を\nグラフで見える化します"
+                    : "Visualize your cleaning stats\nwith beautiful charts",
                 featureIcon: "chart.bar.fill"
             ) {
                 ReportView(home: home)
             }
-            .tabItem { Label("レポート", systemImage: "chart.bar.fill") }
+            .tabItem { Label(L(.tabReport), systemImage: "chart.bar.fill") }
             .overlay(alignment: .topTrailing) {
                 if !PremiumManager.shared.isPremium {
                     PremiumBadge().padding(.top, 8).padding(.trailing, 8)
                 }
             }
 
-            // 履歴（無料）
             HistoryView(home: home)
-                .tabItem { Label("履歴", systemImage: "clock") }
+                .tabItem { Label(L(.tabHistory), systemImage: "clock") }
+
+            MyPageView(home: home)
+                .tabItem { Label(L(.tabMyPage), systemImage: "person.circle.fill") }
         }
         .tint(.teal)
     }
@@ -75,7 +78,7 @@ struct MainTabView: View {
 
 struct PremiumBadge: View {
     var body: some View {
-        Label("プレミアム", systemImage: "sparkles")
+        Label(L(.premium), systemImage: "sparkles")
             .font(.caption2).fontWeight(.semibold)
             .padding(.horizontal, 8).padding(.vertical, 3)
             .background(LinearGradient(
