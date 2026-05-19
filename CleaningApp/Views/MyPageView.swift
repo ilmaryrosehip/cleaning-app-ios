@@ -9,13 +9,15 @@ struct MyPageView: View {
     @State private var localization = LocalizationManager.shared
     @State private var premium = PremiumManager.shared
     @State private var showHelp = false
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsOfService = false
     @State private var showResetAlert = false
     @State private var notificationsEnabled = true
     @State private var notificationHour = 9
     @State private var iCloudEnabled = true
     @State private var selectedTheme: AppTheme = .teal
 
-    // 統計計算
+    // 統計
     private var totalCompleted: Int {
         home.rooms.flatMap { $0.tasks }.flatMap { $0.logs }.count
     }
@@ -45,51 +47,26 @@ struct MyPageView: View {
         return min(100, completedThisMonth * 100 / max(1, activeTasks.count))
     }
 
-    // 家族ごとの完了数（iCloud同期時は別デバイスのデータも含む想定）
-    private var familyContributions: [(name: String, count: Int, color: Color)] {
-        // 現時点はローカルデータのみ表示（iCloud共有実装後に拡張予定）
-        let total = totalCompleted
-        guard total > 0 else { return [] }
-        return [("あなた", total, .teal)]
-    }
-
     var body: some View {
         NavigationStack {
             List {
-                // 統計セクション
                 statisticsSection
-
-                // 家族共有セクション
                 familySharingSection
-
-                // プレミアムセクション
                 premiumSection
-
-                // 通知設定
                 notificationSection
-
-                // カスタマイズ
                 customizeSection
-
-                // データ管理
                 dataSection
-
-                // 言語設定
                 languageSection
-
-                // サポート
                 supportSection
-
-                // アプリ情報
                 appInfoSection
             }
             .navigationTitle(L(.myPage))
-            .sheet(isPresented: $showHelp) { HelpView() }
+            .sheet(isPresented: $showHelp)             { HelpView() }
+            .sheet(isPresented: $showPrivacyPolicy)    { LegalView(type: .privacyPolicy) }
+            .sheet(isPresented: $showTermsOfService)   { LegalView(type: .termsOfService) }
             .alert(L(.resetData), isPresented: $showResetAlert) {
                 Button(L(.cancel), role: .cancel) {}
-                Button(L(.delete), role: .destructive) {
-                    // データリセット処理（実際の実装時に追加）
-                }
+                Button(L(.delete), role: .destructive) {}
             } message: {
                 Text(localization.language == .japanese
                      ? "すべてのデータが削除されます。この操作は取り消せません。"
@@ -98,42 +75,25 @@ struct MyPageView: View {
         }
     }
 
-    // MARK: - 統計セクション
+    // MARK: - 統計
 
     private var statisticsSection: some View {
         Section {
-            // 統計グリッド
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                StatCard(
-                    icon: "checkmark.circle.fill",
-                    label: L(.totalCompleted),
-                    value: "\(totalCompleted)",
-                    unit: localization.language == .japanese ? "件" : "tasks",
-                    color: .teal
-                )
-                StatCard(
-                    icon: "clock.fill",
-                    label: L(.totalMinutes),
-                    value: totalMinutes >= 60 ? "\(totalMinutes / 60)" : "\(totalMinutes)",
-                    unit: totalMinutes >= 60
-                        ? (localization.language == .japanese ? "時間" : "hrs")
-                        : (localization.language == .japanese ? "分" : "min"),
-                    color: .blue
-                )
-                StatCard(
-                    icon: "flame.fill",
-                    label: L(.streakDays),
-                    value: "\(streakDays)",
-                    unit: localization.language == .japanese ? "日" : "days",
-                    color: .orange
-                )
-                StatCard(
-                    icon: "chart.line.uptrend.xyaxis",
-                    label: L(.monthlyRate),
-                    value: "\(monthlyRate)",
-                    unit: "%",
-                    color: .green
-                )
+                StatCard(icon: "checkmark.circle.fill", label: L(.totalCompleted),
+                         value: "\(totalCompleted)",
+                         unit: localization.language == .japanese ? "件" : "tasks", color: .teal)
+                StatCard(icon: "clock.fill", label: L(.totalMinutes),
+                         value: totalMinutes >= 60 ? "\(totalMinutes / 60)" : "\(totalMinutes)",
+                         unit: totalMinutes >= 60
+                            ? (localization.language == .japanese ? "時間" : "hrs")
+                            : (localization.language == .japanese ? "分" : "min"),
+                         color: .blue)
+                StatCard(icon: "flame.fill", label: L(.streakDays),
+                         value: "\(streakDays)",
+                         unit: localization.language == .japanese ? "日" : "days", color: .orange)
+                StatCard(icon: "chart.line.uptrend.xyaxis", label: L(.monthlyRate),
+                         value: "\(monthlyRate)", unit: "%", color: .green)
             }
             .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             .listRowBackground(Color.clear)
@@ -142,70 +102,35 @@ struct MyPageView: View {
         }
     }
 
-    // MARK: - 家族共有セクション
+    // MARK: - 家族共有
 
     private var familySharingSection: some View {
         Section {
-            if familyContributions.isEmpty {
-                HStack(spacing: 12) {
-                    Image(systemName: "person.2.fill").foregroundStyle(.teal).font(.title3)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(localization.language == .japanese
-                             ? "家族や同居人と掃除を共有できます"
-                             : "Share cleaning tasks with family members")
-                            .font(.subheadline)
-                        Text(localization.language == .japanese
-                             ? "iCloud同期を有効にして招待してください"
-                             : "Enable iCloud sync and send an invite")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.vertical, 4)
-            } else {
-                ForEach(familyContributions, id: \.name) { member in
-                    HStack(spacing: 12) {
-                        ZStack {
-                            Circle().fill(member.color.opacity(0.15)).frame(width: 36, height: 36)
-                            Text(String(member.name.prefix(1)))
-                                .font(.subheadline).fontWeight(.bold).foregroundStyle(member.color)
-                        }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(member.name).font(.subheadline).fontWeight(.medium)
-                            Text(localization.language == .japanese
-                                 ? "\(member.count)件完了"
-                                 : "\(member.count) tasks completed")
-                                .font(.caption).foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        // 貢献度バー
-                        let ratio = totalCompleted > 0 ? Double(member.count) / Double(totalCompleted) : 0
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 3).fill(Color(.systemGray5)).frame(height: 6)
-                                RoundedRectangle(cornerRadius: 3).fill(member.color)
-                                    .frame(width: geo.size.width * ratio, height: 6)
-                            }
-                        }
-                        .frame(width: 80, height: 6)
-                        Text("\(Int(ratio * 100))%")
-                            .font(.caption).foregroundStyle(.secondary).frame(width: 36, alignment: .trailing)
-                    }
-                    .padding(.vertical, 2)
+            HStack(spacing: 12) {
+                Image(systemName: "person.2.fill").foregroundStyle(.teal).font(.title3)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(localization.language == .japanese
+                         ? "家族や同居人と掃除を共有できます"
+                         : "Share cleaning tasks with family members")
+                        .font(.subheadline)
+                    Text(localization.language == .japanese
+                         ? "iCloud同期を有効にして招待してください"
+                         : "Enable iCloud sync and send an invite")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
+            .padding(.vertical, 4)
 
             Button {
-                // 招待機能（iCloud Sharing実装後）
             } label: {
-                Label(L(.inviteMember), systemImage: "person.badge.plus")
-                    .foregroundStyle(.teal)
+                Label(L(.inviteMember), systemImage: "person.badge.plus").foregroundStyle(.teal)
             }
         } header: {
             Label(L(.familySharing), systemImage: "person.2.fill")
         }
     }
 
-    // MARK: - プレミアムセクション
+    // MARK: - プレミアム
 
     private var premiumSection: some View {
         Section {
@@ -224,19 +149,11 @@ struct MyPageView: View {
                         .font(.subheadline).fontWeight(.semibold)
                     Text(premium.isPremium
                          ? (localization.language == .japanese ? "すべての機能が利用可能です" : "All features unlocked")
-                         : (localization.language == .japanese ? "プレミアムにアップグレードして全機能を解錠" : "Upgrade to unlock all features"))
+                         : (localization.language == .japanese ? "プレミアムにアップグレードして全機能を解鎖" : "Upgrade to unlock all features"))
                         .font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                if !premium.isPremium {
-                    Image(systemName: "chevron.right").foregroundStyle(.secondary).font(.caption)
                 }
             }
             .padding(.vertical, 4)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                if !premium.isPremium { }
-            }
 
             if !premium.isPremium {
                 Button {
@@ -258,11 +175,9 @@ struct MyPageView: View {
                 .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
                 .listRowBackground(Color.clear)
 
-                Button(L(.restore)) {
-                    Task { await premium.restore() }
-                }
-                .font(.subheadline).foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
+                Button(L(.restore)) { Task { await premium.restore() } }
+                    .font(.subheadline).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
             }
         } header: {
             Label(L(.premium), systemImage: "crown.fill")
@@ -273,13 +188,10 @@ struct MyPageView: View {
 
     private var notificationSection: some View {
         Section {
-            Toggle(L(.notifyOnOff), isOn: $notificationsEnabled)
-                .tint(.teal)
+            Toggle(L(.notifyOnOff), isOn: $notificationsEnabled).tint(.teal)
             if notificationsEnabled {
                 Picker(L(.notifyTime), selection: $notificationHour) {
-                    ForEach(6..<23) { hour in
-                        Text("\(hour):00").tag(hour)
-                    }
+                    ForEach(6..<23) { hour in Text("\(hour):00").tag(hour) }
                 }
             }
         } header: {
@@ -296,12 +208,8 @@ struct MyPageView: View {
                 Spacer()
                 HStack(spacing: 8) {
                     ForEach(AppTheme.allCases, id: \.self) { theme in
-                        Circle()
-                            .fill(theme.color)
-                            .frame(width: 24, height: 24)
-                            .overlay(
-                                Circle().stroke(Color.white, lineWidth: selectedTheme == theme ? 2 : 0)
-                            )
+                        Circle().fill(theme.color).frame(width: 24, height: 24)
+                            .overlay(Circle().stroke(Color.white, lineWidth: selectedTheme == theme ? 2 : 0))
                             .shadow(color: selectedTheme == theme ? theme.color.opacity(0.5) : .clear, radius: 4)
                             .onTapGesture { selectedTheme = theme }
                     }
@@ -317,12 +225,8 @@ struct MyPageView: View {
     private var dataSection: some View {
         Section {
             Toggle(L(.icloudSync), isOn: $iCloudEnabled).tint(.teal)
-
-            Button {
-                showResetAlert = true
-            } label: {
-                Label(L(.resetData), systemImage: "trash.fill")
-                    .foregroundStyle(.red)
+            Button { showResetAlert = true } label: {
+                Label(L(.resetData), systemImage: "trash.fill").foregroundStyle(.red)
             }
         } header: {
             Label(L(.dataManagement), systemImage: "externaldrive.fill")
@@ -357,16 +261,12 @@ struct MyPageView: View {
 
     private var supportSection: some View {
         Section {
-            Button {
-                showHelp = true
-            } label: {
+            Button { showHelp = true } label: {
                 Label(L(.howToUse), systemImage: "book.fill").foregroundStyle(.primary)
             }
-
             Link(destination: URL(string: "mailto:feedback@pikari.app")!) {
                 Label(L(.sendFeedback), systemImage: "envelope.fill")
             }
-
             Button {
                 if let url = URL(string: "itms-apps://itunes.apple.com/app/id0000000000?action=write-review") {
                     UIApplication.shared.open(url)
@@ -374,13 +274,12 @@ struct MyPageView: View {
             } label: {
                 Label(L(.writeReview), systemImage: "star.fill").foregroundStyle(.primary)
             }
-
-            Link(destination: URL(string: "https://pikari.app/privacy")!) {
-                Label(L(.privacyPolicy), systemImage: "lock.shield.fill")
+            // アプリ内遺移に変更
+            Button { showPrivacyPolicy = true } label: {
+                Label(L(.privacyPolicy), systemImage: "lock.shield.fill").foregroundStyle(.primary)
             }
-
-            Link(destination: URL(string: "https://pikari.app/terms")!) {
-                Label(L(.termsOfService), systemImage: "doc.text.fill")
+            Button { showTermsOfService = true } label: {
+                Label(L(.termsOfService), systemImage: "doc.text.fill").foregroundStyle(.primary)
             }
         } header: {
             Label(L(.support), systemImage: "questionmark.circle.fill")
@@ -404,18 +303,10 @@ struct MyPageView: View {
 // MARK: - StatCard
 
 struct StatCard: View {
-    let icon: String
-    let label: String
-    let value: String
-    let unit: String
-    let color: Color
-
+    let icon: String; let label: String; let value: String; let unit: String; let color: Color
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: icon).foregroundStyle(color).font(.subheadline)
-                Spacer()
-            }
+            HStack { Image(systemName: icon).foregroundStyle(color).font(.subheadline); Spacer() }
             HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Text(value).font(.title2).fontWeight(.bold).foregroundStyle(color)
                 Text(unit).font(.caption).foregroundStyle(color.opacity(0.8))
@@ -428,23 +319,19 @@ struct StatCard: View {
     }
 }
 
-// MARK: - AppTheme（カラーテーマ）
+// MARK: - AppTheme
 
 enum AppTheme: CaseIterable {
     case teal, blue, purple, orange, green
-
     var color: Color {
         switch self {
-        case .teal:   return .teal
-        case .blue:   return .blue
-        case .purple: return .purple
-        case .orange: return .orange
-        case .green:  return .green
+        case .teal: return .teal; case .blue: return .blue
+        case .purple: return .purple; case .orange: return .orange; case .green: return .green
         }
     }
 }
 
-// MARK: - HelpView（操作方法）
+// MARK: - HelpView
 
 struct HelpView: View {
     @Environment(\.dismiss) private var dismiss
@@ -454,103 +341,74 @@ struct HelpView: View {
         NavigationStack {
             List {
                 HelpSection(
-                    title: L(.howToSetup),
-                    icon: "house.fill",
-                    color: .teal,
+                    title: L(.howToSetup), icon: "house.fill", color: .teal,
                     steps: [
-                        (L(.step) + " 1", L(.setupHome),
-                         localization.language == .japanese
+                        ("1", L(.setupHome), localization.language == .japanese
                             ? "アプリを初めて起動すると家の名前を入力する画面が表示されます。家の名前（例：我が家）を入力してください。"
-                            : "When you first launch the app, you'll be asked to name your home. Enter a name (e.g., My Home)."),
-                        (L(.step) + " 2", L(.setupRoom),
-                         localization.language == .japanese
+                            : "When you first launch the app, you'll be asked to name your home. Enter a name like 'My Home'."),
+                        ("2", L(.setupRoom), localization.language == .japanese
                             ? "「間取り」タブから部屋を追加できます。リビング、キッチン、バスルームなどを登録しましょう。"
-                            : "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom, etc."),
-                        (L(.step) + " 3", L(.setupTask),
-                         localization.language == .japanese
+                            : "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom."),
+                        ("3", L(.setupTask), localization.language == .japanese
                             ? "ホームタブの「＋」ボタンからタスクを追加します。頻度（毎日・毎週・毎月）も設定できます。"
                             : "Add tasks using the '+' button on the Home tab. Set frequency (daily, weekly, monthly)."),
                     ]
                 )
-
                 HelpSection(
-                    title: L(.howToDaily),
-                    icon: "checkmark.circle.fill",
-                    color: .green,
+                    title: L(.howToDaily), icon: "checkmark.circle.fill", color: .green,
                     steps: [
-                        (L(.step) + " 1", L(.dailyComplete),
-                         localization.language == .japanese
+                        ("1", L(.dailyComplete), localization.language == .japanese
                             ? "ホームタブでタスクをタップし、「完了」ボタンを押します。所要時間やメモも記録できます。"
                             : "Tap a task on the Home tab and press Complete. You can also record duration and notes."),
-                        (L(.step) + " 2", L(.dailyPhoto),
-                         localization.language == .japanese
+                        ("2", L(.dailyPhoto), localization.language == .japanese
                             ? "「履歴」タブから完了記録を開き、「写真を追加する」で掃除前後の写真を撮影・記録できます。"
                             : "Open a completion record in History, then tap 'Add Photos' to capture before/after photos."),
-                        (L(.step) + " 3", L(.dailyWidget),
-                         localization.language == .japanese
+                        ("3", L(.dailyWidget), localization.language == .japanese
                             ? "ホーム画面を長押しして「＋」からPikariウィジェットを追加すると、今日のタスクが一目でわかります。"
-                            : "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks at a glance."),
+                            : "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks."),
                     ]
                 )
-
                 HelpSection(
-                    title: L(.howToFixture),
-                    icon: "wrench.and.screwdriver.fill",
-                    color: .orange,
+                    title: L(.howToFixture), icon: "wrench.and.screwdriver.fill", color: .orange,
                     steps: [
-                        (L(.step) + " 1", L(.fixtureRegister),
-                         localization.language == .japanese
+                        ("1", L(.fixtureRegister), localization.language == .japanese
                             ? "「間取り」タブで部屋を選択し、「設備・器具」タブから設備を追加します。"
                             : "Select a room in the Floor Plan tab, then add fixtures from the Fixtures tab."),
-                        (L(.step) + " 2", L(.fixturePartAdd),
-                         localization.language == .japanese
+                        ("2", L(.fixturePartAdd), localization.language == .japanese
                             ? "設備を選択してパーツを追加します。交換周期を設定すると交換時期を通知します。"
-                            : "Select a fixture and add parts. Set replacement intervals to receive replacement reminders."),
-                        (L(.step) + " 3", L(.fixtureStockRefill),
-                         localization.language == .japanese
+                            : "Select a fixture and add parts. Set replacement intervals to receive reminders."),
+                        ("3", L(.fixtureStockRefill), localization.language == .japanese
                             ? "「消耗品在庫」タブで在庫を管理します。在庫が少なくなるとウィジェットにアラートが表示されます。"
                             : "Manage stock in the Parts Inventory tab. Low stock alerts will appear in your widget."),
                     ]
                 )
-
                 HelpSection(
-                    title: L(.howToReport),
-                    icon: "chart.bar.fill",
-                    color: .blue,
+                    title: L(.howToReport), icon: "chart.bar.fill", color: .blue,
                     steps: [
-                        (L(.step) + " 1", L(.tabReport),
-                         localization.language == .japanese
-                            ? "「レポート」タブで掃除の統計を確認できます。今週・今月・今年の期間で切り替えられます。（プレミアム機能）"
-                            : "View cleaning statistics in the Report tab. Switch between this week, month, and year. (Premium)"),
-                        (L(.step) + " 2", L(.tabCalendar),
-                         localization.language == .japanese
-                            ? "「カレンダー」タブで月間カレンダーにタスクを表示します。日付をタップすると詳細が確認できます。（プレミアム機能）"
-                            : "The Calendar tab shows tasks on a monthly calendar. Tap a date for details. (Premium)"),
+                        ("1", L(.tabReport), localization.language == .japanese
+                            ? "「レポート」タブで掃除の統計を確認できます。今週・今月・今年の期間で切り替えられます。（プレミアム）"
+                            : "View stats in the Report tab. Switch between this week, month, and year. (Premium)"),
+                        ("2", L(.tabCalendar), localization.language == .japanese
+                            ? "「カレンダー」タブで月間カレンダーにタスクを表示します。（プレミアム）"
+                            : "The Calendar tab shows tasks on a monthly calendar. (Premium)"),
                     ]
                 )
-
                 HelpSection(
-                    title: L(.howToExport),
-                    icon: "square.and.arrow.up.fill",
-                    color: .purple,
+                    title: L(.howToExport), icon: "square.and.arrow.up.fill", color: .purple,
                     steps: [
-                        (L(.step) + " 1", L(.export),
-                         localization.language == .japanese
-                            ? "「履歴」タブ右上のエクスポートボタンをタップします。（プレミアム機能）"
+                        ("1", L(.export), localization.language == .japanese
+                            ? "「履歴」タブ右上のエクスポートボタンをタップします。（プレミアム）"
                             : "Tap the export button in the top right of the History tab. (Premium)"),
-                        (L(.step) + " 2", L(.exportData),
-                         localization.language == .japanese
-                            ? "エクスポートするデータの種類（タスク履歴・在庫・設備記録）とファイル形式（CSV/PDF）を選択します。"
-                            : "Select the data type (task history, inventory, maintenance) and file format (CSV/PDF)."),
+                        ("2", L(.exportData), localization.language == .japanese
+                            ? "データの種類とファイル形式（CSV/PDF）を選択します。"
+                            : "Select the data type and file format (CSV/PDF)."),
                     ]
                 )
             }
             .navigationTitle(L(.howToUse))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(L(.close)) { dismiss() }
-                }
+                ToolbarItem(placement: .confirmationAction) { Button(L(.close)) { dismiss() } }
             }
         }
     }
@@ -559,11 +417,8 @@ struct HelpView: View {
 // MARK: - HelpSection
 
 struct HelpSection: View {
-    let title: String
-    let icon: String
-    let color: Color
+    let title: String; let icon: String; let color: Color
     let steps: [(String, String, String)]
-
     var body: some View {
         Section {
             ForEach(steps.indices, id: \.self) { i in
@@ -571,14 +426,11 @@ struct HelpSection: View {
                     HStack(spacing: 8) {
                         ZStack {
                             Circle().fill(color.opacity(0.15)).frame(width: 28, height: 28)
-                            Text("\(i + 1)").font(.caption).fontWeight(.bold).foregroundStyle(color)
+                            Text(steps[i].0).font(.caption).fontWeight(.bold).foregroundStyle(color)
                         }
                         Text(steps[i].1).font(.subheadline).fontWeight(.semibold)
                     }
-                    Text(steps[i].2)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.leading, 36)
+                    Text(steps[i].2).font(.caption).foregroundStyle(.secondary).padding(.leading, 36)
                 }
                 .padding(.vertical, 4)
             }
