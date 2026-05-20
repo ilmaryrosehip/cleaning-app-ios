@@ -108,6 +108,32 @@ enum L10nKey {
     case step, setupHome, setupRoom, setupTask
     case dailyComplete, dailyPhoto, dailyWidget
     case fixtureRegister, fixturePartAdd, fixtureStockRefill
+
+    // ホーム追加
+    case today, upcoming, overdue, daysOverdue, daysLater, tomorrow
+    case recordCompletion, duplicateWarning, duplicateMessage, recordAnyway
+    case partsUsed, partsUsedFooter, stockCount, noTasks, noTasksHint, all
+    // カレンダー追加
+    case noSchedule
+    // レポート追加
+    case noData
+    // 履歴追加
+    case completedOn, elapsedTime
+    // 用品追加
+    case storeName, purchaseURL, category, openLink, addPurchaseMemo
+    case linkedTasks, noLinkedTasks, purchaseMemo, noSupplies
+    case quantity, estimatedPrice, total, markPurchased, noPurchaseMemo, addSupplyButton
+    // 消耗品在庫追加
+    case partsInventory, stockAdd, stockAfter, noPartsHint
+    case purchaseCount, unitPrice, markAsReplaced, replacedDateUpdated
+    case nextReplacement, lastReplaced, replacementCycle, daysUntil, daysExceeded
+    // 間取り追加
+    case addRoom, editRoom, roomName, roomIcon, addFixture, fixtures, tasks
+    // 設備追加
+    case fixture, fixtureManagement, addPart, partName, partNumber
+    case replacementMonths, lastReplacedAt, purchaseInfo, fixturePresets, addFromPreset
+    // オンボーディング追加
+    case welcomeTitle, welcomeSubtitle, homeName, homeNamePlaceholder, getStarted
 }
 
 extension L10nKey {
@@ -234,6 +260,77 @@ extension L10nKey {
         case .fixtureRegister: return "設備を登録する"
         case .fixturePartAdd: return "消耗品パーツを追加する"
         case .fixtureStockRefill: return "在庫を補充する"
+
+        case .today: return "今日"
+        case .upcoming: return "近日中"
+        case .overdue: return "期限超過"
+        case .daysOverdue: return "日超過"
+        case .daysLater: return "日後"
+        case .tomorrow: return "明日"
+        case .recordCompletion: return "完了を記録"
+        case .duplicateWarning: return "二重完了の確認"
+        case .duplicateMessage: return "本日すでに完了が記録されています。続けて記録しますか？"
+        case .recordAnyway: return "それでも記録する"
+        case .partsUsed: return "消耗品パーツの使用数"
+        case .partsUsedFooter: return "使用した分だけ在庫から差し引かれます"
+        case .stockCount: return "在庫"
+        case .noTasks: return "タスクがありません"
+        case .noTasksHint: return "右上の＋ボタンでタスクを追加しましょう"
+        case .all: return "すべて"
+        case .noSchedule: return "この日の予定・記録はありません"
+        case .noData: return "データがありません"
+        case .completedOn: return "完了日時"
+        case .elapsedTime: return "所要時間"
+        case .storeName: return "店名"
+        case .purchaseURL: return "購入URL"
+        case .category: return "カテゴリ"
+        case .openLink: return "購入ページを開く"
+        case .addPurchaseMemo: return "購入メモを追加"
+        case .linkedTasks: return "使用しているタスク"
+        case .noLinkedTasks: return "紐づいたタスクがありません"
+        case .purchaseMemo: return "購入メモ"
+        case .noSupplies: return "購入先が未登録です"
+        case .quantity: return "数量"
+        case .estimatedPrice: return "予算"
+        case .total: return "合計（目安）"
+        case .markPurchased: return "購入済みにする"
+        case .noPurchaseMemo: return "購入メモがありません"
+        case .addSupplyButton: return "用品画面から購入メモを追加できます"
+        case .partsInventory: return "消耗品在庫"
+        case .stockAdd: return "在庫を追加"
+        case .stockAfter: return "購入後の在庫"
+        case .noPartsHint: return "「間取り」タブ → 部屋 → 設備 → パーツを追加"
+        case .purchaseCount: return "購入数"
+        case .unitPrice: return "単価"
+        case .markAsReplaced: return "今回購入分を交換済みとして記録"
+        case .replacedDateUpdated: return "最終交換日が更新されます"
+        case .nextReplacement: return "次回交換予定"
+        case .lastReplaced: return "最終交換"
+        case .replacementCycle: return "交換周期"
+        case .daysUntil: return "交換まで"
+        case .daysExceeded: return "日超過"
+        case .addRoom: return "部屋を追加"
+        case .editRoom: return "部屋を編集"
+        case .roomName: return "部屋名"
+        case .roomIcon: return "アイコン"
+        case .addFixture: return "設備を追加"
+        case .fixtures: return "設備・器具"
+        case .tasks: return "タスク"
+        case .fixture: return "設備"
+        case .fixtureManagement: return "設備管理"
+        case .addPart: return "パーツを追加"
+        case .partName: return "パーツ名"
+        case .partNumber: return "型番"
+        case .replacementMonths: return "交換周期（月）"
+        case .lastReplacedAt: return "最終交換日"
+        case .purchaseInfo: return "購入情報"
+        case .fixturePresets: return "プリセットから追加"
+        case .addFromPreset: return "プリセットを選択"
+        case .welcomeTitle: return "ようこそ Pikari へ"
+        case .welcomeSubtitle: return "あなたの家のお掃除管理アプリ"
+        case .homeName: return "家の名前"
+        case .homeNamePlaceholder: return "例: 我が家"
+        case .getStarted: return "はじめる"
         }
     }
 
@@ -360,6 +457,77 @@ extension L10nKey {
         case .fixtureRegister: return "Register a fixture"
         case .fixturePartAdd: return "Add consumable parts"
         case .fixtureStockRefill: return "Refill stock"
+
+        case .today: return "Today"
+        case .upcoming: return "Upcoming"
+        case .overdue: return "Overdue"
+        case .daysOverdue: return " days overdue"
+        case .daysLater: return " days"
+        case .tomorrow: return "Tomorrow"
+        case .recordCompletion: return "Record Completion"
+        case .duplicateWarning: return "Duplicate Completion"
+        case .duplicateMessage: return "A completion is already recorded today. Record again?"
+        case .recordAnyway: return "Record Anyway"
+        case .partsUsed: return "Parts Used"
+        case .partsUsedFooter: return "Stock will be reduced by the amount used"
+        case .stockCount: return "Stock"
+        case .noTasks: return "No Tasks"
+        case .noTasksHint: return "Tap + to add your first task"
+        case .all: return "All"
+        case .noSchedule: return "No tasks or records for this day"
+        case .noData: return "No data available"
+        case .completedOn: return "Completed At"
+        case .elapsedTime: return "Duration"
+        case .storeName: return "Store Name"
+        case .purchaseURL: return "Purchase URL"
+        case .category: return "Category"
+        case .openLink: return "Open Purchase Page"
+        case .addPurchaseMemo: return "Add Shopping Memo"
+        case .linkedTasks: return "Linked Tasks"
+        case .noLinkedTasks: return "No linked tasks"
+        case .purchaseMemo: return "Shopping Memo"
+        case .noSupplies: return "No store registered"
+        case .quantity: return "Quantity"
+        case .estimatedPrice: return "Budget"
+        case .total: return "Total (Est.)"
+        case .markPurchased: return "Mark as Purchased"
+        case .noPurchaseMemo: return "No shopping memos"
+        case .addSupplyButton: return "Add memos from the Supplies screen"
+        case .partsInventory: return "Parts Inventory"
+        case .stockAdd: return "Add Stock"
+        case .stockAfter: return "Stock after purchase"
+        case .noPartsHint: return "Floor Plan → Room → Fixture → Add Part"
+        case .purchaseCount: return "Purchase Qty"
+        case .unitPrice: return "Unit Price"
+        case .markAsReplaced: return "Mark as replaced"
+        case .replacedDateUpdated: return "Last replaced date will be updated"
+        case .nextReplacement: return "Next Replacement"
+        case .lastReplaced: return "Last Replaced"
+        case .replacementCycle: return "Cycle"
+        case .daysUntil: return "days until replacement"
+        case .daysExceeded: return "days overdue"
+        case .addRoom: return "Add Room"
+        case .editRoom: return "Edit Room"
+        case .roomName: return "Room Name"
+        case .roomIcon: return "Icon"
+        case .addFixture: return "Add Fixture"
+        case .fixtures: return "Fixtures"
+        case .tasks: return "Tasks"
+        case .fixture: return "Fixture"
+        case .fixtureManagement: return "Fixture Management"
+        case .addPart: return "Add Part"
+        case .partName: return "Part Name"
+        case .partNumber: return "Part Number"
+        case .replacementMonths: return "Replacement Cycle (months)"
+        case .lastReplacedAt: return "Last Replaced"
+        case .purchaseInfo: return "Purchase Info"
+        case .fixturePresets: return "Add from Preset"
+        case .addFromPreset: return "Select Preset"
+        case .welcomeTitle: return "Welcome to Pikari"
+        case .welcomeSubtitle: return "Your home cleaning management app"
+        case .homeName: return "Home Name"
+        case .homeNamePlaceholder: return "e.g. My Home"
+        case .getStarted: return "Get Started"
         }
     }
 }
