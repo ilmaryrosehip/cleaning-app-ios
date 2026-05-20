@@ -100,7 +100,7 @@ struct SupplyDetailView: View {
     var body: some View {
         List {
             Section(L(.statistics)) {
-                Picker("在庫状況", selection: $supply.stockStatus) {
+                Picker(LocalizationManager.shared.language == .japanese ? "在庫状況" : "Stock Status", selection: $supply.stockStatus) {
                     ForEach(StockStatus.allCases, id: \.self) { s in Text(s.rawValue).tag(s) }
                 }
                 .onChange(of: supply.stockStatus) { _, _ in try? context.save() }
@@ -157,7 +157,7 @@ struct SupplyDetailView: View {
         }
         .navigationTitle(supply.name)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) { Button("編集") { showEdit = true } }
+            ToolbarItem(placement: .primaryAction) { Button(L(.edit)) { showEdit = true } }
         }
         .sheet(isPresented: $showAddPurchase) { AddPurchaseItemSheet(supply: supply) }
         .sheet(isPresented: $showEdit) { EditSupplySheet(supply: supply) }
@@ -176,12 +176,12 @@ struct EditSupplySheet: View {
             Form {
                 Section(LocalizationManager.shared.language == .japanese ? "用品名" : "Supply Name") { TextField("用品名", text: $supply.name) }
                 Section(L(.category)) {
-                    Picker("カテゴリ", selection: $supply.category) {
+                    Picker(L(.category), selection: $supply.category) {
                         ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
                     }
                     .pickerStyle(.segmented)
                 }
-                Section("購入先") {
+                Section(LocalizationManager.shared.language == .japanese ? "購入先" : "Where to Buy") {
                     TextField(LocalizationManager.shared.language == .japanese ? "店名（例: Amazon）" : "Store name (e.g. Amazon)", text: $supply.purchaseStoreName)
                     TextField(L(.purchaseURL), text: $supply.purchaseURL)
                         .keyboardType(.URL).autocorrectionDisabled().textInputAutocapitalization(.never)
@@ -243,15 +243,15 @@ struct AddSupplySheet: View {
         NavigationStack {
             Form {
                 Section("用品名") { TextField(LocalizationManager.shared.language == .japanese ? "例: ダイソン V11" : "e.g. Dyson V11", text: $name) }
-                Section("カテゴリ") {
-                    Picker("カテゴリ", selection: $category) {
+                Section(L(.category)) {
+                    Picker(L(.category), selection: $category) {
                         ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
                     }
                     .pickerStyle(.segmented)
                 }
                 Section(LocalizationManager.shared.language == .japanese ? "購入先（任意）" : "Where to Buy (Optional)") {
-                    TextField("店名（例: Amazon）", text: $purchaseStoreName)
-                    TextField("購入URL", text: $purchaseURL)
+                    TextField(LocalizationManager.shared.language == .japanese ? "店名（例: Amazon）" : "Store (e.g. Amazon)", text: $purchaseStoreName)
+                    TextField(L(.purchaseURL), text: $purchaseURL)
                         .keyboardType(.URL).autocorrectionDisabled().textInputAutocapitalization(.never)
                 }
                 Section("メモ") { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $memo, axis: .vertical).lineLimit(3) }
@@ -286,17 +286,17 @@ struct AddPurchaseItemSheet: View {
                 Section(LocalizationManager.shared.language == .japanese ? "品名" : "Item Name") { TextField(LocalizationManager.shared.language == .japanese ? "例: 重曹スプレー" : "e.g. Baking soda refill", text: $name) }
                 Section(LocalizationManager.shared.language == .japanese ? "数量・価格" : "Qty & Price") {
                     Stepper(LocalizationManager.shared.language == .japanese ? "数量: \(quantity)個" : "Qty: \(quantity)", value: $quantity, in: 1...99)
-                    LabeledContent("予算") {
-                        TextField("円", value: $price, format: .number)
+                    LabeledContent(L(.estimatedPrice)) {
+                        TextField(LocalizationManager.shared.language == .japanese ? "円" : "¥", value: $price, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
                 }
             }
             .navigationTitle(L(.addPurchaseMemo)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("追加") {
+                    Button(L(.add)) {
                         let item = PurchaseItem(name: name, quantity: quantity, estimatedPrice: price)
                         item.supply = supply; context.insert(item); try? context.save(); dismiss()
                     }
@@ -393,7 +393,7 @@ struct HistoryView: View {
 
     private var groupedLogs: [(String, [TaskLog])] {
         let formatter = DateFormatter()
-        formatter.dateFormat = "M月d日（E）"
+        formatter.dateFormat = LocalizationManager.shared.language == .japanese ? "M月d日（E）" : "MMM d, EEE"
         formatter.locale = Locale(identifier: "ja_JP")
         let grouped = Dictionary(grouping: logs) { formatter.string(from: $0.completedAt) }
         return grouped.sorted { $0.key > $1.key }
@@ -402,7 +402,7 @@ struct HistoryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("期間", selection: $selectedPeriod) {
+                Picker(LocalizationManager.shared.language == .japanese ? "期間" : "Period", selection: $selectedPeriod) {
                     ForEach(HistoryPeriod.allCases, id: \.self) { p in Text(p.label).tag(p) }
                 }
                 .pickerStyle(.segmented).padding(.horizontal).padding(.top, 12)
@@ -410,7 +410,7 @@ struct HistoryView: View {
                 if !allTasks.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            TaskFilterChip(name: "すべて", isSelected: selectedTaskID == nil) { selectedTaskID = nil }
+                            TaskFilterChip(name: L(.all), isSelected: selectedTaskID == nil) { selectedTaskID = nil }
                             ForEach(allTasks) { task in
                                 TaskFilterChip(name: task.title, isSelected: selectedTaskID == task.id) {
                                     selectedTaskID = selectedTaskID == task.id ? nil : task.id
@@ -423,7 +423,7 @@ struct HistoryView: View {
 
                 HStack(spacing: 12) {
                     MetricCard(label: L(.completedTasks), value: "\(logs.count)", valueColor: .teal)
-                    MetricCard(label: L(.totalTime),   value: "\(totalMinutes)分", valueColor: .teal)
+                    MetricCard(label: L(.totalTime), value: LocalizationManager.shared.language == .japanese ? "\(totalMinutes)分" : "\(totalMinutes)min", valueColor: .teal)
                 }
                 .padding(.horizontal).padding(.bottom, 8)
 
@@ -479,7 +479,7 @@ struct HistoryLogDetailView: View {
                 LabeledContent(L(.room),   value: log.task?.room?.name ?? "-")
                 LabeledContent(L(.completedOn), value: log.completedAt.formatted(date: .abbreviated, time: .shortened))
                 if log.durationMinutes > 0 {
-                    LabeledContent(L(.elapsedTime), value: "\(log.durationMinutes)分")
+                    LabeledContent(L(.elapsedTime), value: LocalizationManager.shared.language == .japanese ? "\(log.durationMinutes)分" : "\(log.durationMinutes)min")
                 }
                 if !log.memo.isEmpty {
                     Text(log.memo).font(.subheadline).foregroundStyle(.secondary)
@@ -492,7 +492,7 @@ struct HistoryLogDetailView: View {
                         HStack {
                             Text(usage.partName).font(.subheadline)
                             Spacer()
-                            Text("×\(usage.usedCount)個").font(.subheadline).fontWeight(.semibold).foregroundStyle(.orange)
+                            Text(LocalizationManager.shared.language == .japanese ? "×\(usage.usedCount)個" : "×\(usage.usedCount)").font(.subheadline).fontWeight(.semibold).foregroundStyle(.orange)
                         }
                     }
                 }
@@ -519,15 +519,15 @@ struct HistoryLogDetailView: View {
                 }
             } header: {
                 HStack {
-                    Text("写真記録")
+                    Text(L(.photoRecord))
                     Spacer()
                     if !log.photoDataList.isEmpty {
-                        Text("\(log.photoDataList.count)枚").font(.caption).foregroundStyle(.secondary)
+                        Text(LocalizationManager.shared.language == .japanese ? "\(log.photoDataList.count)枚" : "\(log.photoDataList.count) photos").font(.caption).foregroundStyle(.secondary)
                     }
                 }
             }
         }
-        .navigationTitle(log.task?.title ?? "完了記録")
+        .navigationTitle(log.task?.title ?? L(.recordCompletion))
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showPhotoRecord) { PhotoRecordSheet(log: log) }
     }
@@ -553,7 +553,7 @@ struct HistoryLogRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(log.task?.title ?? "削除済みタスク").font(.subheadline).fontWeight(.medium)
+                Text(log.task?.title ?? L(.noRecords)).font(.subheadline).fontWeight(.medium)
                 if let roomName = log.task?.room?.name {
                     Text(roomName).font(.caption).foregroundStyle(.secondary)
                 }
@@ -573,7 +573,7 @@ struct HistoryLogRow: View {
                     }
                 }
                 if !log.photoDataList.isEmpty {
-                    Label("\(log.photoDataList.count)枚の写真", systemImage: "photo")
+                    Label(LocalizationManager.shared.language == .japanese ? "\(log.photoDataList.count)枚の写真" : "\(log.photoDataList.count) photos", systemImage: "photo")
                         .font(.caption2).foregroundStyle(.blue)
                 }
             }
@@ -582,7 +582,7 @@ struct HistoryLogRow: View {
                 Text(log.completedAt.formatted(date: .omitted, time: .shortened))
                     .font(.caption).foregroundStyle(.secondary)
                 if log.durationMinutes > 0 {
-                    Text("\(log.durationMinutes)分").font(.caption2)
+                    Text(LocalizationManager.shared.language == .japanese ? "\(log.durationMinutes)分" : "\(log.durationMinutes)min").font(.caption2)
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(Color.teal.opacity(0.1)).foregroundStyle(.teal)
                         .clipShape(Capsule())
@@ -617,7 +617,7 @@ struct ConsumablePartStockView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "shippingbox").font(.system(size: 40)).foregroundStyle(.secondary)
                         Text(L(.noTasks)).font(.headline)
-                        Text("パーツを追加するには：\n「間取り」タブ → 部屋を選択 →「設備・器具」タブ → 設備を選択 → パーツを追加")
+                        Text(L(.noPartsHint))
                             .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 24)
@@ -656,7 +656,7 @@ struct PartStockRow: View {
                 Circle().fill(stockColor.opacity(0.12)).frame(width: 40, height: 40)
                 VStack(spacing: 0) {
                     Text("\(part.stockCount)").font(.system(size: 16, weight: .bold)).foregroundStyle(stockColor)
-                    Text("個").font(.system(size: 9)).foregroundStyle(stockColor.opacity(0.8))
+                    Text(LocalizationManager.shared.language == .japanese ? "個" : "").font(.system(size: 9)).foregroundStyle(stockColor.opacity(0.8))
                 }
             }
             VStack(alignment: .leading, spacing: 2) {
@@ -718,13 +718,13 @@ struct QuickStockAddSheet: View {
                     Text(LocalizationManager.shared.language == .japanese ? "購入後の在庫: \(part.stockCount + quantity)個" : "Stock after: \(part.stockCount + quantity)").font(.caption).foregroundStyle(.teal)
                 }
                 Section(L(.purchaseInfo)) {
-                    DatePicker("購入日", selection: $purchasedAt, displayedComponents: .date)
+                    DatePicker(L(.purchaseDate), selection: $purchasedAt, displayedComponents: .date)
                     TextField(LocalizationManager.shared.language == .japanese ? "購入店名（例: Amazon）" : "Store name (e.g. Amazon)", text: $storeName)
-                    LabeledContent("単価") {
-                        TextField("円", value: $unitPrice, format: .number)
+                    LabeledContent(L(.unitPrice)) {
+                        TextField(LocalizationManager.shared.language == .japanese ? "円" : "¥", value: $unitPrice, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
-                    if unitPrice > 0 { LabeledContent("合計", value: "¥\((unitPrice * quantity).formatted())") }
+                    if unitPrice > 0 { LabeledContent(L(.total), value: "¥\((unitPrice * quantity).formatted())") }
                 }
                 Section {
                     Toggle(L(.markAsReplaced), isOn: $markAsReplaced).tint(.teal)
@@ -736,7 +736,7 @@ struct QuickStockAddSheet: View {
             }
             .navigationTitle(L(.stockAdd)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L(.add)) { saveStock() }.fontWeight(.semibold)
                 }
@@ -747,7 +747,7 @@ struct QuickStockAddSheet: View {
 
     private func saveStock() {
         part.stockCount += quantity
-        let record = PurchaseRecord(quantity: quantity, unitPrice: unitPrice, storeName: storeName, memo: "在庫補充")
+        let record = PurchaseRecord(quantity: quantity, unitPrice: unitPrice, storeName: storeName, memo: LocalizationManager.shared.language == .japanese ? "在庫補充" : "Restock")
         record.purchasedAt = purchasedAt
         record.part = part
         context.insert(record)

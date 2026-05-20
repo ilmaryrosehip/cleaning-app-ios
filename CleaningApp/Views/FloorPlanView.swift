@@ -61,7 +61,7 @@ struct RoomGridCard: View {
                 }
             }
             Text(room.name).font(.subheadline).fontWeight(.semibold)
-            Text("タスク \(room.tasks.filter { $0.isActive }.count)件").font(.caption).foregroundStyle(.secondary)
+            Text(LocalizationManager.shared.language == .japanese ? "タスク \(room.tasks.filter { $0.isActive }.count)件" : "\(room.tasks.filter { $0.isActive }.count) tasks").font(.caption).foregroundStyle(.secondary)
         }
         .padding(14).frame(maxWidth: .infinity, alignment: .leading).frame(height: 90)
         .background(Color(.systemBackground)).clipShape(RoundedRectangle(cornerRadius: 14))
@@ -110,7 +110,7 @@ struct RoomDetailView: View {
         List {
             if activeTasks.isEmpty {
                 ContentUnavailableView(L(.noTasks), systemImage: "sparkles",
-                                       description: Text("＋ボタンからタスクを追加しましょう"))
+                                       description: Text(LocalizationManager.shared.language == .japanese ? "＋ボタンからタスクを追加しましょう" : "Tap + to add a task"))
                     .listRowBackground(Color.clear)
             } else {
                 ForEach(activeTasks) { task in
@@ -145,7 +145,7 @@ struct TaskListRow: View {
                 if task.estimatedMinutes > 0 {
                     Text("·")
                     Image(systemName: "clock").font(.caption2)
-                    Text("約\(task.estimatedMinutes)分").font(.caption)
+                    Text(LocalizationManager.shared.language == .japanese ? "約\(task.estimatedMinutes)分" : "~\(task.estimatedMinutes)min").font(.caption)
                 }
             }
             .foregroundStyle(.secondary)
@@ -162,26 +162,26 @@ struct TaskDetailView: View {
 
     var body: some View {
         List {
-            Section("基本情報") {
+            Section(LocalizationManager.shared.language == .japanese ? "基本情報" : "Basic Info") {
                 LabeledContent(L(.room), value: task.room?.name ?? "-")
-                LabeledContent("頻度", value: task.frequency.rawValue)
+                LabeledContent(LocalizationManager.shared.language == .japanese ? "頻度" : "Frequency", value: task.frequency.rawValue)
                 if task.frequency.supportsWeekdays && !task.weekdays.isEmpty {
-                    LabeledContent("曜日", value: task.weekdaysLabel)
+                    LabeledContent(LocalizationManager.shared.language == .japanese ? "曜日" : "Days", value: task.weekdaysLabel)
                 }
-                LabeledContent("次回", value: task.nextDueDate.formatted(date: .abbreviated, time: .omitted))
-                LabeledContent("目安時間", value: "\(task.estimatedMinutes)分")
+                LabeledContent(LocalizationManager.shared.language == .japanese ? "次回" : "Next Due", value: task.nextDueDate.formatted(date: .abbreviated, time: .omitted))
+                LabeledContent(LocalizationManager.shared.language == .japanese ? "目安時間" : "Est. Time", value: LocalizationManager.shared.language == .japanese ? "\(task.estimatedMinutes)分" : "\(task.estimatedMinutes)min")
             }
             if !task.notes.isEmpty {
-                Section("メモ") { Text(task.notes).font(.subheadline).foregroundStyle(.secondary) }
+                Section(L(.memo)) { Text(task.notes).font(.subheadline).foregroundStyle(.secondary) }
             }
-            Section("使用用品") {
+            Section(LocalizationManager.shared.language == .japanese ? "使用用品" : "Supplies Used") {
                 ForEach(task.supplies) { supply in Label(supply.name, systemImage: "bag") }
                 if task.supplies.isEmpty {
-                    Text("用品が未登録です").font(.subheadline).foregroundStyle(.tertiary)
+                    Text(LocalizationManager.shared.language == .japanese ? "用品が未登録です" : "No supplies registered").font(.subheadline).foregroundStyle(.tertiary)
                 }
             }
             if !task.fixtures.isEmpty {
-                Section("対象の設備・器具") {
+                Section(L(.fixtures)) {
                     ForEach(task.fixtures.sorted { $0.name < $1.name }) { fixture in
                         NavigationLink(destination: FixtureDetailView(fixture: fixture)) {
                             HStack(spacing: 10) {
@@ -192,24 +192,24 @@ struct TaskDetailView: View {
                     }
                 }
             }
-            Section("実施記録（直近5件）") {
+            Section(LocalizationManager.shared.language == .japanese ? "実施記録（直近5件）" : "Recent Records (last 5)") {
                 let recentLogs = task.logs.sorted { $0.completedAt > $1.completedAt }.prefix(5)
                 ForEach(Array(recentLogs)) { log in
                     HStack {
                         Text(log.completedAt.formatted(date: .abbreviated, time: .omitted)).font(.subheadline)
                         Spacer()
-                        Text("\(log.durationMinutes)分").font(.caption).foregroundStyle(.secondary)
+                        Text(LocalizationManager.shared.language == .japanese ? "\(log.durationMinutes)分" : "\(log.durationMinutes)min").font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 if task.logs.isEmpty {
-                    Text("まだ記録がありません").font(.subheadline).foregroundStyle(.tertiary)
+                    Text(LocalizationManager.shared.language == .japanese ? "まだ記録がありません" : "No records yet").font(.subheadline).foregroundStyle(.tertiary)
                 }
             }
         }
         .navigationTitle(task.title).navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button { showComplete = true } label: { Label("完了", systemImage: "checkmark.circle") }
+                Button { showComplete = true } label: { Label(L(.complete), systemImage: "checkmark.circle") }
                     .tint(.teal)
             }
         }
@@ -230,7 +230,7 @@ struct AddRoomSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(L(.roomName)) { TextField("例: ダイニング", text: $name) }
+                Section(L(.roomName)) { TextField(LocalizationManager.shared.language == .japanese ? "例: ダイニング" : "e.g. Dining Room", text: $name) }
                 Section(L(.roomIcon)) {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
                         ForEach(iconOptions, id: \.self) { n in
@@ -244,7 +244,7 @@ struct AddRoomSheet: View {
                     }.padding(.vertical, 4)
                 }
             }
-            .navigationTitle("部屋を追加").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L(.addRoom)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -288,27 +288,27 @@ struct AddTaskSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("タスク名") { TextField("例: フィルター清掃", text: $title) }
-                Section("設定") {
-                    Picker("部屋", selection: $selectedRoom) {
-                        Text("選択してください").tag(Optional<Room>.none)
+                Section(L(.taskName)) { TextField(LocalizationManager.shared.language == .japanese ? "例: フィルター清掃" : "e.g. Filter cleaning", text: $title) }
+                Section(LocalizationManager.shared.language == .japanese ? "設定" : "Settings") {
+                    Picker(L(.room), selection: $selectedRoom) {
+                        Text(LocalizationManager.shared.language == .japanese ? "選択してください" : "Select...").tag(Optional<Room>.none)
                         ForEach(home.rooms) { room in Text(room.name).tag(Optional(room)) }
                     }
                     .onChange(of: selectedRoom) { _, _ in selectedFixtureIDs = [] }
 
-                    Picker("頻度", selection: $frequency) {
+                    Picker(LocalizationManager.shared.language == .japanese ? "頻度" : "Frequency", selection: $frequency) {
                         ForEach(Frequency.allCases, id: \.self) { f in Text(f.rawValue).tag(f) }
                     }
                     if frequency.supportsWeekdays {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(frequency == .weekly ? "毎週の曜日" : "隔週の曜日")
+                            Text(frequency == .weekly ? LocalizationManager.shared.language == .japanese ? "毎週の曜日" : "Weekly days" : LocalizationManager.shared.language == .japanese ? "隔週の曜日" : "Biweekly days")
                                 .font(.subheadline).foregroundStyle(.secondary)
                             WeekdayPicker(selectedWeekdays: $selectedWeekdays)
                         }
                         .padding(.vertical, 4)
                     }
-                    DatePicker("初回日", selection: $nextDueDate, displayedComponents: .date)
-                    Stepper("目安: \(estimatedMinutes)分", value: $estimatedMinutes, in: 5...180, step: 5)
+                    DatePicker(LocalizationManager.shared.language == .japanese ? "初回日" : "Start Date", selection: $nextDueDate, displayedComponents: .date)
+                    Stepper(LocalizationManager.shared.language == .japanese ? "目安: \(estimatedMinutes)分" : "Est: \(estimatedMinutes)min", value: $estimatedMinutes, in: 5...180, step: 5)
                 }
                 if !roomFixtures.isEmpty {
                     Section {
@@ -327,16 +327,16 @@ struct AddTaskSheet: View {
                         }
                     } header: {
                         HStack {
-                            Text("対象の設備・器具")
+                            Text(L(.fixtures))
                             Spacer()
-                            Text("\(selectedFixtureIDs.count)件選択").font(.caption).foregroundStyle(.secondary)
+                            Text(LocalizationManager.shared.language == .japanese ? "\(selectedFixtureIDs.count)件選択" : "\(selectedFixtureIDs.count) selected").font(.caption).foregroundStyle(.secondary)
                         }
                     } footer: {
-                        Text("複数選択可。選択した設備に紐づくタスクとして管理されます").font(.caption)
+                        Text(LocalizationManager.shared.language == .japanese ? "複数選択可。選択した設備に紐づくタスクとして管理されます" : "Select multiple. Tasks will be linked to selected fixtures.").font(.caption)
                     }
                 }
                 if !allSupplies.isEmpty {
-                    Section("使用用品") {
+                    Section(LocalizationManager.shared.language == .japanese ? "使用用品" : "Supplies") {
                         ForEach(allSupplies) { supply in
                             HStack {
                                 Text(supply.name)
@@ -353,13 +353,13 @@ struct AddTaskSheet: View {
                         }
                     }
                 }
-                Section("メモ") { TextField("任意", text: $notes, axis: .vertical).lineLimit(3) }
+                Section(L(.memo)) { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $notes, axis: .vertical).lineLimit(3) }
             }
-            .navigationTitle("タスクを追加").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L(.addTask)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("追加") { saveTask() }
+                    Button(L(.add)) { saveTask() }
                         .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty || selectedRoom == nil)
                         .fontWeight(.semibold)
                 }
@@ -392,7 +392,7 @@ struct FixtureSelectionRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(fixture.name).font(.subheadline).fontWeight(.medium).foregroundStyle(.primary)
                     if !fixture.parts.isEmpty {
-                        Text("パーツ \(fixture.parts.count)件").font(.caption).foregroundStyle(.secondary)
+                        Text(LocalizationManager.shared.language == .japanese ? "パーツ \(fixture.parts.count)件" : "\(fixture.parts.count) parts").font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Spacer()

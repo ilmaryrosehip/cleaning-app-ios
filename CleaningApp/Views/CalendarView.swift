@@ -57,7 +57,7 @@ struct CalendarView: View {
 
     private var monthTitle: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy年M月"
+        formatter.dateFormat = LocalizationManager.shared.language == .japanese ? "yyyy年M月" : "MMMM yyyy"
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: displayMonth)
     }
@@ -139,7 +139,7 @@ struct CalendarView: View {
     // MARK: - 曜日ヘッダー
 
     private var weekdayHeader: some View {
-        let labels = ["日", "月", "火", "水", "木", "金", "土"]
+        let labels = LocalizationManager.shared.language == .japanese ? ["日", "月", "火", "水", "木", "金", "土"] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         return HStack(spacing: 0) {
             ForEach(labels.indices, id: \.self) { i in
                 Text(labels[i])
@@ -191,7 +191,7 @@ struct CalendarView: View {
                         // 日付ヘッダー
                         let formatter: DateFormatter = {
                             let f = DateFormatter()
-                            f.dateFormat = "M月d日（E）"
+                            f.dateFormat = LocalizationManager.shared.language == .japanese ? "M月d日（E）" : "MMM d, EEE"
                             f.locale = Locale(identifier: "ja_JP")
                             return f
                         }()
@@ -240,14 +240,14 @@ struct CalendarView: View {
                                         Image(systemName: "checkmark.circle.fill")
                                             .foregroundStyle(.green).font(.caption)
                                         VStack(alignment: .leading, spacing: 1) {
-                                            Text(log.task?.title ?? "削除済みタスク")
+                                            Text(log.task?.title ?? L(.noRecords))
                                                 .font(.subheadline)
                                             Text(log.completedAt.formatted(date: .omitted, time: .shortened))
                                                 .font(.caption).foregroundStyle(.secondary)
                                         }
                                         Spacer()
                                         if log.durationMinutes > 0 {
-                                            Text("\(log.durationMinutes)分")
+                                            Text(LocalizationManager.shared.language == .japanese ? "\(log.durationMinutes)分" : "\(log.durationMinutes)min")
                                                 .font(.caption2)
                                                 .padding(.horizontal, 6).padding(.vertical, 2)
                                                 .background(Color.teal.opacity(0.1))
