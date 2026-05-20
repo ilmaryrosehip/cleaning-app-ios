@@ -170,7 +170,7 @@ struct ExportView: View {
     private func generateTaskHistoryCSV(dateFormatter: DateFormatter) -> String {
         var rows = LocalizationManager.shared.language == .japanese ? ["【タスク完了履歴】", "完了日時,部屋,タスク名,所要時間(分),メモ,使用パーツ"] : ["[Task History]", "Date,Room,Task,Duration(min),Memo,Parts Used"]
         for log in home.rooms.flatMap({ $0.tasks }).flatMap({ $0.logs }).sorted(by: { $0.completedAt > $1.completedAt }) {
-            let parts = log.partUsages.map { "\($0.partName)×\($0.usedCount)" }.joined(separator: "・")
+            let parts = log.partUsages.map { "\($0.partName)x\($0.usedCount)" }.joined(separator: ", ")
             rows.append("\(dateFormatter.string(from: log.completedAt)),\(log.task?.room?.name ?? ""),\((log.task?.title ?? (LocalizationManager.shared.language == .japanese ? "削除済みタスク" : "Deleted Task"))),\(log.durationMinutes),\(log.memo.replacingOccurrences(of: ",", with: "、")),\(parts)")
         }
         return rows.joined(separator: "\n")
@@ -190,7 +190,7 @@ struct ExportView: View {
         for room in home.rooms {
             for fixture in room.fixtures {
                 for part in fixture.parts {
-                    let last   = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? "未記録"
+                    let last   = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? (LocalizationManager.shared.language == .japanese ? "未記録" : "N/A")
                     let next   = part.nextReplacementDate.map { dateFormatter.string(from: $0) } ?? "-"
                     rows.append("\(room.name),\(fixture.name),\(part.name),\(part.replacementStatus.label),\(last),\(next)")
                 }
@@ -237,40 +237,40 @@ struct ExportView: View {
             }
 
             // タイトル
-            drawLine("Pikari - \(exportType.rawValue)", fontSize: 18, bold: true)
-            drawLine("エクスポート日時: \(dateFormatter.string(from: .now))  家: \(home.name)", fontSize: 9, color: .gray)
+            drawLine("Pikari - \(exportType.label)", fontSize: 18, bold: true)
+            drawLine(LocalizationManager.shared.language == .japanese ? "エクスポート日時: \(dateFormatter.string(from: .now))  家: \(home.name)" : "Exported: \(dateFormatter.string(from: .now))  Home: \(home.name)", fontSize: 9, color: .gray)
             y += 8
 
             switch exportType {
             case .taskHistory, .allData:
-                drawSectionHeader("タスク完了履歴")
+                drawSectionHeader(LocalizationManager.shared.language == .japanese ? "タスク完了履歴" : "Task History")
                 let logs = home.rooms.flatMap { $0.tasks }.flatMap { $0.logs }.sorted { $0.completedAt > $1.completedAt }
-                if logs.isEmpty { drawLine("記録がありません", color: .gray) }
+                if logs.isEmpty { drawLine(LocalizationManager.shared.language == .japanese ? "記録がありません" : "No records", color: .gray) }
                 for log in logs {
-                    let dur = log.durationMinutes > 0 ? "\(log.durationMinutes)分" : "-"
-                    drawLine("[\(dateFormatter.string(from: log.completedAt))] \(log.task?.room?.name ?? "") / \(log.task?.title ?? "削除済み")  \(dur)", fontSize: 9, indent: 8)
+                    let dur = log.durationMinutes > 0 ? (LocalizationManager.shared.language == .japanese ? "\(log.durationMinutes)分" : "\(log.durationMinutes)min") : "-"
+                    drawLine("[\(dateFormatter.string(from: log.completedAt))] \(log.task?.room?.name ?? "") / \((log.task?.title ?? (LocalizationManager.shared.language == .japanese ? "削除済み" : "Deleted")))  \(dur)", fontSize: 9, indent: 8)
                 }
                 y += 8
                 if exportType == .taskHistory { break }
                 fallthrough
             case .inventory:
-                drawSectionHeader("消耗品在庫")
+                drawSectionHeader(LocalizationManager.shared.language == .japanese ? "消耗品在庫" : "Parts Inventory")
                 let parts = home.rooms.flatMap { $0.fixtures }.flatMap { $0.parts }
-                if parts.isEmpty { drawLine("パーツが登録されていません", color: .gray) }
+                if parts.isEmpty { drawLine(LocalizationManager.shared.language == .japanese ? "パーツが登録されていません" : "No parts registered", color: .gray) }
                 for part in parts {
-                    let last = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? "未記録"
-                    drawLine("\(part.fixture?.name ?? "") / \(part.name)  在庫:\(part.stockCount)個  最終交換:\(last)", fontSize: 9, indent: 8)
+                    let last = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? (LocalizationManager.shared.language == .japanese ? "未記録" : "N/A")
+                    drawLine(LocalizationManager.shared.language == .japanese ? "\(part.fixture?.name ?? "") / \(part.name)  在庫:\(part.stockCount)個  最終交換:\(last)" : "\(part.fixture?.name ?? "") / \(part.name)  Stock:\(part.stockCount)  Last:\(last)", fontSize: 9, indent: 8)
                 }
                 y += 8
                 if exportType == .inventory { break }
                 fallthrough
             case .maintenance:
-                drawSectionHeader("設備メンテナンス記録")
+                drawSectionHeader(LocalizationManager.shared.language == .japanese ? "設備メンテナンス記録" : "Maintenance Records")
                 for room in home.rooms {
                     for fixture in room.fixtures {
                         drawLine("【\(room.name)】\(fixture.name)", fontSize: 10, bold: true)
                         for part in fixture.parts {
-                            let last = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? "未記録"
+                            let last = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? (LocalizationManager.shared.language == .japanese ? "未記録" : "N/A")
                             let next = part.nextReplacementDate.map { dateFormatter.string(from: $0) } ?? "-"
                             drawLine("\(part.name) - \(part.replacementStatus.label)  最終:\(last)  次回:\(next)", fontSize: 9, indent: 16)
                         }
