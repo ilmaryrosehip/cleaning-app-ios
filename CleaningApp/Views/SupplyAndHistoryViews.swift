@@ -352,10 +352,11 @@ struct HistoryView: View {
     enum HistoryPeriod: String, CaseIterable {
         case week = "今週", month = "今月", all = "すべて"
         var label: String {
+            let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
             switch self {
-            case .week:  return L10nKey.thisWeek.ja
-            case .month: return L10nKey.thisMonth.ja
-            case .all:   return L10nKey.all.ja
+            case .week:  return isJP ? "今週" : "This Week"
+            case .month: return isJP ? "今月" : "This Month"
+            case .all:   return isJP ? "すべて" : "All"
             }
         }
         var startDate: Date {

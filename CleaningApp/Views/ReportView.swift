@@ -14,10 +14,11 @@ struct ReportView: View {
         case year  = "今年"
 
         var label: String {
+            let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
             switch self {
-            case .week:  return L10nKey.thisWeek.ja
-            case .month: return L10nKey.thisMonth.ja
-            case .year:  return L10nKey.thisYear.ja
+            case .week:  return isJP ? "今週" : "This Week"
+            case .month: return isJP ? "今月" : "This Month"
+            case .year:  return isJP ? "今年" : "This Year"
             }
         }
         var startDate: Date {
