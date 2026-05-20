@@ -69,7 +69,7 @@ struct MyPageView: View {
                 Button(L(.delete), role: .destructive) {}
             } message: {
                 Text(localization.language == .japanese
-                     ? "すべてのデータが削除されます。この操作は取り消せません。"
+                     ? LocalizationManager.shared.language == .japanese ? "All data will be deleted. This cannot be undone." : "All data will be deleted. This cannot be undone."
                      : "All data will be deleted. This action cannot be undone.")
             }
         }
@@ -110,11 +110,11 @@ struct MyPageView: View {
                 Image(systemName: "person.2.fill").foregroundStyle(.teal).font(.title3)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(localization.language == .japanese
-                         ? "家族や同居人と掃除を共有できます"
+                         ? LocalizationManager.shared.language == .japanese ? "家族や同居人と掃除を共有できます" : "Share cleaning tasks with family members"
                          : "Share cleaning tasks with family members")
                         .font(.subheadline)
                     Text(localization.language == .japanese
-                         ? "iCloud同期を有効にして招待してください"
+                         ? LocalizationManager.shared.language == .japanese ? "iCloud同期を有効にして招待してください" : "Enable iCloud sync and invite members"
                          : "Enable iCloud sync and send an invite")
                         .font(.caption).foregroundStyle(.secondary)
                 }
@@ -344,13 +344,13 @@ struct HelpView: View {
                     title: L(.howToSetup), icon: "house.fill", color: .teal,
                     steps: [
                         ("1", L(.setupHome), localization.language == .japanese
-                            ? "アプリを初めて起動すると家の名前を入力する画面が表示されます。家の名前（例：我が家）を入力してください。"
+                            ? "When you first launch the app, you'll be asked to name your home."
                             : "When you first launch the app, you'll be asked to name your home. Enter a name like 'My Home'."),
                         ("2", L(.setupRoom), localization.language == .japanese
-                            ? "「間取り」タブから部屋を追加できます。リビング、キッチン、バスルームなどを登録しましょう。"
+                            ? "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom."
                             : "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom."),
                         ("3", L(.setupTask), localization.language == .japanese
-                            ? "ホームタブの「＋」ボタンからタスクを追加します。頻度（毎日・毎週・毎月）も設定できます。"
+                            ? "Add tasks using the '+' button on the Home tab. Set frequency (daily, weekly, monthly)."
                             : "Add tasks using the '+' button on the Home tab. Set frequency (daily, weekly, monthly)."),
                     ]
                 )
@@ -358,13 +358,13 @@ struct HelpView: View {
                     title: L(.howToDaily), icon: "checkmark.circle.fill", color: .green,
                     steps: [
                         ("1", L(.dailyComplete), localization.language == .japanese
-                            ? "ホームタブでタスクをタップし、「完了」ボタンを押します。所要時間やメモも記録できます。"
+                            ? "Tap a task on the Home tab and press Complete. You can also record duration and notes."
                             : "Tap a task on the Home tab and press Complete. You can also record duration and notes."),
                         ("2", L(.dailyPhoto), localization.language == .japanese
-                            ? "「履歴」タブから完了記録を開き、「写真を追加する」で掃除前後の写真を撮影・記録できます。"
+                            ? "Open a completion record in History, then tap 'Add Photos' to capture before/after photos."
                             : "Open a completion record in History, then tap 'Add Photos' to capture before/after photos."),
                         ("3", L(.dailyWidget), localization.language == .japanese
-                            ? "ホーム画面を長押しして「＋」からPikariウィジェットを追加すると、今日のタスクが一目でわかります。"
+                            ? "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks."
                             : "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks."),
                     ]
                 )
@@ -372,13 +372,13 @@ struct HelpView: View {
                     title: L(.howToFixture), icon: "wrench.and.screwdriver.fill", color: .orange,
                     steps: [
                         ("1", L(.fixtureRegister), localization.language == .japanese
-                            ? "「間取り」タブで部屋を選択し、「設備・器具」タブから設備を追加します。"
+                            ? "Select a room in the Floor Plan tab, then add fixtures from the Fixtures tab."
                             : "Select a room in the Floor Plan tab, then add fixtures from the Fixtures tab."),
                         ("2", L(.fixturePartAdd), localization.language == .japanese
-                            ? "設備を選択してパーツを追加します。交換周期を設定すると交換時期を通知します。"
+                            ? "Select a fixture and add parts. Set replacement intervals to receive reminders."
                             : "Select a fixture and add parts. Set replacement intervals to receive reminders."),
                         ("3", L(.fixtureStockRefill), localization.language == .japanese
-                            ? "「消耗品在庫」タブで在庫を管理します。在庫が少なくなるとウィジェットにアラートが表示されます。"
+                            ? "Manage stock in the Parts Inventory tab. Low stock alerts will appear in your widget."
                             : "Manage stock in the Parts Inventory tab. Low stock alerts will appear in your widget."),
                     ]
                 )
@@ -386,10 +386,10 @@ struct HelpView: View {
                     title: L(.howToReport), icon: "chart.bar.fill", color: .blue,
                     steps: [
                         ("1", L(.tabReport), localization.language == .japanese
-                            ? "「レポート」タブで掃除の統計を確認できます。今週・今月・今年の期間で切り替えられます。（プレミアム）"
+                            ? "View cleaning statistics in the Report tab. Switch between week, month, and year. (Premium)"
                             : "View stats in the Report tab. Switch between this week, month, and year. (Premium)"),
                         ("2", L(.tabCalendar), localization.language == .japanese
-                            ? "「カレンダー」タブで月間カレンダーにタスクを表示します。（プレミアム）"
+                            ? "The Calendar tab shows tasks on a monthly calendar. (Premium)"
                             : "The Calendar tab shows tasks on a monthly calendar. (Premium)"),
                     ]
                 )
@@ -397,10 +397,10 @@ struct HelpView: View {
                     title: L(.howToExport), icon: "square.and.arrow.up.fill", color: .purple,
                     steps: [
                         ("1", L(.export), localization.language == .japanese
-                            ? "「履歴」タブ右上のエクスポートボタンをタップします。（プレミアム）"
+                            ? "Tap the export button in the top right of the History tab. (Premium)"
                             : "Tap the export button in the top right of the History tab. (Premium)"),
                         ("2", L(.exportData), localization.language == .japanese
-                            ? "データの種類とファイル形式（CSV/PDF）を選択します。"
+                            ? "Select the data type and file format (CSV/PDF)."
                             : "Select the data type and file format (CSV/PDF)."),
                     ]
                 )

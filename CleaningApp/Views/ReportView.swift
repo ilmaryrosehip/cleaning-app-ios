@@ -281,7 +281,7 @@ struct ReportView: View {
                             Circle()
                                 .fill(rankColor(index: index))
                                 .frame(width: 28, height: 28)
-                            Text("\(index + 1)")
+                            Text("\(index + 1).")
                                 .font(.caption).fontWeight(.bold)
                                 .foregroundStyle(.white)
                         }
