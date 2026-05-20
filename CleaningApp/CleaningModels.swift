@@ -135,11 +135,22 @@ final class CleaningTask {
 // MARK: - Frequency（繰り返し種別）
 
 enum Frequency: String, Codable, CaseIterable {
-    case daily    = "毎日"
-    case weekly   = "毎週"
-    case biweekly = "隔週"
-    case monthly  = "毎月"
-    case custom   = "カスタム"
+    case daily    = "daily"
+    case weekly   = "weekly"
+    case biweekly = "biweekly"
+    case monthly  = "monthly"
+    case custom   = "custom"
+
+    var label: String {
+        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+        switch self {
+        case .daily:    return isJP ? "毎日" : "Daily"
+        case .weekly:   return isJP ? "毎週" : "Weekly"
+        case .biweekly: return isJP ? "隔週" : "Biweekly"
+        case .monthly:  return isJP ? "毎月" : "Monthly"
+        case .custom:   return isJP ? "カスタム" : "Custom"
+        }
+    }
 
     func nextDate(from base: Date, intervalDays: Int, weekdays: [Int] = []) -> Date {
         let cal = Calendar.current
@@ -242,19 +253,39 @@ final class Supply {
 }
 
 enum SupplyCategory: String, Codable, CaseIterable {
-    case tool       = "電動工具"
-    case cloth      = "クロス・布"
-    case chemical   = "洗剤・薬剤"
-    case disposable = "消耗品"
-    case other      = "その他"
+    case tool       = "tool"
+    case cloth      = "cloth"
+    case chemical   = "chemical"
+    case disposable = "disposable"
+    case other      = "other"
+
+    var label: String {
+        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+        switch self {
+        case .tool:       return isJP ? "電動工具" : "Tools"
+        case .cloth:      return isJP ? "クロス・布" : "Cloth"
+        case .chemical:   return isJP ? "洗剤・薬剤" : "Detergent"
+        case .disposable: return isJP ? "消耗品" : "Disposables"
+        case .other:      return isJP ? "その他" : "Other"
+        }
+    }
 }
 
 enum StockStatus: String, Codable, CaseIterable {
-    case ok         = "十分"
-    case low        = "残り少"
-    case outOfStock = "切れ"
+    case ok         = "ok"
+    case low        = "low"
+    case outOfStock = "outOfStock"
 
     var needsReorder: Bool { self == .low || self == .outOfStock }
+
+    var label: String {
+        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+        switch self {
+        case .ok:         return isJP ? "十分" : "In Stock"
+        case .low:        return isJP ? "残り少" : "Low Stock"
+        case .outOfStock: return isJP ? "切れ" : "Out of Stock"
+        }
+    }
 }
 
 // MARK: - PurchaseItem
@@ -369,11 +400,12 @@ enum ReplacementStatus {
     case ok, soon, overdue, unknown
 
     var label: String {
+        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
         switch self {
-        case .ok:      return "正常"
-        case .soon:    return "交換まもなく"
-        case .overdue: return "交換時期超過"
-        case .unknown: return "未記録"
+        case .ok:      return isJP ? "正常" : "OK"
+        case .soon:    return isJP ? "交換まもなく" : "Due Soon"
+        case .overdue: return isJP ? "交換時期超過" : "Overdue"
+        case .unknown: return isJP ? "未記録" : "N/A"
         }
     }
 }

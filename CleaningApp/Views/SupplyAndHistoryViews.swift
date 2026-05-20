@@ -101,7 +101,7 @@ struct SupplyDetailView: View {
         List {
             Section(L(.statistics)) {
                 Picker(LocalizationManager.shared.language == .japanese ? "在庫状況" : "Stock Status", selection: $supply.stockStatus) {
-                    ForEach(StockStatus.allCases, id: \.self) { s in Text(s.rawValue).tag(s) }
+                    ForEach(StockStatus.allCases, id: \.self) { s in Text(s.label).tag(s) }
                 }
                 .onChange(of: supply.stockStatus) { _, _ in try? context.save() }
                 LabeledContent(L(.category), value: supply.category.rawValue)

@@ -164,7 +164,7 @@ struct TaskDetailView: View {
         List {
             Section(LocalizationManager.shared.language == .japanese ? "基本情報" : "Basic Info") {
                 LabeledContent(L(.room), value: task.room?.name ?? "-")
-                LabeledContent(LocalizationManager.shared.language == .japanese ? "頻度" : "Frequency", value: task.frequency.rawValue)
+                LabeledContent(LocalizationManager.shared.language == .japanese ? "頻度" : "Frequency", value: task.frequency.label)
                 if task.frequency.supportsWeekdays && !task.weekdays.isEmpty {
                     LabeledContent(LocalizationManager.shared.language == .japanese ? "曜日" : "Days", value: task.weekdaysLabel)
                 }
