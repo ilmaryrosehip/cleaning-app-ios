@@ -20,7 +20,7 @@ struct SupplyListView: View {
                             NavigationLink(destination: SupplyDetailView(supply: supply)) { SupplyRow(supply: supply) }
                         }
                     } header: {
-                        Label("補充が必要", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
+                        Label(L(.reorderNeeded), systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
                     }
                 }
                 ForEach(SupplyCategory.allCases, id: \.self) { category in
@@ -38,13 +38,13 @@ struct SupplyListView: View {
                     }
                 }
             }
-            .navigationTitle("用品管理")
+            .navigationTitle(L(.supplyManagement))
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button { showAddSupply = true } label: { Image(systemName: "plus") }
                 }
                 ToolbarItem(placement: .secondaryAction) {
-                    Button { showPurchaseList = true } label: { Label("購入リスト", systemImage: "cart") }
+                    Button { showPurchaseList = true } label: { Label(L(.purchaseList), systemImage: "cart") }
                 }
             }
             .sheet(isPresented: $showAddSupply) { AddSupplySheet() }
@@ -99,29 +99,29 @@ struct SupplyDetailView: View {
 
     var body: some View {
         List {
-            Section("状態") {
+            Section(L(.statistics)) {
                 Picker("在庫状況", selection: $supply.stockStatus) {
                     ForEach(StockStatus.allCases, id: \.self) { s in Text(s.rawValue).tag(s) }
                 }
                 .onChange(of: supply.stockStatus) { _, _ in try? context.save() }
-                LabeledContent("カテゴリ", value: supply.category.rawValue)
+                LabeledContent(L(.category), value: supply.category.rawValue)
                 if let used = supply.lastUsedAt {
-                    LabeledContent("最終使用", value: used.formatted(date: .abbreviated, time: .omitted))
+                    LabeledContent(LocalizationManager.shared.language == .japanese ? "最終使用" : "Last Used", value: used.formatted(date: .abbreviated, time: .omitted))
                 }
             }
 
-            Section("購入先") {
+            Section(LocalizationManager.shared.language == .japanese ? "購入先" : "Where to Buy") {
                 if supply.purchaseStoreName.isEmpty && supply.purchaseURL.isEmpty {
-                    Text("購入先が未登録です").font(.subheadline).foregroundStyle(.tertiary)
+                    Text(L(.noSupplies)).font(.subheadline).foregroundStyle(.tertiary)
                 } else {
                     if !supply.purchaseStoreName.isEmpty {
-                        LabeledContent("店名", value: supply.purchaseStoreName)
+                        LabeledContent(L(.storeName), value: supply.purchaseStoreName)
                     }
                     if !supply.purchaseURL.isEmpty, let url = URL(string: supply.purchaseURL) {
                         Link(destination: url) {
                             HStack {
                                 Image(systemName: "arrow.up.right.square").foregroundStyle(.teal)
-                                Text("購入ページを開く").foregroundStyle(.teal)
+                                Text(L(.openLink)).foregroundStyle(.teal)
                                 Spacer()
                                 Text(supply.purchaseStoreName.isEmpty ? supply.purchaseURL : supply.purchaseStoreName)
                                     .font(.caption).foregroundStyle(.secondary).lineLimit(1)
@@ -131,9 +131,9 @@ struct SupplyDetailView: View {
                 }
             }
 
-            Section("使用しているタスク") {
+            Section(L(.linkedTasks)) {
                 if supply.tasks.isEmpty {
-                    Text("紐づいたタスクがありません").foregroundStyle(.tertiary).font(.subheadline)
+                    Text(L(.noLinkedTasks)).foregroundStyle(.tertiary).font(.subheadline)
                 } else {
                     ForEach(supply.tasks) { task in
                         HStack {
@@ -144,15 +144,15 @@ struct SupplyDetailView: View {
                 }
             }
 
-            Section("購入メモ") {
+            Section(L(.purchaseMemo)) {
                 ForEach(supply.purchaseItems.sorted { $0.isPurchased == false && $1.isPurchased }) { item in
                     PurchaseItemRow(item: item)
                 }
-                Button { showAddPurchase = true } label: { Label("購入メモを追加", systemImage: "plus") }
+                Button { showAddPurchase = true } label: { Label(L(.addPurchaseMemo), systemImage: "plus") }
             }
 
             if !supply.memo.isEmpty {
-                Section("メモ") { Text(supply.memo).foregroundStyle(.secondary).font(.subheadline) }
+                Section(L(.memo)) { Text(supply.memo).foregroundStyle(.secondary).font(.subheadline) }
             }
         }
         .navigationTitle(supply.name)
@@ -174,31 +174,31 @@ struct EditSupplySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("用品名") { TextField("用品名", text: $supply.name) }
-                Section("カテゴリ") {
+                Section(LocalizationManager.shared.language == .japanese ? "用品名" : "Supply Name") { TextField("用品名", text: $supply.name) }
+                Section(L(.category)) {
                     Picker("カテゴリ", selection: $supply.category) {
                         ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
                     }
                     .pickerStyle(.segmented)
                 }
                 Section("購入先") {
-                    TextField("店名（例: Amazon、ヨドバシ）", text: $supply.purchaseStoreName)
-                    TextField("購入URL（任意）", text: $supply.purchaseURL)
+                    TextField(LocalizationManager.shared.language == .japanese ? "店名（例: Amazon）" : "Store name (e.g. Amazon)", text: $supply.purchaseStoreName)
+                    TextField(L(.purchaseURL), text: $supply.purchaseURL)
                         .keyboardType(.URL).autocorrectionDisabled().textInputAutocapitalization(.never)
                     if !supply.purchaseURL.isEmpty, let url = URL(string: supply.purchaseURL) {
                         Link(destination: url) {
-                            Label("リンクを確認", systemImage: "arrow.up.right.square")
+                            Label(LocalizationManager.shared.language == .japanese ? "リンクを確認" : "Check Link", systemImage: "arrow.up.right.square")
                                 .font(.caption).foregroundStyle(.teal)
                         }
                     }
                 }
-                Section("メモ") { TextField("任意", text: $supply.memo, axis: .vertical).lineLimit(3) }
+                Section("メモ") { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $supply.memo, axis: .vertical).lineLimit(3) }
             }
-            .navigationTitle("用品を編集").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(LocalizationManager.shared.language == .japanese ? "用品を編集" : "Edit Supply").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { try? context.save(); dismiss() }.fontWeight(.semibold)
+                    Button(L(.save)) { try? context.save(); dismiss() }.fontWeight(.semibold)
                 }
             }
         }
@@ -242,25 +242,25 @@ struct AddSupplySheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("用品名") { TextField("例: ダイソン V11", text: $name) }
+                Section("用品名") { TextField(LocalizationManager.shared.language == .japanese ? "例: ダイソン V11" : "e.g. Dyson V11", text: $name) }
                 Section("カテゴリ") {
                     Picker("カテゴリ", selection: $category) {
                         ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
                     }
                     .pickerStyle(.segmented)
                 }
-                Section("購入先（任意）") {
+                Section(LocalizationManager.shared.language == .japanese ? "購入先（任意）" : "Where to Buy (Optional)") {
                     TextField("店名（例: Amazon）", text: $purchaseStoreName)
                     TextField("購入URL", text: $purchaseURL)
                         .keyboardType(.URL).autocorrectionDisabled().textInputAutocapitalization(.never)
                 }
-                Section("メモ") { TextField("任意", text: $memo, axis: .vertical).lineLimit(3) }
+                Section("メモ") { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $memo, axis: .vertical).lineLimit(3) }
             }
-            .navigationTitle("用品を追加").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L(.addSupply)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("追加") {
+                    Button(L(.add)) {
                         let s = Supply(name: name, category: category, memo: memo,
                                        purchaseStoreName: purchaseStoreName, purchaseURL: purchaseURL)
                         context.insert(s); try? context.save(); dismiss()
@@ -283,16 +283,16 @@ struct AddPurchaseItemSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("品名") { TextField("例: 重曹スプレー 詰め替え", text: $name) }
-                Section("数量・価格") {
-                    Stepper("数量: \(quantity)個", value: $quantity, in: 1...99)
+                Section(LocalizationManager.shared.language == .japanese ? "品名" : "Item Name") { TextField(LocalizationManager.shared.language == .japanese ? "例: 重曹スプレー" : "e.g. Baking soda refill", text: $name) }
+                Section(LocalizationManager.shared.language == .japanese ? "数量・価格" : "Qty & Price") {
+                    Stepper(LocalizationManager.shared.language == .japanese ? "数量: \(quantity)個" : "Qty: \(quantity)", value: $quantity, in: 1...99)
                     LabeledContent("予算") {
                         TextField("円", value: $price, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
                 }
             }
-            .navigationTitle("購入メモを追加").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L(.addPurchaseMemo)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
@@ -319,22 +319,22 @@ struct PurchaseListSheet: View {
         NavigationStack {
             List {
                 if pendingItems.isEmpty {
-                    ContentUnavailableView("購入メモがありません", systemImage: "cart",
-                                           description: Text("用品画面から購入メモを追加できます"))
+                    ContentUnavailableView(L(.noPurchaseMemo), systemImage: "cart",
+                                           description: Text(L(.addSupplyButton)))
                 } else {
                     ForEach(pendingItems) { item in PurchaseItemRow(item: item) }
                     Section {
                         HStack {
-                            Text("合計（目安）").fontWeight(.medium)
+                            Text(L(.total)).fontWeight(.medium)
                             Spacer()
                             Text("¥\(totalEstimate.formatted())").fontWeight(.semibold)
                         }
                     }
                 }
             }
-            .navigationTitle("購入リスト").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L(.purchaseList)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("閉じる") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button(L(.close)) { dismiss() } }
             }
         }
     }
@@ -351,6 +351,13 @@ struct HistoryView: View {
 
     enum HistoryPeriod: String, CaseIterable {
         case week = "今週", month = "今月", all = "すべて"
+        var label: String {
+            switch self {
+            case .week:  return L10nKey.thisWeek.ja
+            case .month: return L10nKey.thisMonth.ja
+            case .all:   return L10nKey.all.ja
+            }
+        }
         var startDate: Date {
             let cal = Calendar.current
             switch self {
@@ -396,7 +403,7 @@ struct HistoryView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 Picker("期間", selection: $selectedPeriod) {
-                    ForEach(HistoryPeriod.allCases, id: \.self) { p in Text(p.rawValue).tag(p) }
+                    ForEach(HistoryPeriod.allCases, id: \.self) { p in Text(p.label).tag(p) }
                 }
                 .pickerStyle(.segmented).padding(.horizontal).padding(.top, 12)
 
@@ -415,14 +422,14 @@ struct HistoryView: View {
                 }
 
                 HStack(spacing: 12) {
-                    MetricCard(label: "完了タスク", value: "\(logs.count)", valueColor: .teal)
-                    MetricCard(label: "合計時間",   value: "\(totalMinutes)分", valueColor: .teal)
+                    MetricCard(label: L(.completedTasks), value: "\(logs.count)", valueColor: .teal)
+                    MetricCard(label: L(.totalTime),   value: "\(totalMinutes)分", valueColor: .teal)
                 }
                 .padding(.horizontal).padding(.bottom, 8)
 
                 if logs.isEmpty {
-                    ContentUnavailableView("記録がありません", systemImage: "clock",
-                                           description: Text("タスクを完了すると履歴が表示されます"))
+                    ContentUnavailableView(L(.noRecords), systemImage: "clock",
+                                           description: Text(LocalizationManager.shared.language == .japanese ? "タスクを完了すると履歴が表示されます" : "Complete tasks to see your history"))
                 } else {
                     List {
                         ForEach(groupedLogs, id: \.0) { date, dayLogs in
@@ -438,7 +445,7 @@ struct HistoryView: View {
                     .listStyle(.insetGrouped)
                 }
             }
-            .navigationTitle("履歴")
+            .navigationTitle(L(.history))
             .toolbar {
                 // エクスポートボタン（プレミアム機能）
                 ToolbarItem(placement: .primaryAction) {
@@ -451,7 +458,7 @@ struct HistoryView: View {
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "タスク名・部屋名・メモで検索")
+            .searchable(text: $searchText, prompt: L(.searchPlaceholder))
             .sheet(isPresented: $showExport) {
                 ExportView(home: home)
             }
@@ -467,12 +474,12 @@ struct HistoryLogDetailView: View {
 
     var body: some View {
         List {
-            Section("完了情報") {
-                LabeledContent("タスク", value: log.task?.title ?? "-")
-                LabeledContent("部屋",   value: log.task?.room?.name ?? "-")
-                LabeledContent("完了日時", value: log.completedAt.formatted(date: .abbreviated, time: .shortened))
+            Section(LocalizationManager.shared.language == .japanese ? "完了情報" : "Completion Info") {
+                LabeledContent(L(.taskName), value: log.task?.title ?? "-")
+                LabeledContent(L(.room),   value: log.task?.room?.name ?? "-")
+                LabeledContent(L(.completedOn), value: log.completedAt.formatted(date: .abbreviated, time: .shortened))
                 if log.durationMinutes > 0 {
-                    LabeledContent("所要時間", value: "\(log.durationMinutes)分")
+                    LabeledContent(L(.elapsedTime), value: "\(log.durationMinutes)分")
                 }
                 if !log.memo.isEmpty {
                     Text(log.memo).font(.subheadline).foregroundStyle(.secondary)
@@ -480,7 +487,7 @@ struct HistoryLogDetailView: View {
             }
 
             if !log.partUsages.isEmpty {
-                Section("使用した消耗品") {
+                Section(L(.partsUsed)) {
                     ForEach(log.partUsages) { usage in
                         HStack {
                             Text(usage.partName).font(.subheadline)
@@ -497,8 +504,8 @@ struct HistoryLogDetailView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "camera.fill").font(.title3).foregroundStyle(.teal)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("写真を追加する").font(.subheadline).fontWeight(.medium).foregroundStyle(.teal)
-                                Text("掃除前後の写真を記録できます").font(.caption).foregroundStyle(.secondary)
+                                Text(L(.addPhoto)).font(.subheadline).fontWeight(.medium).foregroundStyle(.teal)
+                                Text(L(.noPhoto)).font(.caption).foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -506,7 +513,7 @@ struct HistoryLogDetailView: View {
                 } else {
                     PhotoGalleryView(log: log).frame(height: 90)
                     Button { showPhotoRecord = true } label: {
-                        Label("写真を追加", systemImage: "plus").font(.subheadline).foregroundStyle(.teal)
+                        Label(L(.addPhoto), systemImage: "plus").font(.subheadline).foregroundStyle(.teal)
                     }
                     .buttonStyle(.plain)
                 }
@@ -609,7 +616,7 @@ struct ConsumablePartStockView: View {
                 Section {
                     VStack(spacing: 12) {
                         Image(systemName: "shippingbox").font(.system(size: 40)).foregroundStyle(.secondary)
-                        Text("消耗品パーツがありません").font(.headline)
+                        Text(L(.noTasks)).font(.headline)
                         Text("パーツを追加するには：\n「間取り」タブ → 部屋を選択 →「設備・器具」タブ → 設備を選択 → パーツを追加")
                             .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
@@ -622,18 +629,18 @@ struct ConsumablePartStockView: View {
                     Section {
                         ForEach(lowStock) { part in PartStockRow(part: part) { showAddRecord = part } }
                     } header: {
-                        Label("在庫少・なし", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
+                        Label(LocalizationManager.shared.language == .japanese ? "在庫少・なし" : "Low / Out of Stock", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
                     }
                 }
                 let normalStock = sortedParts.filter { $0.stockCount > 1 }
                 if !normalStock.isEmpty {
-                    Section("在庫あり") {
+                    Section(LocalizationManager.shared.language == .japanese ? "在庫あり" : "In Stock") {
                         ForEach(normalStock) { part in PartStockRow(part: part) { showAddRecord = part } }
                     }
                 }
             }
         }
-        .navigationTitle("消耗品在庫").navigationBarTitleDisplayMode(.large)
+        .navigationTitle(L(.partsInventory)).navigationBarTitleDisplayMode(.large)
         .sheet(item: $showAddRecord) { part in QuickStockAddSheet(part: part) }
     }
 }
@@ -659,8 +666,8 @@ struct PartStockRow: View {
                 }
                 if let next = part.nextReplacementDate {
                     let days = Calendar.current.dateComponents([.day], from: .now, to: next).day ?? 0
-                    if days < 0 { Text("交換期限 \(abs(days))日超過").font(.caption).foregroundStyle(.red) }
-                    else if days <= 30 { Text("交換まで \(days)日").font(.caption).foregroundStyle(.orange) }
+                    if days < 0 { Text(LocalizationManager.shared.language == .japanese ? "交換期限 \(abs(days))日超過" : "\(abs(days))d overdue").font(.caption).foregroundStyle(.red) }
+                    else if days <= 30 { Text(LocalizationManager.shared.language == .japanese ? "交換まで \(days)日" : "\(days)d until replacement").font(.caption).foregroundStyle(.orange) }
                 }
             }
             Spacer()
@@ -702,17 +709,17 @@ struct QuickStockAddSheet: View {
                             }
                         }
                         Spacer()
-                        Text("現在 \(part.stockCount)個").font(.subheadline).foregroundStyle(.secondary)
+                        Text(LocalizationManager.shared.language == .japanese ? "現在 \(part.stockCount)個" : "Current: \(part.stockCount)").font(.subheadline).foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 }
-                Section("購入数量") {
-                    Stepper("購入数: \(quantity)個", value: $quantity, in: 1...99)
-                    Text("購入後の在庫: \(part.stockCount + quantity)個").font(.caption).foregroundStyle(.teal)
+                Section(L(.purchaseCount)) {
+                    Stepper(LocalizationManager.shared.language == .japanese ? "購入数: \(quantity)個" : "Qty: \(quantity)", value: $quantity, in: 1...99)
+                    Text(LocalizationManager.shared.language == .japanese ? "購入後の在庫: \(part.stockCount + quantity)個" : "Stock after: \(part.stockCount + quantity)").font(.caption).foregroundStyle(.teal)
                 }
-                Section("購入情報") {
+                Section(L(.purchaseInfo)) {
                     DatePicker("購入日", selection: $purchasedAt, displayedComponents: .date)
-                    TextField("購入店名（例: Amazon）", text: $storeName)
+                    TextField(LocalizationManager.shared.language == .japanese ? "購入店名（例: Amazon）" : "Store name (e.g. Amazon)", text: $storeName)
                     LabeledContent("単価") {
                         TextField("円", value: $unitPrice, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
@@ -720,18 +727,18 @@ struct QuickStockAddSheet: View {
                     if unitPrice > 0 { LabeledContent("合計", value: "¥\((unitPrice * quantity).formatted())") }
                 }
                 Section {
-                    Toggle("今回購入分を交換済みとして記録", isOn: $markAsReplaced).tint(.teal)
+                    Toggle(L(.markAsReplaced), isOn: $markAsReplaced).tint(.teal)
                     if markAsReplaced {
-                        Text("最終交換日が \(purchasedAt.formatted(date: .abbreviated, time: .omitted)) に更新されます")
+                        Text(L(.replacedDateUpdated))
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
             }
-            .navigationTitle("在庫を追加").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L(.stockAdd)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("追加") { saveStock() }.fontWeight(.semibold)
+                    Button(L(.add)) { saveStock() }.fontWeight(.semibold)
                 }
             }
         }
