@@ -123,7 +123,7 @@ private struct StepHomeNameView: View {
     var body: some View {
         VStack(spacing: 0) {
             OnboardingHeader(icon: "house.fill", title: "お家を設定しましょう", subtitle: "まずはお家の名前を入力してください")
-            Form { Section("家の名前") { TextField("例: 我が家", text: $homeName) } }
+            Form { Section(L(.homeName)) { TextField(L(.homeNamePlaceholder), text: $homeName) } }
             Spacer()
             OnboardingNextButton(label: "次へ：間取りを選ぶ", action: onNext)
                 .padding(.horizontal, 24).padding(.bottom, 32)
@@ -229,7 +229,7 @@ private struct StepRoomAssignView: View {
             }
             .listStyle(.insetGrouped)
             .overlay(alignment: .bottom) {
-                OnboardingNextButton(label: "はじめる", action: onDone)
+                OnboardingNextButton(label: L(.getStarted), action: onDone)
                     .padding(.horizontal, 24).padding(.bottom, 32)
                     .background(LinearGradient(
                         colors: [Color(.systemGroupedBackground).opacity(0), Color(.systemGroupedBackground)],
