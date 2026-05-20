@@ -3,60 +3,65 @@ import SwiftData
 
 // MARK: - FloorPlanPreset
 
+@MainActor
 struct FloorPlanPreset: Identifiable {
     let id: String
-    let name: String
-    let description: String
+    let nameJA: String; let nameEN: String
+    let descriptionJA: String; let descriptionEN: String
     let slots: [RoomSlot]
+    var name: String { LocalizationManager.shared.language == .japanese ? nameJA : nameEN }
+    var description: String { LocalizationManager.shared.language == .japanese ? descriptionJA : descriptionEN }
 }
 
+@MainActor
 struct RoomSlot: Identifiable {
     let id: String
-    let defaultName: String
+    let defaultNameJA: String; let defaultNameEN: String
     let defaultIcon: String
     let isRequired: Bool
+    var defaultName: String { LocalizationManager.shared.language == .japanese ? defaultNameJA : defaultNameEN }
 }
 
 extension FloorPlanPreset {
     static let presets: [FloorPlanPreset] = [
-        FloorPlanPreset(id: "1r", name: "1R / 1K", description: "一人暮らし向けのシンプルな間取り", slots: [
-            RoomSlot(id: "living",   defaultName: "リビング・寝室", defaultIcon: "sofa",                isRequired: true),
-            RoomSlot(id: "kitchen",  defaultName: "キッチン",       defaultIcon: "fork.knife",          isRequired: true),
-            RoomSlot(id: "bath",     defaultName: "バスルーム",     defaultIcon: "shower",              isRequired: true),
-            RoomSlot(id: "toilet",   defaultName: "トイレ",         defaultIcon: "toilet",              isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関",           defaultIcon: "door.left.hand.open", isRequired: false),
+        FloorPlanPreset(id: "1r", nameJA: "1R / 1K", nameEN: "1R / 1K", descriptionJA: "一人暮らし向けのシンプルな間取り", descriptionEN: "Simple layout for solo living", slots: [
+            RoomSlot(id: "living",   defaultNameJA: "リビング・寝室", defaultNameEN: "Living/Bedroom", defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "kitchen",  defaultNameJA: "キッチン",       defaultNameEN: "Kitchen",        defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultNameJA: "バスルーム",     defaultNameEN: "Bathroom",       defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultNameJA: "トイレ",         defaultNameEN: "Toilet",         defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultNameJA: "玄関",           defaultNameEN: "Entrance",       defaultIcon: "door.left.hand.open", isRequired: false),
         ]),
-        FloorPlanPreset(id: "1ldk", name: "1LDK", description: "一人暮らし〜カップル向け", slots: [
-            RoomSlot(id: "living",   defaultName: "リビング",   defaultIcon: "sofa",                isRequired: true),
-            RoomSlot(id: "bedroom",  defaultName: "寝室",       defaultIcon: "bed.double",          isRequired: true),
-            RoomSlot(id: "kitchen",  defaultName: "キッチン",   defaultIcon: "fork.knife",          isRequired: true),
-            RoomSlot(id: "bath",     defaultName: "バスルーム", defaultIcon: "shower",              isRequired: true),
-            RoomSlot(id: "toilet",   defaultName: "トイレ",     defaultIcon: "toilet",              isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関",       defaultIcon: "door.left.hand.open", isRequired: false),
+        FloorPlanPreset(id: "1ldk", nameJA: "1LDK", nameEN: "1LDK", descriptionJA: "一人暮らし〜カップル向け", descriptionEN: "For singles or couples", slots: [
+            RoomSlot(id: "living",   defaultNameJA: "リビング",   defaultNameEN: "Living Room", defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "bedroom",  defaultNameJA: "寝室",       defaultNameEN: "Bedroom",     defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "kitchen",  defaultNameJA: "キッチン",   defaultNameEN: "Kitchen",     defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultNameJA: "バスルーム", defaultNameEN: "Bathroom",    defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultNameJA: "トイレ",     defaultNameEN: "Toilet",      defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultNameJA: "玄関",       defaultNameEN: "Entrance",    defaultIcon: "door.left.hand.open", isRequired: false),
         ]),
-        FloorPlanPreset(id: "2ldk", name: "2LDK", description: "ファミリー・シェアハウス向け", slots: [
-            RoomSlot(id: "living",   defaultName: "リビング",   defaultIcon: "sofa",                isRequired: true),
-            RoomSlot(id: "bedroom1", defaultName: "寝室1",      defaultIcon: "bed.double",          isRequired: true),
-            RoomSlot(id: "bedroom2", defaultName: "寝室2",      defaultIcon: "bed.double",          isRequired: true),
-            RoomSlot(id: "kitchen",  defaultName: "キッチン",   defaultIcon: "fork.knife",          isRequired: true),
-            RoomSlot(id: "bath",     defaultName: "バスルーム", defaultIcon: "shower",              isRequired: true),
-            RoomSlot(id: "toilet",   defaultName: "トイレ",     defaultIcon: "toilet",              isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関",       defaultIcon: "door.left.hand.open", isRequired: false),
-            RoomSlot(id: "storage",  defaultName: "収納",       defaultIcon: "archivebox",          isRequired: false),
+        FloorPlanPreset(id: "2ldk", nameJA: "2LDK", nameEN: "2LDK", descriptionJA: "ファミリー・シェアハウス向け", descriptionEN: "For families or shared houses", slots: [
+            RoomSlot(id: "living",   defaultNameJA: "リビング",   defaultNameEN: "Living Room", defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "bedroom1", defaultNameJA: "寝室1",      defaultNameEN: "Bedroom 1",   defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "bedroom2", defaultNameJA: "寝室2",      defaultNameEN: "Bedroom 2",   defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "kitchen",  defaultNameJA: "キッチン",   defaultNameEN: "Kitchen",     defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultNameJA: "バスルーム", defaultNameEN: "Bathroom",    defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultNameJA: "トイレ",     defaultNameEN: "Toilet",      defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultNameJA: "玄関",       defaultNameEN: "Entrance",    defaultIcon: "door.left.hand.open", isRequired: false),
+            RoomSlot(id: "storage",  defaultNameJA: "収納",       defaultNameEN: "Storage",     defaultIcon: "archivebox",          isRequired: false),
         ]),
-        FloorPlanPreset(id: "3ldk", name: "3LDK以上", description: "大家族・広めの住まい向け", slots: [
-            RoomSlot(id: "living",   defaultName: "リビング",   defaultIcon: "sofa",                isRequired: true),
-            RoomSlot(id: "dining",   defaultName: "ダイニング", defaultIcon: "fork.knife",          isRequired: true),
-            RoomSlot(id: "bedroom1", defaultName: "寝室1",      defaultIcon: "bed.double",          isRequired: true),
-            RoomSlot(id: "bedroom2", defaultName: "寝室2",      defaultIcon: "bed.double",          isRequired: true),
-            RoomSlot(id: "bedroom3", defaultName: "寝室3",      defaultIcon: "bed.double",          isRequired: false),
-            RoomSlot(id: "kitchen",  defaultName: "キッチン",   defaultIcon: "fork.knife",          isRequired: true),
-            RoomSlot(id: "bath",     defaultName: "バスルーム", defaultIcon: "shower",              isRequired: true),
-            RoomSlot(id: "toilet",   defaultName: "トイレ",     defaultIcon: "toilet",              isRequired: true),
-            RoomSlot(id: "entrance", defaultName: "玄関",       defaultIcon: "door.left.hand.open", isRequired: false),
-            RoomSlot(id: "study",    defaultName: "書斎",       defaultIcon: "books.vertical",      isRequired: false),
+        FloorPlanPreset(id: "3ldk", nameJA: "3LDK以上", nameEN: "3+ Bedrooms", descriptionJA: "大家族・広めの住まい向け", descriptionEN: "For large families or bigger homes", slots: [
+            RoomSlot(id: "living",   defaultNameJA: "リビング",   defaultNameEN: "Living Room", defaultIcon: "sofa",                isRequired: true),
+            RoomSlot(id: "dining",   defaultNameJA: "ダイニング", defaultNameEN: "Dining Room", defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bedroom1", defaultNameJA: "寝室1",      defaultNameEN: "Bedroom 1",   defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "bedroom2", defaultNameJA: "寝室2",      defaultNameEN: "Bedroom 2",   defaultIcon: "bed.double",          isRequired: true),
+            RoomSlot(id: "bedroom3", defaultNameJA: "寝室3",      defaultNameEN: "Bedroom 3",   defaultIcon: "bed.double",          isRequired: false),
+            RoomSlot(id: "kitchen",  defaultNameJA: "キッチン",   defaultNameEN: "Kitchen",     defaultIcon: "fork.knife",          isRequired: true),
+            RoomSlot(id: "bath",     defaultNameJA: "バスルーム", defaultNameEN: "Bathroom",    defaultIcon: "shower",              isRequired: true),
+            RoomSlot(id: "toilet",   defaultNameJA: "トイレ",     defaultNameEN: "Toilet",      defaultIcon: "toilet",              isRequired: true),
+            RoomSlot(id: "entrance", defaultNameJA: "玄関",       defaultNameEN: "Entrance",    defaultIcon: "door.left.hand.open", isRequired: false),
+            RoomSlot(id: "study",    defaultNameJA: "書斎",       defaultNameEN: "Study",       defaultIcon: "books.vertical",      isRequired: false),
         ]),
-        FloorPlanPreset(id: "custom", name: "カスタム", description: "自分で部屋をゼロから設定する", slots: []),
+        FloorPlanPreset(id: "custom", nameJA: "カスタム", nameEN: "Custom", descriptionJA: "自分で部屋をゼロから設定する", descriptionEN: "Set up rooms from scratch", slots: []),
     ]
 }
 
@@ -100,7 +105,7 @@ struct OnboardingView: View {
     }
 
     private func saveHome() {
-        let home = Home(name: homeName.isEmpty ? "我が家" : homeName)
+        let home = Home(name: homeName.isEmpty ? LocalizationManager.shared.language == .japanese ? "我が家" : "My Home" : homeName)
         context.insert(home)
         guard let preset = selectedPreset else { try? context.save(); return }
         for (sortOrder, slot) in preset.slots.enumerated() {
@@ -122,10 +127,10 @@ private struct StepHomeNameView: View {
     let onNext: () -> Void
     var body: some View {
         VStack(spacing: 0) {
-            OnboardingHeader(icon: "house.fill", title: "お家を設定しましょう", subtitle: "まずはお家の名前を入力してください")
+            OnboardingHeader(icon: "house.fill", title: LocalizationManager.shared.language == .japanese ? "お家を設定しましょう" : "Set Up Your Home", subtitle: LocalizationManager.shared.language == .japanese ? "まずはお家の名前を入力してください" : "Enter your home name to get started")
             Form { Section(L(.homeName)) { TextField(L(.homeNamePlaceholder), text: $homeName) } }
             Spacer()
-            OnboardingNextButton(label: "次へ：間取りを選ぶ", action: onNext)
+            OnboardingNextButton(label: LocalizationManager.shared.language == .japanese ? "次へ：間取りを選ぶ" : "Next: Choose Floor Plan", action: onNext)
                 .padding(.horizontal, 24).padding(.bottom, 32)
         }
         .navigationBarBackButtonHidden()
@@ -138,7 +143,7 @@ private struct StepFloorPlanView: View {
     let onBack: () -> Void
     var body: some View {
         VStack(spacing: 0) {
-            OnboardingHeader(icon: "square.split.2x2", title: "間取りを選んでください", subtitle: "近い間取りを選ぶと部屋が自動で設定されます")
+            OnboardingHeader(icon: "square.split.2x2", title: LocalizationManager.shared.language == .japanese ? "間取りを選んでください" : "Choose Your Floor Plan", subtitle: LocalizationManager.shared.language == .japanese ? "近い間取りを選ぶと部屋が自動で設定されます" : "Select the closest match and rooms will be set up automatically")
             ScrollView {
                 VStack(spacing: 10) {
                     ForEach(FloorPlanPreset.presets) { preset in
@@ -171,14 +176,14 @@ private struct StepFloorPlanView: View {
                 }
                 .padding(.horizontal, 20).padding(.vertical, 12)
             }
-            OnboardingNextButton(label: "次へ：部屋を設定する", action: onNext)
+            OnboardingNextButton(label: LocalizationManager.shared.language == .japanese ? "次へ：部屋を設定する" : "Next: Set Up Rooms", action: onNext)
                 .disabled(selectedPreset == nil)
                 .padding(.horizontal, 24).padding(.bottom, 32)
         }
         .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button { onBack() } label: { Label("戻る", systemImage: "chevron.left") }
+                Button { onBack() } label: { Label(LocalizationManager.shared.language == .japanese ? "戻る" : "Back", systemImage: "chevron.left") }
             }
         }
     }
@@ -196,13 +201,13 @@ private struct StepRoomAssignView: View {
     var body: some View {
         VStack(spacing: 0) {
             OnboardingHeader(icon: "pencil.and.list.clipboard",
-                             title: "部屋を設定してください",
-                             subtitle: "タップして名前・アイコンを変更できます")
+                             title: LocalizationManager.shared.language == .japanese ? "部屋を設定してください" : "Set Up Your Rooms",
+                             subtitle: LocalizationManager.shared.language == .japanese ? "タップして名前・アイコンを変更できます" : "Tap to change room name and icon")
             List {
                 let required = preset.slots.filter { $0.isRequired }
                 let optional = preset.slots.filter { !$0.isRequired }
                 if !required.isEmpty {
-                    Section("必須の部屋") {
+                    Section(LocalizationManager.shared.language == .japanese ? "必須の部屋" : "Required Rooms") {
                         ForEach(required) { slot in
                             RoomSlotRow(name: slotNames[slot.id] ?? slot.defaultName,
                                         icon: slotIcons[slot.id] ?? slot.defaultIcon,
@@ -211,7 +216,7 @@ private struct StepRoomAssignView: View {
                     }
                 }
                 if !optional.isEmpty {
-                    Section("オプションの部屋") {
+                    Section(LocalizationManager.shared.language == .japanese ? "オプションの部屋" : "Optional Rooms") {
                         ForEach(optional) { slot in
                             RoomSlotRow(name: slotNames[slot.id] ?? slot.defaultName,
                                         icon: slotIcons[slot.id] ?? slot.defaultIcon,
@@ -240,7 +245,7 @@ private struct StepRoomAssignView: View {
         .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button { onBack() } label: { Label("戻る", systemImage: "chevron.left") }
+                Button { onBack() } label: { Label(LocalizationManager.shared.language == .japanese ? "戻る" : "Back", systemImage: "chevron.left") }
             }
         }
         .sheet(item: $editingSlot) { slot in
@@ -288,8 +293,8 @@ struct RoomEditSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("部屋名") { TextField("部屋名", text: $name) }
-                Section("アイコン") {
+                Section(L(.roomName)) { TextField(L(.roomName), text: $name) }
+                Section(L(.roomIcon)) {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
                         ForEach(iconOptions, id: \.self) { n in
                             Button { icon = n } label: {
@@ -305,7 +310,7 @@ struct RoomEditSheet: View {
             .navigationTitle(title).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完了") { dismiss() }.fontWeight(.semibold)
+                    Button(L(.complete)) { dismiss() }.fontWeight(.semibold)
                 }
             }
         }
