@@ -483,7 +483,8 @@ extension FixturePreset {
 // MARK: - VersionedSchema（スキーマバージョン管理）
 
 enum PikariSchemaV1: VersionedSchema {
-    static var versionIdentifier = Schema.Version(1, 0, 0)
+    // nonisolated(unsafe) で Swift 6 の並行性エラーを解消
+    nonisolated(unsafe) static var versionIdentifier = Schema.Version(1, 0, 0)
     static var models: [any PersistentModel.Type] {
         [
             Home.self, Room.self, CleaningTask.self, TaskLog.self,
@@ -500,11 +501,7 @@ enum PikariMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
         [PikariSchemaV1.self]
     }
-
-    // 現在はV1のみ。将来バージョンアップ時はここにステージを追加
-    static var stages: [MigrationStage] {
-        []
-    }
+    static var stages: [MigrationStage] { [] }
 }
 
 // MARK: - ModelContainer（マイグレーション対応 + iCloud同期）
@@ -514,14 +511,12 @@ extension ModelContainer {
     static let cleaningApp: ModelContainer = {
         let schema = Schema(PikariSchemaV1.models)
 
-        // マイグレーション対応のiCloud設定
         let cloudConfig = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false,
             cloudKitDatabase: .private("iCloud.com.hiroki.CleaningApp")
         )
 
-        // まずiCloud+マイグレーションで試みる
         do {
             return try ModelContainer(
                 for: schema,
@@ -529,14 +524,11 @@ extension ModelContainer {
                 configurations: cloudConfig
             )
         } catch {
-            print("iCloud migration failed, trying local: \(error)")
+            print("iCloud migration failed: \(error)")
         }
 
-        // ローカル+マイグレーションにフォールバック
-        let localConfig = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
-        )
+        let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
         do {
             return try ModelContainer(
                 for: schema,
@@ -544,10 +536,9 @@ extension ModelContainer {
                 configurations: localConfig
             )
         } catch {
-            print("Local migration failed, trying without migration: \(error)")
+            print("Local migration failed: \(error)")
         }
 
-        // 最終フォールバック：マイグレーションなしで起動
         do {
             return try ModelContainer(for: schema, configurations: localConfig)
         } catch {
