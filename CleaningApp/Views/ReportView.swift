@@ -134,8 +134,8 @@ struct ReportView: View {
                     icon: "clock.fill",
                     label: L(.totalTime),
                     value: totalMinutes >= 60
-                        ? "\(totalMinutes / 60)時間\(totalMinutes % 60)分"
-                        : "\(totalMinutes)分",
+                        ? (LocalizationManager.shared.language == .japanese ? "\(totalMinutes / 60)時間\(totalMinutes % 60)分" : "\(totalMinutes / 60)h \(totalMinutes % 60)m")
+                        : (LocalizationManager.shared.language == .japanese ? "\(totalMinutes)分" : "\(totalMinutes) min"),
                     color: .blue
                 )
             }
@@ -143,13 +143,13 @@ struct ReportView: View {
                 ReportMetricCard(
                     icon: "house.fill",
                     label: L(.roomsCleaned),
-                    value: "\(Set(logs.compactMap { $0.task?.room?.name }).count)部屋",
+                    value: LocalizationManager.shared.language == .japanese ? "\(Set(logs.compactMap { $0.task?.room?.name }).count)部屋" : "\(Set(logs.compactMap { $0.task?.room?.name }).count) rooms",
                     color: .orange
                 )
                 ReportMetricCard(
                     icon: "timer",
                     label: L(.avgTime),
-                    value: totalCount > 0 ? "\(totalMinutes / totalCount)分" : "-",
+                    value: totalCount > 0 ? (LocalizationManager.shared.language == .japanese ? "\(totalMinutes / totalCount)分" : "\(totalMinutes / totalCount) min") : "-",
                     color: .purple
                 )
             }
@@ -167,8 +167,8 @@ struct ReportView: View {
 
             Chart(dailyData, id: \.date) { item in
                 BarMark(
-                    x: .value("日付", item.date, unit: .day),
-                    y: .value("件数", item.count)
+                    x: .value(LocalizationManager.shared.language == .japanese ? "日付" : "Date", item.date, unit: .day),
+                    y: .value(LocalizationManager.shared.language == .japanese ? "件数" : "Count", item.count)
                 )
                 .foregroundStyle(Color.teal.gradient)
                 .cornerRadius(4)
@@ -203,12 +203,12 @@ struct ReportView: View {
 
             Chart(weekdayData, id: \.label) { item in
                 BarMark(
-                    x: .value("曜日", item.label),
+                    x: .value(LocalizationManager.shared.language == .japanese ? "曜日" : "Day", item.label),
                     y: .value("件数", item.count)
                 )
                 .foregroundStyle(
-                    item.label == "日" ? Color.red.gradient :
-                    item.label == "土" ? Color.blue.gradient :
+                    item.label == (LocalizationManager.shared.language == .japanese ? "日" : "Sun") ? Color.red.gradient :
+                    item.label == (LocalizationManager.shared.language == .japanese ? "土" : "Sat") ? Color.blue.gradient :
                     Color.teal.gradient
                 )
                 .cornerRadius(4)
@@ -233,7 +233,7 @@ struct ReportView: View {
 
             Chart(roomData, id: \.name) { item in
                 SectorMark(
-                    angle: .value("件数", item.count),
+                    angle: .value(LocalizationManager.shared.language == .japanese ? "件数" : "Count", item.count),
                     innerRadius: .ratio(0.55),
                     angularInset: 2
                 )
@@ -252,7 +252,7 @@ struct ReportView: View {
                             .frame(width: 12, height: 12)
                         Text(item.name).font(.caption)
                         Spacer()
-                        Text("\(item.count)件").font(.caption).foregroundStyle(.secondary)
+                        Text(LocalizationManager.shared.language == .japanese ? "\(item.count)件" : "\(item.count)").font(.caption).foregroundStyle(.secondary)
                     }
                 }
             }

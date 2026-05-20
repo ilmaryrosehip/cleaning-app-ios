@@ -23,7 +23,7 @@ struct FixtureListView: View {
                 }
             }
         }
-        .navigationTitle("\(room.name)の設備").navigationBarTitleDisplayMode(.large)
+        .navigationTitle(LocalizationManager.shared.language == .japanese ? "\(room.name)の設備" : "\(room.name) Fixtures").navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { showAddFixture = true } label: { Image(systemName: "plus") }
@@ -287,7 +287,7 @@ struct AddFixtureSheet: View {
                         }
                     }
                 }
-                Section(L(.memo)) { TextField("任意", text: $memo, axis: .vertical).lineLimit(3) }
+                Section(L(.memo)) { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $memo, axis: .vertical).lineLimit(3) }
             }
             .navigationTitle(L(.addFixture)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -368,7 +368,7 @@ struct AddConsumablePartSheet: View {
                     Stepper(replacementMonths == 0 ? LocalizationManager.shared.language == .japanese ? LocalizationManager.shared.language == .japanese ? "交換サイクル: 都度" : "Cycle: As needed" : "Cycle: As needed" : LocalizationManager.shared.language == .japanese ? "交換サイクル: \(replacementMonths)ヶ月" : "Cycle: \(replacementMonths) months",
                             value: $replacementMonths, in: 0...120, step: 1)
                 }
-                Section("購入先") {
+                Section(L(.purchaseInfo)) {
                     TextField(LocalizationManager.shared.language == .japanese ? "購入店名（例: Amazon）" : "Store (e.g. Amazon)", text: $purchaseStoreName)
                     TextField(L(.purchaseURL), text: $purchaseURL).keyboardType(.URL).autocorrectionDisabled()
                     LabeledContent(L(.unitPrice)) {
@@ -376,11 +376,11 @@ struct AddConsumablePartSheet: View {
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
                 }
-                Section("メモ") { TextField("任意", text: $memo, axis: .vertical).lineLimit(3) }
+                Section(L(.memo)) { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $memo, axis: .vertical).lineLimit(3) }
             }
             .navigationTitle(L(.addPart)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L(.add)) {
                         let part = ConsumablePart(name: name, partNumber: partNumber,
@@ -404,37 +404,37 @@ struct EditConsumablePartSheet: View {
         NavigationStack {
             Form {
                 Section(L(.partName)) { TextField(L(.partName), text: $part.name) }
-                Section("品番・交換サイクル") {
+                Section(LocalizationManager.shared.language == .japanese ? "品番・交換サイクル" : "Part No. & Cycle") {
                     TextField(LocalizationManager.shared.language == .japanese ? "品番" : "Part No.", text: $part.partNumber)
                     Stepper(part.replacementMonths == 0 ? "交換サイクル: 都度" : LocalizationManager.shared.language == .japanese ? "交換サイクル: \(part.replacementMonths)ヶ月" : "Cycle: \(part.replacementMonths) months",
                             value: $part.replacementMonths, in: 0...120)
                 }
                 Section(L(.lastReplacedAt)) {
-                    DatePicker("最終交換日", selection: Binding(
+                    DatePicker(L(.lastReplacedAt), selection: Binding(
                         get: { part.lastReplacedAt ?? .now },
                         set: { part.lastReplacedAt = $0 }
                     ), displayedComponents: .date)
-                    Toggle("交換済みとして記録", isOn: Binding(
+                    Toggle(LocalizationManager.shared.language == .japanese ? "交換済みとして記録" : "Mark as replaced", isOn: Binding(
                         get: { part.lastReplacedAt != nil },
                         set: { part.lastReplacedAt = $0 ? .now : nil }
                     )).tint(.teal)
                 }
-                Section("在庫数") { Stepper("在庫: \(part.stockCount)個", value: $part.stockCount, in: 0...99) }
+                Section(L(.stockCount)) { Stepper(LocalizationManager.shared.language == .japanese ? "在庫: \(part.stockCount)個" : "Stock: \(part.stockCount)", value: $part.stockCount, in: 0...99) }
                 Section("購入先") {
-                    TextField("購入店名", text: $part.purchaseStoreName)
+                    TextField(LocalizationManager.shared.language == .japanese ? "購入店名" : "Store name", text: $part.purchaseStoreName)
                     TextField(L(.purchaseURL), text: $part.purchaseURL).keyboardType(.URL).autocorrectionDisabled()
-                    LabeledContent("単価") {
-                        TextField("円", value: $part.unitPrice, format: .number)
+                    LabeledContent(L(.unitPrice)) {
+                        TextField(LocalizationManager.shared.language == .japanese ? "円" : "¥", value: $part.unitPrice, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
                 }
-                Section("メモ") { TextField("任意", text: $part.memo, axis: .vertical).lineLimit(3) }
+                Section("メモ") { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $part.memo, axis: .vertical).lineLimit(3) }
             }
             .navigationTitle(part.name).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { try? context.save(); dismiss() }.fontWeight(.semibold)
+                    Button(L(.save)) { try? context.save(); dismiss() }.fontWeight(.semibold)
                 }
             }
         }
@@ -462,31 +462,31 @@ struct AddPurchaseRecordSheet: View {
         NavigationStack {
             Form {
                 Section(L(.purchaseInfo)) {
-                    DatePicker("購入日", selection: $purchasedAt, displayedComponents: .date)
-                    Stepper("数量: \(quantity)個", value: $quantity, in: 1...99)
-                    LabeledContent("単価") {
-                        TextField("円", value: $unitPrice, format: .number)
+                    DatePicker(L(.purchaseDate), selection: $purchasedAt, displayedComponents: .date)
+                    Stepper(LocalizationManager.shared.language == .japanese ? "数量: \(quantity)個" : "Qty: \(quantity)", value: $quantity, in: 1...99)
+                    LabeledContent(L(.unitPrice)) {
+                        TextField(LocalizationManager.shared.language == .japanese ? "円" : "¥", value: $unitPrice, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
-                    TextField("購入店名", text: $storeName)
+                    TextField(LocalizationManager.shared.language == .japanese ? "購入店名" : "Store name", text: $storeName)
                 }
                 Section {
-                    Toggle("最終交換日を今日に更新", isOn: $markAsReplaced).tint(.teal)
+                    Toggle(LocalizationManager.shared.language == .japanese ? "最終交換日を今日に更新" : "Update last replaced date", isOn: $markAsReplaced).tint(.teal)
                     if markAsReplaced {
-                        Text("交換日: \(purchasedAt.formatted(date: .abbreviated, time: .omitted))")
+                        Text(LocalizationManager.shared.language == .japanese ? "交換日: \(purchasedAt.formatted(date: .abbreviated, time: .omitted))" : "Replaced: \(purchasedAt.formatted(date: .abbreviated, time: .omitted))")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
-                Section("合計") {
-                    LabeledContent("合計金額", value: "¥\((unitPrice * quantity).formatted())")
+                Section(L(.total)) {
+                    LabeledContent(LocalizationManager.shared.language == .japanese ? "合計金額" : "Total", value: "¥\((unitPrice * quantity).formatted())")
                 }
-                Section("メモ") { TextField("任意", text: $memo, axis: .vertical).lineLimit(2) }
+                Section("メモ") { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $memo, axis: .vertical).lineLimit(2) }
             }
-            .navigationTitle("購入を記録").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(LocalizationManager.shared.language == .japanese ? "購入を記録" : "Record Purchase").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("記録") {
+                    Button(LocalizationManager.shared.language == .japanese ? "記録" : "Record") {
                         let record = PurchaseRecord(quantity: quantity, unitPrice: unitPrice,
                                                      storeName: storeName, memo: memo)
                         record.purchasedAt = purchasedAt
