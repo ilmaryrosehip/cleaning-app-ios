@@ -96,7 +96,7 @@ struct CalendarView: View {
                 // 選択日のタスク・完了一覧
                 selectedDayDetail
             }
-            .navigationTitle("カレンダー")
+            .navigationTitle(L(.calendar))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -201,7 +201,7 @@ struct CalendarView: View {
                         // タスク
                         if !selectedTasks.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
-                                Label("予定タスク", systemImage: "checklist")
+                                Label(L(.scheduledTasks), systemImage: "checklist")
                                     .font(.subheadline).fontWeight(.semibold)
                                     .foregroundStyle(.teal)
                                     .padding(.horizontal)
@@ -219,7 +219,7 @@ struct CalendarView: View {
                                         }
                                         Spacer()
                                         if task.isOverdue {
-                                            Text("超過").font(.caption2).foregroundStyle(.red)
+                                            Text(LocalizationManager.shared.language == .japanese ? "超過" : "Overdue").font(.caption2).foregroundStyle(.red)
                                         }
                                     }
                                     .padding(.horizontal)
@@ -230,7 +230,7 @@ struct CalendarView: View {
                         // 完了ログ
                         if !selectedLogs.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
-                                Label("完了済み", systemImage: "checkmark.circle.fill")
+                                Label(L(.completed), systemImage: "checkmark.circle.fill")
                                     .font(.subheadline).fontWeight(.semibold)
                                     .foregroundStyle(.green)
                                     .padding(.horizontal)
@@ -261,7 +261,7 @@ struct CalendarView: View {
                         }
 
                         if selectedTasks.isEmpty && selectedLogs.isEmpty {
-                            Text("この日の予定・記録はありません")
+                            Text(L(.noSchedule))
                                 .font(.subheadline).foregroundStyle(.secondary)
                                 .frame(maxWidth: .infinity)
                                 .padding(.top, 8)
@@ -273,7 +273,7 @@ struct CalendarView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "calendar")
                         .font(.system(size: 32)).foregroundStyle(.secondary.opacity(0.5))
-                    Text("日付をタップして詳細を確認")
+                    Text(LocalizationManager.shared.language == .japanese ? "日付をタップして詳細を確認" : "Tap a date to see details")
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
