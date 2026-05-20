@@ -178,11 +178,9 @@ final class TaskLog {
     var memo: String
     var task: CleaningTask?
 
-    /// タスク実行時のパーツ使用記録
     @Relationship(deleteRule: .cascade)
     var partUsages: [TaskPartUsage] = []
 
-    /// 写真記録（JPEG Data の配列）
     var photoDataList: [Data] = []
 
     init(task: CleaningTask? = nil, durationMinutes: Int = 0, memo: String = "") {
@@ -194,7 +192,7 @@ final class TaskLog {
     }
 }
 
-// MARK: - TaskPartUsage（タスク実行時のパーツ使用記録）
+// MARK: - TaskPartUsage
 
 @Model
 final class TaskPartUsage {
@@ -482,36 +480,78 @@ extension FixturePreset {
     ]
 }
 
-// MARK: - ModelContainer（iCloud同期対応）
+// MARK: - VersionedSchema（スキーマバージョン管理）
 
-extension ModelContainer {
-    @MainActor
-    static let cleaningApp: ModelContainer = {
-        let schema = Schema([
+enum PikariSchemaV1: VersionedSchema {
+    static var versionIdentifier = Schema.Version(1, 0, 0)
+    static var models: [any PersistentModel.Type] {
+        [
             Home.self, Room.self, CleaningTask.self, TaskLog.self,
             TaskPartUsage.self,
             Supply.self, PurchaseItem.self,
             Fixture.self, ConsumablePart.self, PurchaseRecord.self,
-        ])
+        ]
+    }
+}
 
-        // iCloud同期を試みる。失敗した場合はローカルにフォールバック
+// MARK: - MigrationPlan
+
+enum PikariMigrationPlan: SchemaMigrationPlan {
+    static var schemas: [any VersionedSchema.Type] {
+        [PikariSchemaV1.self]
+    }
+
+    // 現在はV1のみ。将来バージョンアップ時はここにステージを追加
+    static var stages: [MigrationStage] {
+        []
+    }
+}
+
+// MARK: - ModelContainer（マイグレーション対応 + iCloud同期）
+
+extension ModelContainer {
+    @MainActor
+    static let cleaningApp: ModelContainer = {
+        let schema = Schema(PikariSchemaV1.models)
+
+        // マイグレーション対応のiCloud設定
         let cloudConfig = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false,
             cloudKitDatabase: .private("iCloud.com.hiroki.CleaningApp")
         )
 
+        // まずiCloud+マイグレーションで試みる
         do {
-            return try ModelContainer(for: schema, configurations: cloudConfig)
+            return try ModelContainer(
+                for: schema,
+                migrationPlan: PikariMigrationPlan.self,
+                configurations: cloudConfig
+            )
         } catch {
-            // iCloud未設定・未ログインの場合はローカルで動作
-            print("iCloud sync unavailable, falling back to local: \(error)")
-            let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-            do {
-                return try ModelContainer(for: schema, configurations: localConfig)
-            } catch {
-                fatalError("ModelContainer の初期化に失敗しました: \(error)")
-            }
+            print("iCloud migration failed, trying local: \(error)")
+        }
+
+        // ローカル+マイグレーションにフォールバック
+        let localConfig = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
+        do {
+            return try ModelContainer(
+                for: schema,
+                migrationPlan: PikariMigrationPlan.self,
+                configurations: localConfig
+            )
+        } catch {
+            print("Local migration failed, trying without migration: \(error)")
+        }
+
+        // 最終フォールバック：マイグレーションなしで起動
+        do {
+            return try ModelContainer(for: schema, configurations: localConfig)
+        } catch {
+            fatalError("ModelContainer の初期化に完全に失敗しました: \(error)")
         }
     }()
 }
