@@ -21,7 +21,7 @@ struct FloorPlanView: View {
                         Button { showAddRoom = true } label: {
                             VStack(spacing: 8) {
                                 Image(systemName: "plus").font(.title2).foregroundStyle(.secondary)
-                                Text("部屋を追加").font(.subheadline).foregroundStyle(.secondary)
+                                Text(L(.addRoom)).font(.subheadline).foregroundStyle(.secondary)
                             }
                             .frame(maxWidth: .infinity).frame(height: 90)
                             .background(Color(.systemGray6))
@@ -36,7 +36,7 @@ struct FloorPlanView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("間取り")
+            .navigationTitle(L(.tabFloorPlan))
             .navigationDestination(item: $selectedRoom) { room in RoomDetailView(room: room) }
             .sheet(isPresented: $showAddRoom) { AddRoomSheet(home: home) }
         }
@@ -82,8 +82,8 @@ struct RoomDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             Picker("", selection: $selectedTab) {
-                Text("タスク").tag(0)
-                Text("設備・器具").tag(1)
+                Text(L(.tasks)).tag(0)
+                Text(L(.fixtures)).tag(1)
             }
             .pickerStyle(.segmented).padding(.horizontal).padding(.vertical, 8)
 
@@ -109,7 +109,7 @@ struct RoomDetailView: View {
     private var taskList: some View {
         List {
             if activeTasks.isEmpty {
-                ContentUnavailableView("タスクがありません", systemImage: "sparkles",
+                ContentUnavailableView(L(.noTasks), systemImage: "sparkles",
                                        description: Text("＋ボタンからタスクを追加しましょう"))
                     .listRowBackground(Color.clear)
             } else {
@@ -163,7 +163,7 @@ struct TaskDetailView: View {
     var body: some View {
         List {
             Section("基本情報") {
-                LabeledContent("部屋", value: task.room?.name ?? "-")
+                LabeledContent(L(.room), value: task.room?.name ?? "-")
                 LabeledContent("頻度", value: task.frequency.rawValue)
                 if task.frequency.supportsWeekdays && !task.weekdays.isEmpty {
                     LabeledContent("曜日", value: task.weekdaysLabel)
@@ -230,8 +230,8 @@ struct AddRoomSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("部屋名") { TextField("例: ダイニング", text: $name) }
-                Section("アイコン") {
+                Section(L(.roomName)) { TextField("例: ダイニング", text: $name) }
+                Section(L(.roomIcon)) {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
                         ForEach(iconOptions, id: \.self) { n in
                             Button { icon = n } label: {
@@ -246,9 +246,9 @@ struct AddRoomSheet: View {
             }
             .navigationTitle("部屋を追加").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("追加") {
+                    Button(L(.add)) {
                         let room = Room(name: name, icon: icon, sortOrder: home.rooms.count)
                         room.home = home
                         context.insert(room)
