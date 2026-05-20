@@ -420,7 +420,7 @@ struct EditConsumablePartSheet: View {
                     )).tint(.teal)
                 }
                 Section(L(.stockCount)) { Stepper(LocalizationManager.shared.language == .japanese ? "在庫: \(part.stockCount)個" : "Stock: \(part.stockCount)", value: $part.stockCount, in: 0...99) }
-                Section("購入先") {
+                Section(L(.purchaseInfo)) {
                     TextField(LocalizationManager.shared.language == .japanese ? "購入店名" : "Store name", text: $part.purchaseStoreName)
                     TextField(L(.purchaseURL), text: $part.purchaseURL).keyboardType(.URL).autocorrectionDisabled()
                     LabeledContent(L(.unitPrice)) {
@@ -432,7 +432,7 @@ struct EditConsumablePartSheet: View {
             }
             .navigationTitle(part.name).navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L(.save)) { try? context.save(); dismiss() }.fontWeight(.semibold)
                 }
@@ -484,7 +484,7 @@ struct AddPurchaseRecordSheet: View {
             }
             .navigationTitle(LocalizationManager.shared.language == .japanese ? "購入を記録" : "Record Purchase").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(LocalizationManager.shared.language == .japanese ? "記録" : "Record") {
                         let record = PurchaseRecord(quantity: quantity, unitPrice: unitPrice,

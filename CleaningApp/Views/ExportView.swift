@@ -16,10 +16,19 @@ struct ExportView: View {
     @State private var errorMessage: String? = nil
 
     enum ExportType: String, CaseIterable {
-        case taskHistory  = "タスク完了履歴"
-        case inventory    = "消耗品在庫"
-        case maintenance  = "設備メンテナンス記録"
-        case allData      = "すべてのデータ"
+        case taskHistory  = "taskHistory"
+        case inventory    = "inventory"
+        case maintenance  = "maintenance"
+        case allData      = "allData"
+
+        var label: String {
+            switch self {
+            case .taskHistory:  return L10nKey.taskHistory.ja
+            case .inventory:    return L10nKey.inventory.ja
+            case .maintenance:  return L10nKey.maintenance.ja
+            case .allData:      return L10nKey.allData.ja
+            }
+        }
 
         var icon: String {
             switch self {
@@ -39,7 +48,7 @@ struct ExportView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("エクスポートするデータ") {
+                Section(L(.exportData)) {
                     ForEach(ExportType.allCases, id: \.self) { type in
                         Button { exportType = type } label: {
                             HStack(spacing: 12) {
@@ -55,8 +64,8 @@ struct ExportView: View {
                     }
                 }
 
-                Section("ファイル形式") {
-                    Picker("形式", selection: $fileFormat) {
+                Section(LocalizationManager.shared.language == .japanese ? "ファイル形式" : "File Format") {
+                    Picker(LocalizationManager.shared.language == .japanese ? "形式" : "Format", selection: $fileFormat) {
                         ForEach(FileFormat.allCases, id: \.self) { format in
                             Text(format.rawValue).tag(format)
                         }
@@ -64,16 +73,16 @@ struct ExportView: View {
                     .pickerStyle(.segmented)
                     Group {
                         if fileFormat == .csv {
-                            Label("ExcelやNumbersで開けます", systemImage: "tablecells")
+                            Label(L(.csvFormat), systemImage: "tablecells")
                                 .font(.caption).foregroundStyle(.secondary)
                         } else {
-                            Label("印刷・共有に適したPDF形式", systemImage: "doc.fill")
+                            Label(L(.pdfFormat), systemImage: "doc.fill")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                     }
                 }
 
-                Section("エクスポート対象") {
+                Section(L(.exportTarget)) {
                     ExportPreviewRow(home: home, exportType: exportType)
                 }
 
@@ -85,10 +94,10 @@ struct ExportView: View {
                             Spacer()
                             if isExporting {
                                 ProgressView().tint(.white)
-                                Text("生成中...").foregroundStyle(.white)
+                                Text(L(.exporting)).foregroundStyle(.white)
                             } else {
                                 Image(systemName: "square.and.arrow.up")
-                                Text("\(fileFormat.rawValue)をエクスポート").fontWeight(.semibold)
+                                Text(LocalizationManager.shared.language == .japanese ? "\(fileFormat.rawValue)をエクスポート" : "Export as \(fileFormat.rawValue)").fontWeight(.semibold)
                             }
                             Spacer()
                         }
@@ -102,10 +111,10 @@ struct ExportView: View {
                     Section { Text(error).font(.caption).foregroundStyle(.red) }
                 }
             }
-            .navigationTitle("エクスポート")
+            .navigationTitle(L(.export))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("閉じる") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.close)) { dismiss() } }
             }
             .sheet(isPresented: $showShareSheet) {
                 if let url = exportedURL { ShareSheet(url: url) }
@@ -128,7 +137,7 @@ struct ExportView: View {
             exportedURL = url
             showShareSheet = true
         } catch {
-            errorMessage = "エクスポートに失敗しました: \(error.localizedDescription)"
+            errorMessage = LocalizationManager.shared.language == .japanese ? "エクスポートに失敗しました: \(error.localizedDescription)" : "Export failed: \(error.localizedDescription)"
         }
     }
 
@@ -159,25 +168,25 @@ struct ExportView: View {
     }
 
     private func generateTaskHistoryCSV(dateFormatter: DateFormatter) -> String {
-        var rows = ["【タスク完了履歴】", "完了日時,部屋,タスク名,所要時間(分),メモ,使用パーツ"]
+        var rows = LocalizationManager.shared.language == .japanese ? ["【タスク完了履歴】", "完了日時,部屋,タスク名,所要時間(分),メモ,使用パーツ"] : ["[Task History]", "Date,Room,Task,Duration(min),Memo,Parts Used"]
         for log in home.rooms.flatMap({ $0.tasks }).flatMap({ $0.logs }).sorted(by: { $0.completedAt > $1.completedAt }) {
             let parts = log.partUsages.map { "\($0.partName)×\($0.usedCount)" }.joined(separator: "・")
-            rows.append("\(dateFormatter.string(from: log.completedAt)),\(log.task?.room?.name ?? ""),\(log.task?.title ?? "削除済みタスク"),\(log.durationMinutes),\(log.memo.replacingOccurrences(of: ",", with: "、")),\(parts)")
+            rows.append("\(dateFormatter.string(from: log.completedAt)),\(log.task?.room?.name ?? ""),\((log.task?.title ?? (LocalizationManager.shared.language == .japanese ? "削除済みタスク" : "Deleted Task"))),\(log.durationMinutes),\(log.memo.replacingOccurrences(of: ",", with: "、")),\(parts)")
         }
         return rows.joined(separator: "\n")
     }
 
     private func generateInventoryCSV(dateFormatter: DateFormatter) -> String {
-        var rows = ["【消耗品在庫】", "設備名,パーツ名,在庫数,単価,購入先,交換周期(月),最終交換日"]
+        var rows = LocalizationManager.shared.language == .japanese ? ["【消耗品在庫】", "設備名,パーツ名,在庫数,単価,購入先,交換周期(月),最終交換日"] : ["[Parts Inventory]", "Fixture,Part,Stock,Unit Price,Store,Cycle(months),Last Replaced"]
         for part in home.rooms.flatMap({ $0.fixtures }).flatMap({ $0.parts }).sorted(by: { $0.name < $1.name }) {
-            let last = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? "未記録"
+            let last = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? (LocalizationManager.shared.language == .japanese ? "未記録" : "N/A")
             rows.append("\(part.fixture?.name ?? ""),\(part.name),\(part.stockCount),\(part.unitPrice),\(part.purchaseStoreName),\(part.replacementMonths),\(last)")
         }
         return rows.joined(separator: "\n")
     }
 
     private func generateMaintenanceCSV(dateFormatter: DateFormatter) -> String {
-        var rows = ["【設備メンテナンス記録】", "部屋,設備名,パーツ名,交換状況,最終交換日,次回交換予定"]
+        var rows = LocalizationManager.shared.language == .japanese ? ["【設備メンテナンス記録】", "部屋,設備名,パーツ名,交換状況,最終交換日,次回交換予定"] : ["[Maintenance Records]", "Room,Fixture,Part,Status,Last Replaced,Next Due"]
         for room in home.rooms {
             for fixture in room.fixtures {
                 for part in fixture.parts {
@@ -289,14 +298,14 @@ struct ExportPreviewRow: View {
         let fixtures = home.rooms.flatMap { $0.fixtures }.count
 
         switch exportType {
-        case .taskHistory: LabeledContent("完了記録", value: "\(logs)件")
-        case .inventory:   LabeledContent("消耗品パーツ", value: "\(parts)個")
-        case .maintenance: LabeledContent("設備", value: "\(fixtures)台")
+        case .taskHistory: LabeledContent(L(.taskHistory), value: "\(logs)件")
+        case .inventory:   LabeledContent(L(.inventory), value: "\(parts)個")
+        case .maintenance: LabeledContent(L(.fixture), value: "\(fixtures)台")
         case .allData:
             VStack(alignment: .leading, spacing: 4) {
-                LabeledContent("完了記録", value: "\(logs)件")
-                LabeledContent("消耗品パーツ", value: "\(parts)個")
-                LabeledContent("設備", value: "\(fixtures)台")
+                LabeledContent(L(.taskHistory), value: "\(logs)件")
+                LabeledContent(L(.inventory), value: "\(parts)個")
+                LabeledContent(L(.fixture), value: "\(fixtures)台")
             }
         }
     }

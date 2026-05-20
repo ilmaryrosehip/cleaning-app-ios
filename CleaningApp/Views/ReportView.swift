@@ -204,7 +204,7 @@ struct ReportView: View {
             Chart(weekdayData, id: \.label) { item in
                 BarMark(
                     x: .value(LocalizationManager.shared.language == .japanese ? "曜日" : "Day", item.label),
-                    y: .value("件数", item.count)
+                    y: .value(LocalizationManager.shared.language == .japanese ? "件数" : "Count", item.count)
                 )
                 .foregroundStyle(
                     item.label == (LocalizationManager.shared.language == .japanese ? "日" : "Sun") ? Color.red.gradient :
@@ -287,7 +287,7 @@ struct ReportView: View {
                         }
                         Text(item.title).font(.subheadline).lineLimit(1)
                         Spacer()
-                        Text("\(item.count)回")
+                        Text(LocalizationManager.shared.language == .japanese ? "\(item.count)回" : "\(item.count)")
                             .font(.subheadline).fontWeight(.semibold)
                             .foregroundStyle(.teal)
                     }
