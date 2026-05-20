@@ -13,6 +13,13 @@ struct ReportView: View {
         case month = "今月"
         case year  = "今年"
 
+        var label: String {
+            switch self {
+            case .week:  return L10nKey.thisWeek.ja
+            case .month: return L10nKey.thisMonth.ja
+            case .year:  return L10nKey.thisYear.ja
+            }
+        }
         var startDate: Date {
             let cal = Calendar.current
             switch self {
@@ -78,7 +85,7 @@ struct ReportView: View {
                     // 期間選択
                     Picker("期間", selection: $selectedPeriod) {
                         ForEach(ReportPeriod.allCases, id: \.self) { p in
-                            Text(p.rawValue).tag(p)
+                            Text(p.label).tag(p)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -107,7 +114,7 @@ struct ReportView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("レポート")
+            .navigationTitle(L(.report))
             .navigationBarTitleDisplayMode(.large)
         }
     }
@@ -119,13 +126,13 @@ struct ReportView: View {
             HStack(spacing: 12) {
                 ReportMetricCard(
                     icon: "checkmark.circle.fill",
-                    label: "完了タスク",
+                    label: L(.completedTasks),
                     value: "\(totalCount)件",
                     color: .teal
                 )
                 ReportMetricCard(
                     icon: "clock.fill",
-                    label: "合計時間",
+                    label: L(.totalTime),
                     value: totalMinutes >= 60
                         ? "\(totalMinutes / 60)時間\(totalMinutes % 60)分"
                         : "\(totalMinutes)分",
@@ -135,13 +142,13 @@ struct ReportView: View {
             HStack(spacing: 12) {
                 ReportMetricCard(
                     icon: "house.fill",
-                    label: "対応部屋数",
+                    label: L(.roomsCleaned),
                     value: "\(Set(logs.compactMap { $0.task?.room?.name }).count)部屋",
                     color: .orange
                 )
                 ReportMetricCard(
                     icon: "timer",
-                    label: "平均時間/回",
+                    label: L(.avgTime),
                     value: totalCount > 0 ? "\(totalMinutes / totalCount)分" : "-",
                     color: .purple
                 )
@@ -154,7 +161,7 @@ struct ReportView: View {
 
     private var dailyChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("日別完了タスク数")
+            Text(L(.dailyChart))
                 .font(.headline)
                 .padding(.horizontal)
 
@@ -190,7 +197,7 @@ struct ReportView: View {
 
     private var weekdayChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("曜日別完了数")
+            Text(L(.weekdayChart))
                 .font(.headline)
                 .padding(.horizontal)
 
@@ -220,7 +227,7 @@ struct ReportView: View {
 
     private var roomChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("部屋別完了数")
+            Text(L(.roomChart))
                 .font(.headline)
                 .padding(.horizontal)
 
@@ -230,7 +237,7 @@ struct ReportView: View {
                     innerRadius: .ratio(0.55),
                     angularInset: 2
                 )
-                .foregroundStyle(by: .value("部屋", item.name))
+                .foregroundStyle(by: .value(L(.room), item.name))
                 .cornerRadius(4)
             }
             .frame(height: 200)
@@ -262,7 +269,7 @@ struct ReportView: View {
 
     private var taskRankSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("よく完了するタスク TOP5")
+            Text(L(.taskRanking))
                 .font(.headline)
                 .padding(.horizontal)
 
