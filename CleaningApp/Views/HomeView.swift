@@ -258,7 +258,8 @@ struct StatusBadge: View {
         Group {
             if task.isOverdue {
                 let days = Calendar.current.dateComponents([.day], from: task.nextDueDate, to: .now).day ?? 0
-                Text("\(days)日超過").foregroundStyle(.red).background(Color.red.opacity(0.1))
+                let t1 = LocalizationManager.shared.language == .japanese ? "\(days)日超過" : "\(days)d overdue"
+                Text(t1).foregroundStyle(.red).background(Color.red.opacity(0.1))
             } else if task.isDueToday {
                 Text(L(.today)).foregroundStyle(.orange).background(Color.orange.opacity(0.1))
             } else {
@@ -304,9 +305,9 @@ struct CompleteTaskSheet: View {
                         HStack(spacing: 10) {
                             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("本日 \(completedTodayCount) 回完了済み")
+                                Text(LocalizationManager.shared.language == .japanese ? "本日 \(completedTodayCount) 回完了済み" : "Completed \(completedTodayCount) time(s) today")
                                     .font(.subheadline).fontWeight(.semibold).foregroundStyle(.orange)
-                                Text("本日すでに完了が記録されています。続けて記録しますか？")
+                                Text(LocalizationManager.shared.language == .japanese ? "本日すでに完了が記録されています。" : "A completion is already recorded today.")
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                         }
@@ -370,10 +371,10 @@ struct CompleteTaskSheet: View {
                 }
             }
             .alert(L(.duplicateWarning), isPresented: $showDuplicateWarning) {
-                Button("キャンセル", role: .cancel) {}
+                Button(L(.cancel), role: .cancel) {}
                 Button(L(.recordAnyway), role: .destructive) { saveCompletion() }
             } message: {
-                Text("本日すでに \(completedTodayCount) 回完了が記録されています。\nもう一度記録してよいですか？")
+                Text(LocalizationManager.shared.language == .japanese ? "本日すでに \(completedTodayCount) 回完了が記録されています。\nもう一度記録してよいですか？" : "\(completedTodayCount) completion(s) recorded today.\nRecord again?")
             }
         }
         .presentationDetents([.large])

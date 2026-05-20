@@ -10,8 +10,8 @@ struct FixtureListView: View {
     var body: some View {
         List {
             if sortedFixtures.isEmpty {
-                ContentUnavailableView("設備が登録されていません", systemImage: "wrench.and.screwdriver",
-                                       description: Text("＋ボタンから設備を追加しましょう"))
+                ContentUnavailableView(LocalizationManager.shared.language == .japanese ? "設備が登録されていません" : "No fixtures registered", systemImage: "wrench.and.screwdriver",
+                                       description: Text(LocalizationManager.shared.language == .japanese ? "＋ボタンから設備を追加しましょう" : "Tap + to add a fixture"))
                     .listRowBackground(Color.clear)
             } else {
                 ForEach(sortedFixtures) { fixture in
@@ -51,7 +51,7 @@ struct FixtureRow: View {
                     if !fixture.makerName.isEmpty { Text(fixture.makerName).font(.caption).foregroundStyle(.secondary) }
                     if !fixture.modelNumber.isEmpty { Text(fixture.modelNumber).font(.caption).foregroundStyle(.secondary) }
                 }
-                Text("パーツ \(fixture.parts.count)件").font(.caption).foregroundStyle(.secondary)
+                Text(LocalizationManager.shared.language == .japanese ? "パーツ \(fixture.parts.count)件" : "\(fixture.parts.count) parts").font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
             StatusDot(status: worstStatus)
@@ -90,7 +90,7 @@ struct FixtureDetailView: View {
         .navigationTitle(fixture.name).navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button { showEditFixture = true } label: { Text("編集") }
+                Button { showEditFixture = true } label: { Text(L(.edit)) }
             }
         }
         .sheet(isPresented: $showAddPart) { AddConsumablePartSheet(fixture: fixture) }
@@ -108,18 +108,18 @@ struct ConsumablePartRow: View {
                 if let next = part.nextReplacementDate {
                     let days = Calendar.current.dateComponents([.day], from: .now, to: next).day ?? 0
                     Group {
-                        if days < 0 { Text("交換期限 \(abs(days))日超過").foregroundStyle(.red) }
-                        else if days == 0 { Text("本日交換推奨").foregroundStyle(.orange) }
-                        else { Text("次回交換まで \(days)日").foregroundStyle(.secondary) }
+                        if days < 0 { Text(LocalizationManager.shared.language == .japanese ? "交換期限 \(abs(days))日超過" : "\(abs(days))d overdue").foregroundStyle(.red) }
+                        else if days == 0 { Text(LocalizationManager.shared.language == .japanese ? "本日交換推奨" : "Replace today").foregroundStyle(.orange) }
+                        else { Text(LocalizationManager.shared.language == .japanese ? "次回交換まで \(days)日" : "\(days)d until replacement").foregroundStyle(.secondary) }
                     }.font(.caption)
                 } else if part.lastReplacedAt == nil {
-                    Text("未交換").font(.caption).foregroundStyle(.secondary)
+                    Text(LocalizationManager.shared.language == .japanese ? "未交換" : "Not replaced").font(.caption).foregroundStyle(.secondary)
                 }
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
                 if part.stockCount > 0 {
-                    Text("在庫 \(part.stockCount)個").font(.caption2)
+                    Text(LocalizationManager.shared.language == .japanese ? "在庫 \(part.stockCount)個" : "Stock: \(part.stockCount)").font(.caption2)
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(Color.teal.opacity(0.1)).foregroundStyle(.teal).clipShape(Capsule())
                 }
@@ -140,30 +140,30 @@ struct ConsumablePartDetailView: View {
 
     var body: some View {
         List {
-            Section("パーツ情報") {
-                if !part.partNumber.isEmpty { LabeledContent("品番", value: part.partNumber) }
-                if part.replacementMonths > 0 { LabeledContent("交換目安", value: "\(part.replacementMonths)ヶ月ごと") }
+            Section(LocalizationManager.shared.language == .japanese ? "パーツ情報" : "Part Info") {
+                if !part.partNumber.isEmpty { LabeledContent(LocalizationManager.shared.language == .japanese ? "品番" : "Part No.", value: part.partNumber) }
+                if part.replacementMonths > 0 { LabeledContent("交換目安", value: LocalizationManager.shared.language == .japanese ? "\(part.replacementMonths)ヶ月ごと" : "Every \(part.replacementMonths) months") }
                 if let last = part.lastReplacedAt {
                     LabeledContent(L(.lastReplaced), value: last.formatted(date: .abbreviated, time: .omitted))
                 }
                 if let next = part.nextReplacementDate {
-                    LabeledContent("次回推奨", value: next.formatted(date: .abbreviated, time: .omitted))
+                    LabeledContent(LocalizationManager.shared.language == .japanese ? "次回推奨" : "Next Due", value: next.formatted(date: .abbreviated, time: .omitted))
                 }
-                LabeledContent("在庫数", value: "\(part.stockCount)個")
+                LabeledContent(LocalizationManager.shared.language == .japanese ? "在庫数" : "Stock", value: LocalizationManager.shared.language == .japanese ? "\(part.stockCount)個" : "\(part.stockCount)")
                 if !part.memo.isEmpty { Text(part.memo).font(.subheadline).foregroundStyle(.secondary) }
             }
-            Section("購入先") {
-                if !part.purchaseStoreName.isEmpty { LabeledContent("購入店", value: part.purchaseStoreName) }
+            Section(L(.purchaseInfo)) {
+                if !part.purchaseStoreName.isEmpty { LabeledContent(L(.storeName), value: part.purchaseStoreName) }
                 if part.unitPrice > 0 { LabeledContent(L(.unitPrice), value: "¥\(part.unitPrice.formatted())") }
                 if !part.purchaseURL.isEmpty {
                     Link(destination: URL(string: part.purchaseURL) ?? URL(string: "https://")!) {
-                        Label("購入ページを開く", systemImage: "arrow.up.right.square").font(.subheadline)
+                        Label(L(.openLink), systemImage: "arrow.up.right.square").font(.subheadline)
                     }
                 }
             }
             Section {
                 if sortedRecords.isEmpty {
-                    Text("購入履歴がありません").font(.subheadline).foregroundStyle(.tertiary)
+                    Text(LocalizationManager.shared.language == .japanese ? "購入履歴がありません" : "No purchase history").font(.subheadline).foregroundStyle(.tertiary)
                 } else {
                     ForEach(sortedRecords) { record in PurchaseRecordRow(record: record) }
                         .onDelete { offsets in
@@ -171,13 +171,13 @@ struct ConsumablePartDetailView: View {
                             try? context.save()
                         }
                 }
-                Button { showAddRecord = true } label: { Label("購入を記録", systemImage: "cart.badge.plus") }
+                Button { showAddRecord = true } label: { Label(LocalizationManager.shared.language == .japanese ? "購入を記録" : "Record Purchase", systemImage: "cart.badge.plus") }
             } header: {
                 HStack {
-                    Text("購入履歴")
+                    Text(LocalizationManager.shared.language == .japanese ? "購入履歴" : "Purchase History")
                     Spacer()
                     if !sortedRecords.isEmpty {
-                        Text("合計 ¥\(sortedRecords.reduce(0) { $0 + $1.totalPrice }.formatted())")
+                        Text(LocalizationManager.shared.language == .japanese ? "合計 ¥\(sortedRecords.reduce(0) { $0 + $1.totalPrice }.formatted())" : "Total: ¥\(sortedRecords.reduce(0) { $0 + $1.totalPrice }.formatted())")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -185,7 +185,7 @@ struct ConsumablePartDetailView: View {
         }
         .navigationTitle(part.name).navigationBarTitleDisplayMode(.large)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) { Button { showEditPart = true } label: { Text("編集") } }
+            ToolbarItem(placement: .primaryAction) { Button { showEditPart = true } label: { Text(L(.edit)) } }
         }
         .sheet(isPresented: $showAddRecord) { AddPurchaseRecordSheet(part: part) }
         .sheet(isPresented: $showEditPart) { EditConsumablePartSheet(part: part) }
@@ -207,7 +207,7 @@ struct PurchaseRecordRow: View {
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
                 Text("¥\(record.totalPrice.formatted())").font(.subheadline).fontWeight(.medium)
-                Text("×\(record.quantity)個 @¥\(record.unitPrice.formatted())").font(.caption2).foregroundStyle(.secondary)
+                Text(LocalizationManager.shared.language == .japanese ? "×\(record.quantity)個 @¥\(record.unitPrice.formatted())" : "×\(record.quantity) @¥\(record.unitPrice.formatted())").font(.caption2).foregroundStyle(.secondary)
             }
         }
     }
@@ -234,7 +234,7 @@ struct AddFixtureSheet: View {
         NavigationStack {
             Form {
                 if !suggestedPresets.isEmpty {
-                    Section("よくある設備（タップで選択）") {
+                    Section(LocalizationManager.shared.language == .japanese ? "よくある設備（タップで選択）" : "Common Fixtures (tap to select)") {
                         ForEach(suggestedPresets) { preset in
                             Button {
                                 name = preset.name; icon = preset.icon
@@ -250,8 +250,8 @@ struct AddFixtureSheet: View {
                         }
                     }
                 }
-                Section("設備名") { TextField("例: 浴室乾燥機", text: $name) }
-                Section("アイコン") {
+                Section(L(.fixture)) { TextField(LocalizationManager.shared.language == .japanese ? "例: 浴室乾燥機" : "e.g. Bath dryer", text: $name) }
+                Section(L(.roomIcon)) {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 10) {
                         ForEach(iconOptions, id: \.self) { n in
                             Button { icon = n } label: {
@@ -263,14 +263,14 @@ struct AddFixtureSheet: View {
                         }
                     }.padding(.vertical, 4)
                 }
-                Section("メーカー・型番（任意）") {
-                    TextField("メーカー名", text: $makerName)
+                Section(LocalizationManager.shared.language == .japanese ? "メーカー・型番（任意）" : "Maker & Model (Optional)") {
+                    TextField(LocalizationManager.shared.language == .japanese ? "メーカー名" : "Maker", text: $makerName)
                     TextField(LocalizationManager.shared.language == .japanese ? "型番" : "Model No.", text: $modelNumber)
                 }
                 if !suggestedPresets.isEmpty,
                    let preset = suggestedPresets.first(where: { $0.name == name }),
                    !preset.parts.isEmpty {
-                    Section("消耗品パーツを追加") {
+                    Section(L(.addPart)) {
                         ForEach(preset.parts) { part in
                             HStack {
                                 Text(part.name).font(.subheadline)
@@ -323,22 +323,22 @@ struct EditFixtureSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("設備名") { TextField("設備名", text: $fixture.name) }
-                Section("メーカー・型番") {
-                    TextField("メーカー名", text: $fixture.makerName)
-                    TextField("型番", text: $fixture.modelNumber)
+                Section(L(.fixture)) { TextField(L(.fixture), text: $fixture.name) }
+                Section(LocalizationManager.shared.language == .japanese ? "メーカー・型番" : "Maker & Model") {
+                    TextField(LocalizationManager.shared.language == .japanese ? "メーカー名" : "Maker", text: $fixture.makerName)
+                    TextField(LocalizationManager.shared.language == .japanese ? "型番" : "Model No.", text: $fixture.modelNumber)
                 }
-                Section("設置日") {
-                    DatePicker("設置日", selection: Binding(
+                Section(LocalizationManager.shared.language == .japanese ? "設置日" : "Installed Date") {
+                    DatePicker(LocalizationManager.shared.language == .japanese ? "設置日" : "Date", selection: Binding(
                         get: { fixture.installedAt ?? .now },
                         set: { fixture.installedAt = $0 }
                     ), displayedComponents: .date)
                 }
-                Section("メモ") { TextField("任意", text: $fixture.memo, axis: .vertical).lineLimit(3) }
+                Section(L(.memo)) { TextField(LocalizationManager.shared.language == .japanese ? "任意" : "Optional", text: $fixture.memo, axis: .vertical).lineLimit(3) }
             }
-            .navigationTitle("設備を編集").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(LocalizationManager.shared.language == .japanese ? "設備を編集" : "Edit Fixture").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.cancel)) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L(.save)) { try? context.save(); dismiss() }.fontWeight(.semibold)
                 }
@@ -362,27 +362,27 @@ struct AddConsumablePartSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(L(.partName)) { TextField("例: 排気フィルター", text: $name) }
-                Section("品番・交換サイクル") {
-                    TextField("品番（任意）", text: $partNumber)
-                    Stepper(replacementMonths == 0 ? "交換サイクル: 都度" : "交換サイクル: \(replacementMonths)ヶ月",
+                Section(L(.partName)) { TextField(LocalizationManager.shared.language == .japanese ? "例: 排気フィルター" : "e.g. Exhaust filter", text: $name) }
+                Section(LocalizationManager.shared.language == .japanese ? "品番・交換サイクル" : "Part No. & Cycle") {
+                    TextField(LocalizationManager.shared.language == .japanese ? "品番（任意）" : "Part No. (optional)", text: $partNumber)
+                    Stepper(replacementMonths == 0 ? LocalizationManager.shared.language == .japanese ? LocalizationManager.shared.language == .japanese ? "交換サイクル: 都度" : "Cycle: As needed" : "Cycle: As needed" : LocalizationManager.shared.language == .japanese ? "交換サイクル: \(replacementMonths)ヶ月" : "Cycle: \(replacementMonths) months",
                             value: $replacementMonths, in: 0...120, step: 1)
                 }
                 Section("購入先") {
-                    TextField("購入店名（例: Amazon）", text: $purchaseStoreName)
-                    TextField("購入URL（任意）", text: $purchaseURL).keyboardType(.URL).autocorrectionDisabled()
-                    LabeledContent("単価") {
-                        TextField("円", value: $unitPrice, format: .number)
+                    TextField(LocalizationManager.shared.language == .japanese ? "購入店名（例: Amazon）" : "Store (e.g. Amazon)", text: $purchaseStoreName)
+                    TextField(L(.purchaseURL), text: $purchaseURL).keyboardType(.URL).autocorrectionDisabled()
+                    LabeledContent(L(.unitPrice)) {
+                        TextField(LocalizationManager.shared.language == .japanese ? "円" : "¥", value: $unitPrice, format: .number)
                             .keyboardType(.numberPad).multilineTextAlignment(.trailing)
                     }
                 }
                 Section("メモ") { TextField("任意", text: $memo, axis: .vertical).lineLimit(3) }
             }
-            .navigationTitle("パーツを追加").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L(.addPart)).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("追加") {
+                    Button(L(.add)) {
                         let part = ConsumablePart(name: name, partNumber: partNumber,
                                                    replacementMonths: replacementMonths,
                                                    purchaseURL: purchaseURL, purchaseStoreName: purchaseStoreName,
@@ -403,10 +403,10 @@ struct EditConsumablePartSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("パーツ名") { TextField("パーツ名", text: $part.name) }
+                Section(L(.partName)) { TextField(L(.partName), text: $part.name) }
                 Section("品番・交換サイクル") {
-                    TextField("品番", text: $part.partNumber)
-                    Stepper(part.replacementMonths == 0 ? "交換サイクル: 都度" : "交換サイクル: \(part.replacementMonths)ヶ月",
+                    TextField(LocalizationManager.shared.language == .japanese ? "品番" : "Part No.", text: $part.partNumber)
+                    Stepper(part.replacementMonths == 0 ? "交換サイクル: 都度" : LocalizationManager.shared.language == .japanese ? "交換サイクル: \(part.replacementMonths)ヶ月" : "Cycle: \(part.replacementMonths) months",
                             value: $part.replacementMonths, in: 0...120)
                 }
                 Section(L(.lastReplacedAt)) {

@@ -53,14 +53,14 @@ struct ReportView: View {
 
     // 部屋別完了数
     private var roomData: [(name: String, count: Int)] {
-        let grouped = Dictionary(grouping: logs) { $0.task?.room?.name ?? "不明" }
+        let grouped = Dictionary(grouping: logs) { $0.task?.room?.name ?? (LocalizationManager.shared.language == .japanese ? "不明" : "Unknown") }
         return grouped.map { (name: $0.key, count: $0.value.count) }
             .sorted { $0.count > $1.count }
     }
 
     // 曜日別完了数
     private var weekdayData: [(label: String, count: Int)] {
-        let labels = ["日", "月", "火", "水", "木", "金", "土"]
+        let labels = LocalizationManager.shared.language == .japanese ? ["日", "月", "火", "水", "木", "金", "土"] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         var counts = Array(repeating: 0, count: 7)
         for log in logs {
             let wd = Calendar.current.component(.weekday, from: log.completedAt) - 1
@@ -71,7 +71,7 @@ struct ReportView: View {
 
     // タスク別完了ランキング
     private var taskRankData: [(title: String, count: Int)] {
-        let grouped = Dictionary(grouping: logs) { $0.task?.title ?? "不明" }
+        let grouped = Dictionary(grouping: logs) { $0.task?.title ?? (LocalizationManager.shared.language == .japanese ? "不明" : "Unknown") }
         return grouped.map { (title: $0.key, count: $0.value.count) }
             .sorted { $0.count > $1.count }
             .prefix(5)
@@ -83,7 +83,7 @@ struct ReportView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     // 期間選択
-                    Picker("期間", selection: $selectedPeriod) {
+                    Picker(LocalizationManager.shared.language == .japanese ? "期間" : "Period", selection: $selectedPeriod) {
                         ForEach(ReportPeriod.allCases, id: \.self) { p in
                             Text(p.label).tag(p)
                         }
@@ -127,7 +127,7 @@ struct ReportView: View {
                 ReportMetricCard(
                     icon: "checkmark.circle.fill",
                     label: L(.completedTasks),
-                    value: "\(totalCount)件",
+                    value: LocalizationManager.shared.language == .japanese ? "\(totalCount)件" : "\(totalCount) tasks",
                     color: .teal
                 )
                 ReportMetricCard(
