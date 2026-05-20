@@ -20,9 +20,12 @@ struct ContentView: View {
 struct MainTabView: View {
     let home: Home
     @State private var localization = LocalizationManager.shared
+    // 言語変更を検知してタブを再描画するためのID
+    @State private var tabViewID = UUID()
 
     var body: some View {
         TabView {
+
             HomeView(home: home)
                 .tabItem { Label(L(.tabHome), systemImage: "square.grid.2x2") }
 
@@ -71,6 +74,10 @@ struct MainTabView: View {
                 .tabItem { Label(L(.tabMyPage), systemImage: "person.circle.fill") }
         }
         .tint(.teal)
+        .id(tabViewID)
+        .onChange(of: localization.language) { _, _ in
+            tabViewID = UUID()
+        }
     }
 }
 
