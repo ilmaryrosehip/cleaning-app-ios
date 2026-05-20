@@ -26,7 +26,7 @@ struct SupplyListView: View {
                 ForEach(SupplyCategory.allCases, id: \.self) { category in
                     let inCategory = supplies.filter { $0.category == category }
                     if !inCategory.isEmpty {
-                        Section(category.rawValue) {
+                        Section(category.label) {
                             ForEach(inCategory) { supply in
                                 NavigationLink(destination: SupplyDetailView(supply: supply)) { SupplyRow(supply: supply) }
                             }
@@ -68,7 +68,7 @@ struct SupplyRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(supply.name).font(.subheadline).fontWeight(.medium)
                 HStack(spacing: 4) {
-                    Text(supply.category.rawValue)
+                    Text(supply.category.label)
                     if let used = supply.lastUsedAt {
                         Text("·")
                         Text(used.formatted(date: .abbreviated, time: .omitted))
@@ -81,7 +81,7 @@ struct SupplyRow: View {
                 }
             }
             Spacer()
-            Text(supply.stockStatus.rawValue).font(.caption).fontWeight(.medium)
+            Text(supply.stockStatus.label).font(.caption).fontWeight(.medium)
                 .padding(.horizontal, 8).padding(.vertical, 3)
                 .background(statusColor.opacity(0.12)).foregroundStyle(statusColor)
                 .clipShape(Capsule())
@@ -104,7 +104,7 @@ struct SupplyDetailView: View {
                     ForEach(StockStatus.allCases, id: \.self) { s in Text(s.label).tag(s) }
                 }
                 .onChange(of: supply.stockStatus) { _, _ in try? context.save() }
-                LabeledContent(L(.category), value: supply.category.rawValue)
+                LabeledContent(L(.category), value: supply.category.label)
                 if let used = supply.lastUsedAt {
                     LabeledContent(LocalizationManager.shared.language == .japanese ? "最終使用" : "Last Used", value: used.formatted(date: .abbreviated, time: .omitted))
                 }
@@ -177,7 +177,7 @@ struct EditSupplySheet: View {
                 Section(LocalizationManager.shared.language == .japanese ? "用品名" : "Supply Name") { TextField("用品名", text: $supply.name) }
                 Section(L(.category)) {
                     Picker(L(.category), selection: $supply.category) {
-                        ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
+                        ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.label).tag(c) }
                     }
                     .pickerStyle(.segmented)
                 }
@@ -245,7 +245,7 @@ struct AddSupplySheet: View {
                 Section("用品名") { TextField(LocalizationManager.shared.language == .japanese ? "例: ダイソン V11" : "e.g. Dyson V11", text: $name) }
                 Section(L(.category)) {
                     Picker(L(.category), selection: $category) {
-                        ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.rawValue).tag(c) }
+                        ForEach(SupplyCategory.allCases, id: \.self) { c in Text(c.label).tag(c) }
                     }
                     .pickerStyle(.segmented)
                 }
