@@ -26,17 +26,19 @@ jobs:
           xcodebuild build \
             -project CleaningApp.xcodeproj \
             -scheme CleaningApp \
-            -destination 'platform=iOS Simulator,id=7631B9C5-26B8-47DC-AE96-B2D87F4D54B2' \
+            -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
 
       - name: Test
         run: |
+          UDID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -o '[A-F0-9-]\{36\}')
+          echo "Using simulator: $UDID"
           xcodebuild test \
             -project CleaningApp.xcodeproj \
             -scheme CleaningAppTests \
-            -destination 'platform=iOS Simulator,id=7631B9C5-26B8-47DC-AE96-B2D87F4D54B2' \
+            -destination "platform=iOS Simulator,id=$UDID" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
