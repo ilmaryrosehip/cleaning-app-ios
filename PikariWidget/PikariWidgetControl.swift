@@ -35,7 +35,7 @@ struct PikariControlProvider: ControlValueProvider {
 }
 
 struct ToggleCleaningModeIntent: SetValueIntent {
-    static var title: LocalizedStringResource = "掃除モード切替"
+    nonisolated(unsafe) static var title: LocalizedStringResource = "掃除モード切替"
     @Parameter(title: "ON/OFF")
     var value: Bool
     func perform() async throws -> some IntentResult { .result() }
