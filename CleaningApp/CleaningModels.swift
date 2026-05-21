@@ -543,6 +543,28 @@ enum PikariMigrationPlan: SchemaMigrationPlan {
 
 // MARK: - ModelContainer（マイグレーション対応 + iCloud同期）
 
+// MARK: - SwiftData Store Manager
+
+private func nukePikariStore() {
+    let fm = FileManager.default
+    let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+    let storeNames = ["default.store", "CleaningApp.store", ".default.store"]
+    for name in storeNames {
+        let url = appSupport.appending(path: name)
+        for ext in ["", ".shm", ".wal", "-shm", "-wal"] {
+            try? fm.removeItem(at: URL(fileURLWithPath: url.path + ext))
+        }
+    }
+    // SwiftData のデフォルトパスも削除
+    if let containerURL = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.hiroki.CleaningApp") {
+        let storeURL = containerURL.appending(path: "default.store")
+        for ext in ["", ".shm", ".wal", "-shm", "-wal"] {
+            try? fm.removeItem(at: URL(fileURLWithPath: storeURL.path + ext))
+        }
+    }
+    print("✅ Pikari store nuked")
+}
+
 extension ModelContainer {
     @MainActor
     static let cleaningApp: ModelContainer = {
