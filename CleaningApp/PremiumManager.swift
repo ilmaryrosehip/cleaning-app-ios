@@ -19,7 +19,7 @@ final class PremiumManager {
     static let shared = PremiumManager()
     private init() {}
 
-    var isPremium: Bool = true // DEBUG
+    var isPremium: Bool = false
     var premiumProduct: Product? = nil
     var isPurchasing: Bool = false
     var errorMessage: String? = nil

@@ -41,9 +41,7 @@ struct CleaningApp: App {
             .animation(.easeIn(duration: 0.3), value: showSplash)
             .animation(.easeIn(duration: 0.4), value: showLanguageSelect)
             .task {
-                #if !DEBUG
                 await PremiumManager.shared.initialize()
-                #endif
             }
         }
         .modelContainer(ModelContainer.cleaningApp)
