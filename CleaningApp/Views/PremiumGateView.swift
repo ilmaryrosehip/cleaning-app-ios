@@ -8,6 +8,7 @@ struct PremiumGateView: View {
     let featureDescription: String
     let featureIcon: String
     @State private var showPaywall = false
+    @State private var localization = LocalizationManager.shared
 
     var body: some View {
         ZStack {
@@ -81,6 +82,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var premium = PremiumManager.shared
     @State private var showRestoreAlert = false
+    @State private var localization = LocalizationManager.shared
 
     var body: some View {
         NavigationStack {

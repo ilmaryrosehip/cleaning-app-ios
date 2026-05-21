@@ -255,7 +255,27 @@ extension ModelContainer {
         // 4: マイグレーションなし
         if let c = try? ModelContainer(for: schema) { return c }
 
-        // 5: インメモリ（必ず成功する）
-        return try! ModelContainer(for: schema, configurations: ModelConfiguration(schema:schema, isStoredInMemoryOnly:true))
+        // 5: Homeのみのインメモリ（最小限）
+        let memConfig = ModelConfiguration(isStoredInMemoryOnly: true)
+        // 段階的に追加して問題のあるモデルを特定
+        let testModels: [any PersistentModel.Type] = [
+            Home.self, Room.self, CleaningTask.self, TaskLog.self, TaskPartUsage.self,
+            Supply.self, PurchaseItem.self, Fixture.self, ConsumablePart.self, PurchaseRecord.self
+        ]
+        // 1モデルずつ試す
+        for count in stride(from: testModels.count, through: 1, by: -1) {
+            let subset = Array(testModels.prefix(count))
+            let subSchema = Schema(subset)
+            let subConfig = ModelConfiguration(schema: subSchema, isStoredInMemoryOnly: true)
+            if let c = try? ModelContainer(for: subSchema, configurations: subConfig) {
+                print("✅ Started with \(count) models")
+                return c
+            }
+            print("❌ Failed with \(count) models")
+        }
+        // Homeだけで強制起動
+        let minSchema = Schema([Home.self])
+        let minConfig = ModelConfiguration(schema: minSchema, isStoredInMemoryOnly: true)
+        return try! ModelContainer(for: minSchema, configurations: minConfig)
     }()
 }
