@@ -344,64 +344,64 @@ struct HelpView: View {
                     title: L(.howToSetup), icon: "house.fill", color: .teal,
                     steps: [
                         ("1", L(.setupHome), localization.language == .japanese
-                            ? "When you first launch the app, you'll be asked to name your home."
+                            ? LocalizationManager.shared.language == .japanese ? "アプリを初めて起動すると家の名前を入力する画面が表示されます。" : "When you first launch the app, you'll be asked to name your home."
                             : "When you first launch the app, you'll be asked to name your home. Enter a name like 'My Home'."),
                         ("2", L(.setupRoom), localization.language == .japanese
-                            ? "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom."
-                            : "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom."),
+                            ? LocalizationManager.shared.language == .japanese ? "「間取り」タブから部屋を追加できます。リビング、キッチンなどを登録しましょう。" : "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom."
+                            : LocalizationManager.shared.language == .japanese ? "「間取り」タブから部屋を追加できます。リビング、キッチンなどを登録しましょう。" : "Add rooms from the Floor Plan tab. Register rooms like living room, kitchen, bathroom."),
                         ("3", L(.setupTask), localization.language == .japanese
-                            ? "Add tasks using the '+' button on the Home tab. Set frequency (daily, weekly, monthly)."
-                            : "Add tasks using the '+' button on the Home tab. Set frequency (daily, weekly, monthly)."),
+                            ? LocalizationManager.shared.language == .japanese ? "ホームタブの「＋」ボタンからタスクを追加します。頻度も設定できます。" : "Add tasks using the '+' button on the Home tab. Set frequency (daily, weekly, monthly)."
+                            : LocalizationManager.shared.language == .japanese ? "ホームタブの「＋」ボタンからタスクを追加します。頻度も設定できます。" : "Add tasks using the '+' button on the Home tab. Set frequency (daily, weekly, monthly)."),
                     ]
                 )
                 HelpSection(
                     title: L(.howToDaily), icon: "checkmark.circle.fill", color: .green,
                     steps: [
                         ("1", L(.dailyComplete), localization.language == .japanese
-                            ? "Tap a task on the Home tab and press Complete. You can also record duration and notes."
-                            : "Tap a task on the Home tab and press Complete. You can also record duration and notes."),
+                            ? LocalizationManager.shared.language == .japanese ? "ホームタブでタスクをタップし、「完了」ボタンを押します。所要時間やメモも記録できます。" : "Tap a task on the Home tab and press Complete. You can also record duration and notes."
+                            : LocalizationManager.shared.language == .japanese ? "ホームタブでタスクをタップし、「完了」ボタンを押します。所要時間やメモも記録できます。" : "Tap a task on the Home tab and press Complete. You can also record duration and notes."),
                         ("2", L(.dailyPhoto), localization.language == .japanese
-                            ? "Open a completion record in History, then tap 'Add Photos' to capture before/after photos."
-                            : "Open a completion record in History, then tap 'Add Photos' to capture before/after photos."),
+                            ? LocalizationManager.shared.language == .japanese ? "「履歴」タブから完了記録を開き、「写真を追加する」で写真を記録できます。" : "Open a completion record in History, then tap 'Add Photos' to capture before/after photos."
+                            : LocalizationManager.shared.language == .japanese ? "「履歴」タブから完了記録を開き、「写真を追加する」で写真を記録できます。" : "Open a completion record in History, then tap 'Add Photos' to capture before/after photos."),
                         ("3", L(.dailyWidget), localization.language == .japanese
-                            ? "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks."
-                            : "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks."),
+                            ? LocalizationManager.shared.language == .japanese ? "ホーム画面を長押しして「＋」からPikariウィジェットを追加すると、今日のタスクが一目でわかります。" : "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks."
+                            : LocalizationManager.shared.language == .japanese ? "ホーム画面を長押しして「＋」からPikariウィジェットを追加すると、今日のタスクが一目でわかります。" : "Long-press your home screen, tap '+', and add a Pikari widget to see today's tasks."),
                     ]
                 )
                 HelpSection(
                     title: L(.howToFixture), icon: "wrench.and.screwdriver.fill", color: .orange,
                     steps: [
                         ("1", L(.fixtureRegister), localization.language == .japanese
-                            ? "Select a room in the Floor Plan tab, then add fixtures from the Fixtures tab."
-                            : "Select a room in the Floor Plan tab, then add fixtures from the Fixtures tab."),
+                            ? LocalizationManager.shared.language == .japanese ? "「間取り」タブで部屋を選択し、「設備・器具」タブから設備を追加します。" : "Select a room in the Floor Plan tab, then add fixtures from the Fixtures tab."
+                            : LocalizationManager.shared.language == .japanese ? "「間取り」タブで部屋を選択し、「設備・器具」タブから設備を追加します。" : "Select a room in the Floor Plan tab, then add fixtures from the Fixtures tab."),
                         ("2", L(.fixturePartAdd), localization.language == .japanese
-                            ? "Select a fixture and add parts. Set replacement intervals to receive reminders."
-                            : "Select a fixture and add parts. Set replacement intervals to receive reminders."),
+                            ? LocalizationManager.shared.language == .japanese ? "設備を選択してパーツを追加します。交換周期を設定すると通知します。" : "Select a fixture and add parts. Set replacement intervals to receive reminders."
+                            : LocalizationManager.shared.language == .japanese ? "設備を選択してパーツを追加します。交換周期を設定すると通知します。" : "Select a fixture and add parts. Set replacement intervals to receive reminders."),
                         ("3", L(.fixtureStockRefill), localization.language == .japanese
-                            ? "Manage stock in the Parts Inventory tab. Low stock alerts will appear in your widget."
-                            : "Manage stock in the Parts Inventory tab. Low stock alerts will appear in your widget."),
+                            ? LocalizationManager.shared.language == .japanese ? "「消耗品在庫」タブで在庫を管理します。在庫が少なくなるとウィジェットにアラートが表示されます。" : "Manage stock in the Parts Inventory tab. Low stock alerts will appear in your widget."
+                            : LocalizationManager.shared.language == .japanese ? "「消耗品在庫」タブで在庫を管理します。在庫が少なくなるとウィジェットにアラートが表示されます。" : "Manage stock in the Parts Inventory tab. Low stock alerts will appear in your widget."),
                     ]
                 )
                 HelpSection(
                     title: L(.howToReport), icon: "chart.bar.fill", color: .blue,
                     steps: [
                         ("1", L(.tabReport), localization.language == .japanese
-                            ? "View cleaning statistics in the Report tab. Switch between week, month, and year. (Premium)"
+                            ? LocalizationManager.shared.language == .japanese ? "「レポート」タブで掃除の統計を確認できます。今週・今月・今年の期間で切り替えられます。（プレミアム）" : "View cleaning statistics in the Report tab. Switch between week, month, and year. (Premium)"
                             : "View stats in the Report tab. Switch between this week, month, and year. (Premium)"),
                         ("2", L(.tabCalendar), localization.language == .japanese
-                            ? "The Calendar tab shows tasks on a monthly calendar. (Premium)"
-                            : "The Calendar tab shows tasks on a monthly calendar. (Premium)"),
+                            ? LocalizationManager.shared.language == .japanese ? "「カレンダー」タブで月間カレンダーにタスクを表示します。（プレミアム）" : "The Calendar tab shows tasks on a monthly calendar. (Premium)"
+                            : LocalizationManager.shared.language == .japanese ? "「カレンダー」タブで月間カレンダーにタスクを表示します。（プレミアム）" : "The Calendar tab shows tasks on a monthly calendar. (Premium)"),
                     ]
                 )
                 HelpSection(
                     title: L(.howToExport), icon: "square.and.arrow.up.fill", color: .purple,
                     steps: [
                         ("1", L(.export), localization.language == .japanese
-                            ? "Tap the export button in the top right of the History tab. (Premium)"
-                            : "Tap the export button in the top right of the History tab. (Premium)"),
+                            ? LocalizationManager.shared.language == .japanese ? "「履歴」タブ右上のエクスポートボタンをタップします。（プレミアム）" : "Tap the export button in the top right of the History tab. (Premium)"
+                            : LocalizationManager.shared.language == .japanese ? "「履歴」タブ右上のエクスポートボタンをタップします。（プレミアム）" : "Tap the export button in the top right of the History tab. (Premium)"),
                         ("2", L(.exportData), localization.language == .japanese
-                            ? "Select the data type and file format (CSV/PDF)."
-                            : "Select the data type and file format (CSV/PDF)."),
+                            ? LocalizationManager.shared.language == .japanese ? "データの種類とファイル形式（CSV/PDF）を選択します。" : "Select the data type and file format (CSV/PDF)."
+                            : LocalizationManager.shared.language == .japanese ? "データの種類とファイル形式（CSV/PDF）を選択します。" : "Select the data type and file format (CSV/PDF)."),
                     ]
                 )
             }
