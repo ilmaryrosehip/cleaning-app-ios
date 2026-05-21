@@ -48,8 +48,13 @@ struct MainTabView: View {
                 }
             }
 
-            SupplyListView()
-                .tabItem { Label(L(.tabSupply), systemImage: "bag") }
+            TabView {
+                SupplyListView()
+                    .tabItem { Label(L(.supplyManagement), systemImage: "bag") }
+                ConsumablePartStockView()
+                    .tabItem { Label(L(.partsInventory), systemImage: "shippingbox.fill") }
+            }
+            .tabItem { Label(L(.tabSupply), systemImage: "bag") }
 
             PremiumLockedView(
                 featureName: L(.tabReport),
