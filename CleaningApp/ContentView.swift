@@ -20,6 +20,7 @@ struct ContentView: View {
 struct MainTabView: View {
     let home: Home
     @State private var localization = LocalizationManager.shared
+    @State private var premium = PremiumManager.shared
     // 言語変更を検知してタブを再描画するためのID
     @State private var tabViewID = UUID()
 
@@ -43,7 +44,7 @@ struct MainTabView: View {
             }
             .tabItem { Label(L(.tabCalendar), systemImage: "calendar") }
             .overlay(alignment: .topTrailing) {
-                if !PremiumManager.shared.isPremium {
+                if !premium.isPremium {
                     PremiumBadge().padding(.top, 8).padding(.trailing, 8)
                 }
             }
@@ -67,7 +68,7 @@ struct MainTabView: View {
             }
             .tabItem { Label(L(.tabReport), systemImage: "chart.bar.fill") }
             .overlay(alignment: .topTrailing) {
-                if !PremiumManager.shared.isPremium {
+                if !premium.isPremium {
                     PremiumBadge().padding(.top, 8).padding(.trailing, 8)
                 }
             }
