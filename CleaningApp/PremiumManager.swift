@@ -41,7 +41,7 @@ final class PremiumManager {
             let products = try await Product.products(for: PremiumProduct.allIDs)
             premiumProduct = products.first
         } catch {
-            errorMessage = "商品情報の取得に失敗しました: \(error.localizedDescription)"
+            errorMessage = UserDefaults.standard.string(forKey: "app_language") == "en" ? "Failed to load products: \(error.localizedDescription)" : "商品情報の取得に失敗しました: \(error.localizedDescription)"
         }
     }
 
@@ -49,7 +49,7 @@ final class PremiumManager {
 
     func purchase() async -> Bool {
         guard let product = premiumProduct else {
-            errorMessage = "商品情報を読み込み中です。しばらくお待ちください。"
+            errorMessage = UserDefaults.standard.string(forKey: "app_language") == "en" ? "Loading products. Please wait." : "商品情報を読み込み中です。しばらくお待ちください。"
             return false
         }
         isPurchasing = true
@@ -67,13 +67,13 @@ final class PremiumManager {
             case .userCancelled:
                 return false
             case .pending:
-                errorMessage = "購入が保留中です。承認をお待ちください。"
+                errorMessage = UserDefaults.standard.string(forKey: "app_language") == "en" ? "Purchase is pending approval." : "購入が保留中です。承認をお待ちください。"
                 return false
             @unknown default:
                 return false
             }
         } catch {
-            errorMessage = "購入に失敗しました: \(error.localizedDescription)"
+            errorMessage = UserDefaults.standard.string(forKey: "app_language") == "en" ? "Purchase failed: \(error.localizedDescription)" : "購入に失敗しました: \(error.localizedDescription)"
             return false
         }
     }
@@ -87,7 +87,7 @@ final class PremiumManager {
             try await AppStore.sync()
             await updatePurchasedProducts()
         } catch {
-            errorMessage = "購入の復元に失敗しました: \(error.localizedDescription)"
+            errorMessage = UserDefaults.standard.string(forKey: "app_language") == "en" ? "Restore failed: \(error.localizedDescription)" : "購入の復元に失敗しました: \(error.localizedDescription)"
         }
     }
 

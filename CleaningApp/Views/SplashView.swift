@@ -113,12 +113,12 @@ struct SplashView: View {
 
                 // タイトル
                 VStack(spacing: 8) {
-                    Text("おうちのお掃除")
+                    Text(LocalizationManager.shared.language == .japanese ? "おうちのお掃除" : "Home Cleaning")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .opacity(titleOpacity)
 
-                    Text("タスクを管理して、いつも清潔な住まいを")
+                    Text(LocalizationManager.shared.language == .japanese ? "タスクを管理して、いつも清潔な住まいを" : "Manage tasks for a clean home")
                         .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundStyle(.white.opacity(0.6))
                         .multilineTextAlignment(.center)

@@ -37,7 +37,7 @@ struct MainTabView: View {
                 featureName: L(.tabCalendar),
                 featureDescription: localization.language == .japanese
                     ? "月間カレンダーでタスクを\n一目で確認できます"
-                    : "View your tasks on a monthly calendar",
+                    : LocalizationManager.shared.language == .japanese ? "月間カレンダーでタスクを一目で確認できます" : "View your tasks on a monthly calendar",
                 featureIcon: "calendar"
             ) {
                 CalendarView(home: home)
@@ -61,7 +61,7 @@ struct MainTabView: View {
                 featureName: L(.tabReport),
                 featureDescription: localization.language == .japanese
                     ? "日別・曜日別・部屋別の統計を\nグラフで見える化します"
-                    : "Visualize your cleaning stats\nwith beautiful charts",
+                    : LocalizationManager.shared.language == .japanese ? "日別・曜日別・部屋別の統計をグラフで見える化します" : "Visualize your cleaning stats with beautiful charts",
                 featureIcon: "chart.bar.fill"
             ) {
                 ReportView(home: home)

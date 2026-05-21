@@ -273,7 +273,7 @@ struct ExportView: View {
                         for part in fixture.parts {
                             let last = part.lastReplacedAt.map { dateFormatter.string(from: $0) } ?? (LocalizationManager.shared.language == .japanese ? "未記録" : "N/A")
                             let next = part.nextReplacementDate.map { dateFormatter.string(from: $0) } ?? "-"
-                            drawLine("\(part.name) - \(part.replacementStatus.label)  最終:\(last)  次回:\(next)", fontSize: 9, indent: 16)
+                            drawLine(LocalizationManager.shared.language == .japanese ? "\(part.name) - \(part.replacementStatus.label)  最終:\(last)  次回:\(next)" : "\(part.name) - \(part.replacementStatus.label)  Last:\(last)  Next:\(next)", fontSize: 9, indent: 16)
                         }
                     }
                 }
@@ -299,14 +299,14 @@ struct ExportPreviewRow: View {
         let fixtures = home.rooms.flatMap { $0.fixtures }.count
 
         switch exportType {
-        case .taskHistory: LabeledContent(L(.taskHistory), value: "\(logs)件")
-        case .inventory:   LabeledContent(L(.inventory), value: "\(parts)個")
-        case .maintenance: LabeledContent(L(.fixture), value: "\(fixtures)台")
+        case .taskHistory: LabeledContent(L(.taskHistory), value: LocalizationManager.shared.language == .japanese ? "\(logs)件" : "\(logs) tasks")
+        case .inventory:   LabeledContent(L(.inventory), value: LocalizationManager.shared.language == .japanese ? "\(parts)個" : "\(parts) parts")
+        case .maintenance: LabeledContent(L(.fixture), value: LocalizationManager.shared.language == .japanese ? "\(fixtures)台" : "\(fixtures) items")
         case .allData:
             VStack(alignment: .leading, spacing: 4) {
-                LabeledContent(L(.taskHistory), value: "\(logs)件")
-                LabeledContent(L(.inventory), value: "\(parts)個")
-                LabeledContent(L(.fixture), value: "\(fixtures)台")
+                LabeledContent(L(.taskHistory), value: LocalizationManager.shared.language == .japanese ? "\(logs)件" : "\(logs) tasks")
+                LabeledContent(L(.inventory), value: LocalizationManager.shared.language == .japanese ? "\(parts)個" : "\(parts) parts")
+                LabeledContent(L(.fixture), value: LocalizationManager.shared.language == .japanese ? "\(fixtures)台" : "\(fixtures) items")
             }
         }
     }

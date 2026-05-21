@@ -321,7 +321,7 @@ struct AddTaskSheet: View {
                                 } else {
                                     selectedFixtureIDs.insert(fixture.id)
                                     if title.trimmingCharacters(in: .whitespaces).isEmpty {
-                                        title = fixture.name + "の清掃"
+                                        title = LocalizationManager.shared.language == .japanese ? fixture.name + "の清掃" : fixture.name + " cleaning"
                                     }
                                 }
                             }

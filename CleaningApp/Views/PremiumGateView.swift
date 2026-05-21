@@ -29,18 +29,18 @@ struct PremiumGateView: View {
                         .multilineTextAlignment(.center).padding(.horizontal, 32)
                 }
                 VStack(alignment: .leading, spacing: 10) {
-                    PremiumBenefit(icon: "chart.bar.fill",      text: "掃除レポート・統計グラフ")
-                    PremiumBenefit(icon: "camera.fill",         text: "写真記録（Before/After）")
-                    PremiumBenefit(icon: "icloud.fill",         text: "iCloud同期（家族と共有）")
-                    PremiumBenefit(icon: "calendar",            text: "カレンダー表示")
-                    PremiumBenefit(icon: "square.and.arrow.up", text: "データエクスポート")
+                    PremiumBenefit(icon: "chart.bar.fill",      text: LocalizationManager.shared.language == .japanese ? "掃除レポート・統計グラフ" : "Cleaning Reports & Charts")
+                    PremiumBenefit(icon: "camera.fill",         text: LocalizationManager.shared.language == .japanese ? "写真記録（Before/After）" : "Photo Records (Before/After)")
+                    PremiumBenefit(icon: "icloud.fill",         text: LocalizationManager.shared.language == .japanese ? "iCloud同期（家族と共有）" : "iCloud Sync (Family Sharing)")
+                    PremiumBenefit(icon: "calendar",            text: LocalizationManager.shared.language == .japanese ? "カレンダー表示" : "Calendar View")
+                    PremiumBenefit(icon: "square.and.arrow.up", text: LocalizationManager.shared.language == .japanese ? "データエクスポート" : "Data Export")
                 }
                 .padding(.horizontal, 32)
 
                 Button { showPaywall = true } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "sparkles")
-                        Text("Pikari プレミアムを見る")
+                        Text(LocalizationManager.shared.language == .japanese ? "Pikari プレミアムを見る" : "See Pikari Premium")
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 16)
@@ -95,8 +95,8 @@ struct PaywallView: View {
                         )
                         VStack(spacing: 12) {
                             Image(systemName: "house.fill").font(.system(size: 48)).foregroundStyle(.white)
-                            Text("Pikari プレミアム").font(.title).fontWeight(.bold).foregroundStyle(.white)
-                            Text("買い切りですべての機能を解鎖")
+                            Text(L(.premiumTitle)).font(.title).fontWeight(.bold).foregroundStyle(.white)
+                            Text(L(.premiumDesc))
                                 .font(.subheadline).foregroundStyle(.white.opacity(0.8))
                         }
                         .padding(.vertical, 40)
@@ -105,13 +105,13 @@ struct PaywallView: View {
                     VStack(spacing: 20) {
                         // 特典リスト
                         VStack(alignment: .leading, spacing: 14) {
-                            Text("プレミアム特典").font(.headline)
+                            Text(L(.premiumFeatures)).font(.headline)
                             PremiumBenefit(icon: "chart.bar.fill",      text: "掃除レポート・統計グラフ")
                             PremiumBenefit(icon: "camera.fill",          text: "写真記録（Before/After）")
                             PremiumBenefit(icon: "icloud.fill",          text: "iCloud同期（家族と共有）")
                             PremiumBenefit(icon: "calendar",             text: "カレンダー表示")
-                            PremiumBenefit(icon: "square.and.arrow.up",  text: "データエクスポート（CSV/PDF）")
-                            PremiumBenefit(icon: "arrow.clockwise.circle.fill", text: "将来の新機能もすべて無料")
+                            PremiumBenefit(icon: "square.and.arrow.up",  text: LocalizationManager.shared.language == .japanese ? "データエクスポート（CSV/PDF）" : "Data Export (CSV/PDF)")
+                            PremiumBenefit(icon: "arrow.clockwise.circle.fill", text: LocalizationManager.shared.language == .japanese ? "将来の新機能もすべて無料" : "All future features included")
                         }
                         .padding(20)
                         .background(Color(.systemBackground))
@@ -123,11 +123,11 @@ struct PaywallView: View {
                                 Text(product.displayPrice)
                                     .font(.system(size: 42, weight: .bold))
                                     .foregroundStyle(Color(red:0.11,green:0.31,blue:0.87))
-                                Text("一度の購入で永久に使えます")
+                                Text(L(.oneTimePurchase))
                                     .font(.subheadline).foregroundStyle(.secondary)
                             } else {
                                 ProgressView()
-                                Text("商品情報を読み込み中...")
+                                Text(LocalizationManager.shared.language == .japanese ? "商品情報を読み込み中..." : "Loading...")
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                         }
@@ -145,7 +145,7 @@ struct PaywallView: View {
                                     ProgressView().tint(.white)
                                 } else {
                                     Image(systemName: "sparkles")
-                                    Text("事人購入する")
+                                    Text(L(.buyNow))
                                         .fontWeight(.bold)
                                 }
                             }
@@ -166,7 +166,7 @@ struct PaywallView: View {
                         }
 
                         // 購入復元
-                        Button("購入を復元する") {
+                        Button(L(.restore)) {
                             Task {
                                 await premium.restore()
                                 if premium.isPremium { dismiss() }
@@ -175,7 +175,7 @@ struct PaywallView: View {
                         }
                         .font(.subheadline).foregroundStyle(.secondary)
 
-                        Text("一度購入すると、追加費用なしですべてのプレミアム機能を永久ご利用いただけます。\n将来のアップデートによる機能追加も無料で提供します。")
+                        Text(LocalizationManager.shared.language == .japanese ? "一度購入すると、追加費用なしですべてのプレミアム機能を永久ご利用いただけます。" : "One-time purchase. All premium features, forever.")
                             .font(.caption2).foregroundStyle(.secondary)
                             .multilineTextAlignment(.center).padding(.bottom, 20)
                     }
@@ -184,12 +184,12 @@ struct PaywallView: View {
             }
             .ignoresSafeArea(edges: .top)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("閉じる") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button(L(.close)) { dismiss() } }
             }
-            .alert("復元完了", isPresented: $showRestoreAlert) {
+            .alert(LocalizationManager.shared.language == .japanese ? "復元完了" : "Restore Complete", isPresented: $showRestoreAlert) {
                 Button("OK") {}
             } message: {
-                Text("復元できる購入履歴が見つかりませんでした。")
+                Text(LocalizationManager.shared.language == .japanese ? "復元できる購入履歴が見つかりませんでした。" : "No purchases to restore.")
             }
         }
         .task { await premium.loadProducts() }

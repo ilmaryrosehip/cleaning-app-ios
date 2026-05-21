@@ -86,7 +86,8 @@ final class NotificationManager {
 
         func makeContent() -> UNMutableNotificationContent {
             let c = UNMutableNotificationContent()
-            c.title = "掃除の時間です 🏠"
+            let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+            c.title = isJP ? "掃除の時間です 🏠" : "Time to clean! 🏠"
             c.body  = body
             c.sound = .default
             c.badge = 1
