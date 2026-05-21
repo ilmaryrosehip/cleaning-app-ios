@@ -22,11 +22,12 @@ struct ExportView: View {
         case allData      = "allData"
 
         var label: String {
+            let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
             switch self {
-            case .taskHistory:  return L10nKey.taskHistory.ja
-            case .inventory:    return L10nKey.inventory.ja
-            case .maintenance:  return L10nKey.maintenance.ja
-            case .allData:      return L10nKey.allData.ja
+            case .taskHistory:  return isJP ? L10nKey.taskHistory.ja : L10nKey.taskHistory.en
+            case .inventory:    return isJP ? L10nKey.inventory.ja   : L10nKey.inventory.en
+            case .maintenance:  return isJP ? L10nKey.maintenance.ja : L10nKey.maintenance.en
+            case .allData:      return isJP ? L10nKey.allData.ja     : L10nKey.allData.en
             }
         }
 
@@ -53,7 +54,7 @@ struct ExportView: View {
                         Button { exportType = type } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: type.icon).foregroundStyle(.teal).frame(width: 24)
-                                Text(type.rawValue).foregroundStyle(.primary)
+                                Text(type.label).foregroundStyle(.primary)
                                 Spacer()
                                 if exportType == type {
                                     Image(systemName: "checkmark").foregroundStyle(.teal).fontWeight(.semibold)
