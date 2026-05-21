@@ -49,7 +49,7 @@ struct PhotoRecordSheet: View {
                             VStack(spacing: 8) {
                                 Image(systemName: "camera.fill")
                                     .font(.title2).foregroundStyle(.teal)
-                                Text(LocalizationManager.shared.language == .japanese ? "撮影する" : "Take Photo").font(.caption).foregroundStyle(.teal)
+                                Text(UserDefaults.standard.string(forKey: "app_language") != "en" ? "撮影する" : "Take Photo").font(.caption).foregroundStyle(.teal)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
@@ -67,7 +67,7 @@ struct PhotoRecordSheet: View {
                             VStack(spacing: 8) {
                                 Image(systemName: "photo.on.rectangle")
                                     .font(.title2).foregroundStyle(.blue)
-                                Text(LocalizationManager.shared.language == .japanese ? "写真を選択" : "Choose Photo").font(.caption).foregroundStyle(.blue)
+                                Text(UserDefaults.standard.string(forKey: "app_language") != "en" ? "写真を選択" : "Choose Photo").font(.caption).foregroundStyle(.blue)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
@@ -84,10 +84,10 @@ struct PhotoRecordSheet: View {
                     if !photos.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
-                                Text(LocalizationManager.shared.language == .japanese ? "追加する写真 (\(photos.count)枚)" : "Photos to add (\(photos.count))")
+                                Text(UserDefaults.standard.string(forKey: "app_language") != "en" ? "追加する写真 (\(photos.count)枚)" : "Photos to add (\(photos.count))")
                                     .font(.subheadline).fontWeight(.semibold)
                                 Spacer()
-                                Button(LocalizationManager.shared.language == .japanese ? "すべて削除" : "Remove All") { photos = []; selectedItems = [] }
+                                Button(UserDefaults.standard.string(forKey: "app_language") != "en" ? "すべて削除" : "Remove All") { photos = []; selectedItems = [] }
                                     .font(.caption).foregroundStyle(.red)
                             }
                             .padding(.horizontal)
@@ -123,7 +123,7 @@ struct PhotoRecordSheet: View {
                     // 既存の写真
                     if !log.photoDataList.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text(LocalizationManager.shared.language == .japanese ? "記録済みの写真 (\(log.photoDataList.count)枚)" : "Recorded photos (\(log.photoDataList.count))")
+                            Text(UserDefaults.standard.string(forKey: "app_language") != "en" ? "記録済みの写真 (\(log.photoDataList.count)枚)" : "Recorded photos (\(log.photoDataList.count))")
                                 .font(.subheadline).fontWeight(.semibold)
                                 .padding(.horizontal)
 
@@ -159,14 +159,14 @@ struct PhotoRecordSheet: View {
                     }
 
                     if isLoading {
-                        HStack { Spacer(); ProgressView(LocalizationManager.shared.language == .japanese ? "読み込み中..." : "Loading..."); Spacer() }
+                        HStack { Spacer(); ProgressView(UserDefaults.standard.string(forKey: "app_language") != "en" ? "読み込み中..." : "Loading..."); Spacer() }
                     }
 
                     Spacer(minLength: 40)
                 }
                 .padding(.vertical)
             }
-            .navigationTitle(LocalizationManager.shared.language == .japanese ? "写真を記録" : "Record Photos")
+            .navigationTitle(UserDefaults.standard.string(forKey: "app_language") != "en" ? "写真を記録" : "Record Photos")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
