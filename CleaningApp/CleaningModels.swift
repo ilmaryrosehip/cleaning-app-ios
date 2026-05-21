@@ -142,7 +142,6 @@ enum Frequency: String, Codable, CaseIterable {
     case custom   = "custom"
 
     var label: String {
-        // "en" が明示的に設定されている場合のみ英語、それ以外は日本語
         let lang = UserDefaults.standard.string(forKey: "app_language") ?? "ja"
         let isJP = lang == "ja"
         switch self {
@@ -520,7 +519,6 @@ extension FixturePreset {
 // MARK: - VersionedSchema（スキーマバージョン管理）
 
 enum PikariSchemaV1: VersionedSchema {
-    // nonisolated(unsafe) で Swift 6 の並行性エラーを解消
     nonisolated(unsafe) static var versionIdentifier = Schema.Version(1, 0, 0)
     static var models: [any PersistentModel.Type] {
         [
@@ -541,67 +539,61 @@ enum PikariMigrationPlan: SchemaMigrationPlan {
     static var stages: [MigrationStage] { [] }
 }
 
-// MARK: - ModelContainer（マイグレーション対応 + iCloud同期）
-
-// MARK: - SwiftData Store Manager
-
-private func nukePikariStore() {
-    let fm = FileManager.default
-    let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-    let storeNames = ["default.store", "CleaningApp.store", ".default.store"]
-    for name in storeNames {
-        let url = appSupport.appending(path: name)
-        for ext in ["", ".shm", ".wal", "-shm", "-wal"] {
-            try? fm.removeItem(at: URL(fileURLWithPath: url.path + ext))
-        }
-    }
-    // SwiftData のデフォルトパスも削除
-    if let containerURL = fm.containerURL(forSecurityApplicationGroupIdentifier: "group.com.hiroki.CleaningApp") {
-        let storeURL = containerURL.appending(path: "default.store")
-        for ext in ["", ".shm", ".wal", "-shm", "-wal"] {
-            try? fm.removeItem(at: URL(fileURLWithPath: storeURL.path + ext))
-        }
-    }
-    print("✅ Pikari store nuked")
-}
+// MARK: - ModelContainer
 
 extension ModelContainer {
     @MainActor
     static let cleaningApp: ModelContainer = {
         let schema = Schema(PikariSchemaV1.models)
 
+        // iCloud付きで試みる
         let cloudConfig = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false,
             cloudKitDatabase: .private("iCloud.com.hiroki.CleaningApp")
         )
-
-        do {
-            return try ModelContainer(
-                for: schema,
-                migrationPlan: PikariMigrationPlan.self,
-                configurations: cloudConfig
-            )
-        } catch {
-            print("iCloud migration failed: \(error)")
+        if let container = try? ModelContainer(
+            for: schema,
+            migrationPlan: PikariMigrationPlan.self,
+            configurations: cloudConfig
+        ) {
+            return container
         }
 
+        // ローカルで試みる
         let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(
-                for: schema,
-                migrationPlan: PikariMigrationPlan.self,
-                configurations: localConfig
-            )
-        } catch {
-            print("Local migration failed: \(error)")
+        if let container = try? ModelContainer(
+            for: schema,
+            migrationPlan: PikariMigrationPlan.self,
+            configurations: localConfig
+        ) {
+            return container
         }
 
-        do {
-            return try ModelContainer(for: schema, configurations: localConfig)
-        } catch {
-            fatalError("ModelContainer の初期化に完全に失敗しました: \(error)")
+        // ストアを削除して再作成
+        let fm = FileManager.default
+        let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        if let files = try? fm.contentsOfDirectory(at: appSupport, includingPropertiesForKeys: nil) {
+            for file in files {
+                let name = file.lastPathComponent.lowercased()
+                if name.hasSuffix(".store") || name.hasSuffix("-shm") || name.hasSuffix("-wal")
+                    || name.hasSuffix(".sqlite") || name.hasSuffix(".sqlite-shm") || name.hasSuffix(".sqlite-wal") {
+                    try? fm.removeItem(at: file)
+                }
+            }
         }
+
+        if let container = try? ModelContainer(for: schema, configurations: localConfig) {
+            return container
+        }
+
+        // 最終手段：インメモリ
+        let memConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        if let container = try? ModelContainer(for: schema, configurations: memConfig) {
+            print("⚠️ Using in-memory store")
+            return container
+        }
+
+        fatalError("ModelContainer の初期化に完全に失敗しました")
     }()
 }
