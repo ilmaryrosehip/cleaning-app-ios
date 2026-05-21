@@ -72,7 +72,7 @@ final class PurchaseManager {
             products = try await Product.products(for: ids)
                 .sorted { $0.price < $1.price }
         } catch {
-            errorMessage = "商品情報の取得に失敗しました"
+            errorMessage = (UserDefaults.standard.string(forKey:"app_language") == "en" ? "Failed to load products" : "商品情報の取得に失敗しました")
             print("Product load error: \(error)")
         }
     }
@@ -91,12 +91,12 @@ final class PurchaseManager {
             case .userCancelled:
                 break
             case .pending:
-                errorMessage = "購入が保留中です。確認後に有効になります"
+                errorMessage = (UserDefaults.standard.string(forKey:"app_language") == "en" ? "Purchase pending approval" : "購入が保留中です。確認後に有効になります")
             @unknown default:
                 break
             }
         } catch {
-            errorMessage = "購入処理中にエラーが発生しました"
+            errorMessage = (UserDefaults.standard.string(forKey:"app_language") == "en" ? "Purchase failed" : "購入処理中にエラーが発生しました")
             print("Purchase error: \(error)")
         }
 
@@ -113,7 +113,7 @@ final class PurchaseManager {
             try await AppStore.sync()
             await refreshPurchaseStatus()
         } catch {
-            errorMessage = "購入の復元に失敗しました"
+            errorMessage = (UserDefaults.standard.string(forKey:"app_language") == "en" ? "Restore failed" : "購入の復元に失敗しました")
         }
 
         isPurchasing = false
@@ -235,7 +235,7 @@ struct PremiumGateView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "crown.fill")
-                    Text("プレミアムにアップグレード")
+                    Text(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Upgrade to Premium" : "プレミアムにアップグレード")
                 }
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
@@ -268,11 +268,11 @@ struct PaywallView: View {
     @State private var selectedProduct: PikariProduct = .yearly
 
     private let features: [(icon: String, text: String)] = [
-        ("chart.bar.fill",          "掃除レポート・統計グラフ"),
-        ("photo.fill",              "写真記録（掃除前後の記録）"),
-        ("icloud.fill",             "iCloud同期（家族間で共有）"),
-        ("rectangle.3.group.fill",  "ホーム画面ウィジェット"),
-        ("calendar",                "カレンダー表示"),
+        ("chart.bar.fill", UserDefaults.standard.string(forKey:"app_language") == "en" ? "Cleaning Reports & Charts" : "掃除レポート・統計グラフ"),
+        ("photo.fill", UserDefaults.standard.string(forKey:"app_language") == "en" ? "Photo Records (Before/After)" : "写真記録（掃除前後の記録）"),
+        ("icloud.fill", UserDefaults.standard.string(forKey:"app_language") == "en" ? "iCloud Sync (Family Sharing)" : "iCloud同期（家族間で共有）"),
+        ("rectangle.3.group.fill", UserDefaults.standard.string(forKey:"app_language") == "en" ? "Home Screen Widget" : "ホーム画面ウィジェット"),
+        ("calendar", UserDefaults.standard.string(forKey:"app_language") == "en" ? "Calendar View" : "カレンダー表示"),
     ]
 
     var body: some View {
@@ -298,9 +298,9 @@ struct PaywallView: View {
                                     startPoint: .top, endPoint: .bottom
                                 ))
                         }
-                        Text("Pikari プレミアム")
+                        Text(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Pikari Premium" : "Pikari プレミアム")
                             .font(.title).fontWeight(.bold)
-                        Text("すべての機能をアンロックして\nより快適な掃除管理を")
+                        Text(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Unlock all features for better cleaning management" : "すべての機能をアンロックして\nより快適な掃除管理を")
                             .font(.subheadline).foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
@@ -360,7 +360,7 @@ struct PaywallView: View {
                                 if purchaseManager.isPurchasing {
                                     ProgressView().tint(.white)
                                 } else {
-                                    Text("今すぐ始める")
+                                    Text(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Get Started" : "今すぐ始める")
                                         .fontWeight(.bold)
                                 }
                             }
@@ -376,7 +376,7 @@ struct PaywallView: View {
                         }
                         .disabled(purchaseManager.isPurchasing || purchaseManager.products.isEmpty)
 
-                        Button("購入を復元する") {
+                        Button(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Restore Purchase" : "購入を復元する") {
                             Task { await purchaseManager.restorePurchases() }
                         }
                         .font(.subheadline).foregroundStyle(.secondary)
@@ -386,7 +386,7 @@ struct PaywallView: View {
                         }
 
                         // 注記
-                        Text("購入はApple IDに請求されます。サブスクリプションは期間終了の24時間前までキャンセルしない限り自動更新されます。")
+                        Text(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Charged to your Apple ID. Subscriptions auto-renew unless cancelled 24 hours before the period ends." : "購入はApple IDに請求されます。サブスクリプションは期間終了の24時間前までキャンセルしない限り自動更新されます。")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                             .multilineTextAlignment(.center)
@@ -399,7 +399,7 @@ struct PaywallView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") { dismiss() }
+                    Button(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Close" : "閉じる") { dismiss() }
                 }
             }
         }
@@ -437,7 +437,7 @@ struct PlanCard: View {
                         Text(plan.displayName)
                             .font(.subheadline).fontWeight(.semibold)
                         if plan == .yearly {
-                            Text("おすすめ")
+                            Text(UserDefaults.standard.string(forKey:"app_language") == "en" ? "Recommended" : "おすすめ")
                                 .font(.caption2).fontWeight(.bold)
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6).padding(.vertical, 2)

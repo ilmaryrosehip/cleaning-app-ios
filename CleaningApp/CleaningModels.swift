@@ -195,25 +195,47 @@ enum ReplacementStatus {
 }
 
 struct FixturePreset: Identifiable {
-    let id: String; let name: String; let icon: String; let parts: [PartPreset]
+    let id: String; let nameJA: String; let nameEN: String; let icon: String; let parts: [PartPreset]
+    var name: String { (UserDefaults.standard.string(forKey: "app_language") ?? "ja") == "ja" ? nameJA : nameEN }
 }
 struct PartPreset: Identifiable {
-    let id: String; let name: String; let replacementMonths: Int; let memo: String
+    let id: String; let nameJA: String; let nameEN: String; let replacementMonths: Int; let memo: String
+    var name: String { (UserDefaults.standard.string(forKey: "app_language") ?? "ja") == "ja" ? nameJA : nameEN }
 }
 extension FixturePreset {
     static let byRoomIcon: [String:[FixturePreset]] = ["shower":bathroomPresets,"drop":bathroomPresets,"fork.knife":kitchenPresets,"washer":laundryPresets,"sofa":livingPresets,"bed.double":bedroomPresets]
     static let bathroomPresets:[FixturePreset] = [
-        FixturePreset(id:"bath_dryer",name:"浴室乾燥機",icon:"wind",parts:[PartPreset(id:"exhaust_filter",name:"排気フィルター",replacementMonths:6,memo:"目詰まりで乾燥効率低下"),PartPreset(id:"intake_filter",name:"吸気グリルフィルター",replacementMonths:3,memo:"月1回掃除推奨")]),
-        FixturePreset(id:"water_heater",name:"給湯器",icon:"flame",parts:[PartPreset(id:"heater_filter",name:"給水フィルター",replacementMonths:12,memo:"年1回点検")])]
+        FixturePreset(id:"bath_dryer",nameJA:"浴室乾燥機",nameEN:"Bath Dryer",icon:"wind",parts:[
+            PartPreset(id:"exhaust_filter",nameJA:"排気フィルター",nameEN:"Exhaust Filter",replacementMonths:6,memo:""),
+            PartPreset(id:"intake_filter",nameJA:"吸気グリルフィルター",nameEN:"Intake Filter",replacementMonths:3,memo:"")]),
+        FixturePreset(id:"water_heater",nameJA:"給湯器",nameEN:"Water Heater",icon:"flame",parts:[
+            PartPreset(id:"heater_filter",nameJA:"給水フィルター",nameEN:"Water Filter",replacementMonths:12,memo:"")])]
     static let kitchenPresets:[FixturePreset] = [
-        FixturePreset(id:"range_hood",name:"レンジフード・換気扇",icon:"arrow.up.to.line",parts:[PartPreset(id:"grease_filter",name:"グリスフィルター",replacementMonths:3,memo:"油汚れが溜まりやすい"),PartPreset(id:"charcoal_filter",name:"整流板・活性炭フィルター",replacementMonths:6,memo:"脱臭効果が落ちたら交換")]),
-        FixturePreset(id:"dishwasher",name:"食洗機",icon:"drop.triangle",parts:[PartPreset(id:"mesh_filter",name:"残菜フィルター",replacementMonths:0,memo:"毎回使用後に清掃"),PartPreset(id:"rinse_aid",name:"リンス剤",replacementMonths:1,memo:"なくなったら補充")]),
-        FixturePreset(id:"refrigerator",name:"冷蔵庫",icon:"refrigerator",parts:[PartPreset(id:"deodorizer",name:"脱臭剤",replacementMonths:12,memo:"1〜2年で交換"),PartPreset(id:"water_filter",name:"浄水フィルター",replacementMonths:6,memo:"製氷機付きの場合")])]
-    static let laundryPresets:[FixturePreset] = [FixturePreset(id:"washer_dryer",name:"洗濯乾燥機",icon:"washer",parts:[PartPreset(id:"lint_filter",name:"糸くずフィルター",replacementMonths:0,memo:"毎回使用後に清掃"),PartPreset(id:"dry_filter",name:"乾燥フィルター",replacementMonths:0,memo:"乾燥後に清掃"),PartPreset(id:"drum_cleaner",name:"槽洗浄剤",replacementMonths:1,memo:"月1回の槽クリーン")])]
+        FixturePreset(id:"range_hood",nameJA:"レンジフード・換気扇",nameEN:"Range Hood",icon:"arrow.up.to.line",parts:[
+            PartPreset(id:"grease_filter",nameJA:"グリスフィルター",nameEN:"Grease Filter",replacementMonths:3,memo:""),
+            PartPreset(id:"charcoal_filter",nameJA:"整流板・活性炭フィルター",nameEN:"Charcoal Filter",replacementMonths:6,memo:"")]),
+        FixturePreset(id:"dishwasher",nameJA:"食洗機",nameEN:"Dishwasher",icon:"drop.triangle",parts:[
+            PartPreset(id:"mesh_filter",nameJA:"残菜フィルター",nameEN:"Mesh Filter",replacementMonths:0,memo:""),
+            PartPreset(id:"rinse_aid",nameJA:"リンス剤",nameEN:"Rinse Aid",replacementMonths:1,memo:"")]),
+        FixturePreset(id:"refrigerator",nameJA:"冷蔵庫",nameEN:"Refrigerator",icon:"refrigerator",parts:[
+            PartPreset(id:"deodorizer",nameJA:"脱臭剤",nameEN:"Deodorizer",replacementMonths:12,memo:""),
+            PartPreset(id:"water_filter",nameJA:"浄水フィルター",nameEN:"Water Filter",replacementMonths:6,memo:"")])]
+    static let laundryPresets:[FixturePreset] = [
+        FixturePreset(id:"washer_dryer",nameJA:"洗濯乾燥機",nameEN:"Washer/Dryer",icon:"washer",parts:[
+            PartPreset(id:"lint_filter",nameJA:"糸くずフィルター",nameEN:"Lint Filter",replacementMonths:0,memo:""),
+            PartPreset(id:"dry_filter",nameJA:"乾燥フィルター",nameEN:"Dry Filter",replacementMonths:0,memo:""),
+            PartPreset(id:"drum_cleaner",nameJA:"槽洗浄剤",nameEN:"Drum Cleaner",replacementMonths:1,memo:"")])]
     static let livingPresets:[FixturePreset] = [
-        FixturePreset(id:"aircon",name:"エアコン",icon:"air.conditioner.horizontal",parts:[PartPreset(id:"aircon_filter",name:"フィルター",replacementMonths:0,memo:"2週間に1回清掃推奨"),PartPreset(id:"aircon_deodorize",name:"脱臭フィルター",replacementMonths:12,memo:"年1回交換")]),
-        FixturePreset(id:"air_purifier",name:"空気清浄機",icon:"aqi.medium",parts:[PartPreset(id:"hepa_filter",name:"HEPAフィルター",replacementMonths:24,memo:"2年に1回が目安"),PartPreset(id:"deodor_filter2",name:"脱臭フィルター",replacementMonths:12,memo:"年1回交換"),PartPreset(id:"prefilter",name:"プレフィルター",replacementMonths:0,memo:"2週間に1回清掃")])]
-    static let bedroomPresets:[FixturePreset] = [FixturePreset(id:"aircon_bed",name:"エアコン",icon:"air.conditioner.horizontal",parts:[PartPreset(id:"aircon_filter2",name:"フィルター",replacementMonths:0,memo:"2週間に1回清掃推奨")])]
+        FixturePreset(id:"aircon",nameJA:"エアコン",nameEN:"Air Conditioner",icon:"air.conditioner.horizontal",parts:[
+            PartPreset(id:"aircon_filter",nameJA:"フィルター",nameEN:"Filter",replacementMonths:0,memo:""),
+            PartPreset(id:"aircon_deodorize",nameJA:"脱臭フィルター",nameEN:"Deodorizing Filter",replacementMonths:12,memo:"")]),
+        FixturePreset(id:"air_purifier",nameJA:"空気清浄機",nameEN:"Air Purifier",icon:"aqi.medium",parts:[
+            PartPreset(id:"hepa_filter",nameJA:"HEPAフィルター",nameEN:"HEPA Filter",replacementMonths:24,memo:""),
+            PartPreset(id:"deodor_filter2",nameJA:"脱臭フィルター",nameEN:"Deodorizing Filter",replacementMonths:12,memo:""),
+            PartPreset(id:"prefilter",nameJA:"プレフィルター",nameEN:"Pre-Filter",replacementMonths:0,memo:"")])]
+    static let bedroomPresets:[FixturePreset] = [
+        FixturePreset(id:"aircon_bed",nameJA:"エアコン",nameEN:"Air Conditioner",icon:"air.conditioner.horizontal",parts:[
+            PartPreset(id:"aircon_filter2",nameJA:"フィルター",nameEN:"Filter",replacementMonths:0,memo:"")])]
 }
 
 enum PikariSchemaV1: VersionedSchema {
