@@ -266,6 +266,7 @@ struct AddRoomSheet: View {
 struct AddTaskSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @State private var localization = LocalizationManager.shared
     let home: Home
     var preselectedRoom: Room? = nil
 
@@ -297,7 +298,7 @@ struct AddTaskSheet: View {
                     .onChange(of: selectedRoom) { _, _ in selectedFixtureIDs = [] }
 
                     Picker(LocalizationManager.shared.language == .japanese ? "頻度" : "Frequency", selection: $frequency) {
-                        ForEach(Frequency.allCases, id: \.self) { f in Text(f.rawValue).tag(f) }
+                        ForEach(Frequency.allCases, id: \.self) { f in Text(f.label).tag(f) }
                     }
                     if frequency.supportsWeekdays {
                         VStack(alignment: .leading, spacing: 8) {

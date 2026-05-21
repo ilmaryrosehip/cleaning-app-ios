@@ -5,7 +5,14 @@ struct FixtureListView: View {
     @Bindable var room: Room
     @Environment(\.modelContext) private var context
     @State private var showAddFixture = false
-    private var sortedFixtures: [Fixture] { room.fixtures.sorted { $0.name < $1.name } }
+    @Query private var allFixtures: [Fixture]
+    private var sortedFixtures: [Fixture] {
+        allFixtures.filter { $0.room?.id == room.id }.sorted { $0.name < $1.name }
+    }
+    init(room: Room) {
+        self.room = room
+        _allFixtures = Query(filter: #Predicate<Fixture> { _ in true })
+    }
 
     var body: some View {
         List {
