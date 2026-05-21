@@ -108,10 +108,10 @@ struct PaywallView: View {
                         // 特典リスト
                         VStack(alignment: .leading, spacing: 14) {
                             Text(L(.premiumFeatures)).font(.headline)
-                            PremiumBenefit(icon: "chart.bar.fill",      text: "掃除レポート・統計グラフ")
-                            PremiumBenefit(icon: "camera.fill",          text: "写真記録（Before/After）")
-                            PremiumBenefit(icon: "icloud.fill",          text: "iCloud同期（家族と共有）")
-                            PremiumBenefit(icon: "calendar",             text: "カレンダー表示")
+                            PremiumBenefit(icon: "chart.bar.fill",      text: LocalizationManager.shared.language == .japanese ? "掃除レポート・統計グラフ" : "Cleaning Reports & Charts")
+                            PremiumBenefit(icon: "camera.fill",          text: LocalizationManager.shared.language == .japanese ? "写真記録（Before/After）" : "Photo Records (Before/After)")
+                            PremiumBenefit(icon: "icloud.fill",          text: LocalizationManager.shared.language == .japanese ? "iCloud同期（家族と共有）" : "iCloud Sync (Family Sharing)")
+                            PremiumBenefit(icon: "calendar",             text: LocalizationManager.shared.language == .japanese ? "カレンダー表示" : "Calendar View")
                             PremiumBenefit(icon: "square.and.arrow.up",  text: LocalizationManager.shared.language == .japanese ? "データエクスポート（CSV/PDF）" : "Data Export (CSV/PDF)")
                             PremiumBenefit(icon: "arrow.clockwise.circle.fill", text: LocalizationManager.shared.language == .japanese ? "将来の新機能もすべて無料" : "All future features included")
                         }
