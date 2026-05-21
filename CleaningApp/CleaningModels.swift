@@ -142,7 +142,9 @@ enum Frequency: String, Codable, CaseIterable {
     case custom   = "custom"
 
     var label: String {
-        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+        // "en" が明示的に設定されている場合のみ英語、それ以外は日本語
+        let lang = UserDefaults.standard.string(forKey: "app_language") ?? "ja"
+        let isJP = lang == "ja"
         switch self {
         case .daily:    return isJP ? "毎日" : "Daily"
         case .weekly:   return isJP ? "毎週" : "Weekly"
@@ -260,7 +262,8 @@ enum SupplyCategory: String, Codable, CaseIterable {
     case other      = "other"
 
     var label: String {
-        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+        let lang = UserDefaults.standard.string(forKey: "app_language") ?? "ja"
+        let isJP = lang == "ja"
         switch self {
         case .tool:       return isJP ? "電動工具" : "Tools"
         case .cloth:      return isJP ? "クロス・布" : "Cloth"
@@ -279,7 +282,8 @@ enum StockStatus: String, Codable, CaseIterable {
     var needsReorder: Bool { self == .low || self == .outOfStock }
 
     var label: String {
-        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+        let lang = UserDefaults.standard.string(forKey: "app_language") ?? "ja"
+        let isJP = lang == "ja"
         switch self {
         case .ok:         return isJP ? "十分" : "In Stock"
         case .low:        return isJP ? "残り少" : "Low Stock"
@@ -400,7 +404,8 @@ enum ReplacementStatus {
     case ok, soon, overdue, unknown
 
     var label: String {
-        let isJP = UserDefaults.standard.string(forKey: "app_language") != "en"
+        let lang = UserDefaults.standard.string(forKey: "app_language") ?? "ja"
+        let isJP = lang == "ja"
         switch self {
         case .ok:      return isJP ? "正常" : "OK"
         case .soon:    return isJP ? "交換まもなく" : "Due Soon"
