@@ -268,7 +268,7 @@ struct MyPageView: View {
                 Label(L(.sendFeedback), systemImage: "envelope.fill")
             }
             Button {
-                if let url = URL(string: "itms-apps://itunes.apple.com/app/id0000000000?action=write-review") {
+                if let url = URL(string: "itms-apps://itunes.apple.com/app/id6773132207?action=write-review") {
                     UIApplication.shared.open(url)
                 }
             } label: {
