@@ -264,7 +264,7 @@ struct MyPageView: View {
             Button { showHelp = true } label: {
                 Label(L(.howToUse), systemImage: "book.fill").foregroundStyle(.primary)
             }
-            Link(destination: URL(string: "mailto:ilmary.rosehip@gmail.com")!) {
+            Link(destination: URL(string: "mailto:pikari.apps@gmail.com")!) {
                 Label(L(.sendFeedback), systemImage: "envelope.fill")
             }
             Button {
