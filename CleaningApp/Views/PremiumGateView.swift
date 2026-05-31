@@ -160,7 +160,7 @@ struct PaywallView: View {
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
-                        .disabled(premium.isPurchasing || premium.premiumProduct == nil)
+                        .disabled(premium.isPurchasing)
 
                         if let error = premium.errorMessage {
                             Text(error).font(.caption).foregroundStyle(.red)
