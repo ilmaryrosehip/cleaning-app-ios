@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7607B0BD2FCF970000B5919A /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 7607B0BC2FCF970000B5919A /* Products.storekit */; };
+		7607B0BE2FCF970000B5919A /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 7607B0BC2FCF970000B5919A /* Products.storekit */; };
 		769B89762FB29EA20001CCB2 /* WidgetSharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 769B89752FB29EA20001CCB2 /* WidgetSharedData.swift */; };
 		769CD6BD2FB5341F00B21E63 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 769CD6BC2FB5341F00B21E63 /* WidgetKit.framework */; };
 		769CD6BF2FB5341F00B21E63 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 769CD6BE2FB5341F00B21E63 /* SwiftUI.framework */; };
@@ -68,6 +70,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7607B0BC2FCF970000B5919A /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = Products.storekit; path = PikariWidget/Products.storekit; sourceTree = "<group>"; };
 		769B89752FB29EA20001CCB2 /* WidgetSharedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSharedData.swift; sourceTree = "<group>"; };
 		769CD6BA2FB5341F00B21E63 /* PikariWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PikariWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		769CD6BC2FB5341F00B21E63 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -180,6 +183,7 @@
 		ROOT = {
 			isa = PBXGroup;
 			children = (
+				7607B0BC2FCF970000B5919A /* Products.storekit */,
 				769CD6D92FB5381C00B21E63 /* PikariWidgetExtension.entitlements */,
 				APPGROUP /* CleaningApp */,
 				TESTGROUP /* CleaningAppTests */,
@@ -327,6 +331,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7607B0BD2FCF970000B5919A /* Products.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +339,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7607B0BE2FCF970000B5919A /* Products.storekit in Resources */,
 				B008 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -408,7 +414,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4VBCU2M332;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -438,7 +444,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4VBCU2M332;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -509,7 +515,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4VBCU2M332;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -540,7 +546,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -565,7 +571,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -593,7 +599,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4VBCU2M332;
 				GENERATE_INFOPLIST_FILE = YES;
