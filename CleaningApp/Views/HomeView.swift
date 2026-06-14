@@ -198,57 +198,170 @@ struct TaskSectionView: View {
     }
 }
 
+// MARK: - TaskCardView（汚れゲージ・スワイプ完了・延期機能）
+
 struct TaskCardView: View {
     @Environment(\.modelContext) private var context
     @Bindable var task: CleaningTask
     @State private var showComplete = false
+    @State private var showSkipMenu = false
+    @State private var swipeOffset: CGFloat = 0
+    private let swipeThreshold: CGFloat = 80
+
+    // 汚れゲージ：前回の掃除からどれだけ経過したか（0.0〜1.0）
+    private var dirtyProgress: Double {
+        guard let lastLog = task.logs.sorted(by: { $0.completedAt > $1.completedAt }).first else {
+            return 1.0 // 未掃除 → 最大
+        }
+        let totalDays = max(1, task.intervalDays > 0 ? task.intervalDays : 7)
+        let elapsed = Calendar.current.dateComponents([.day], from: lastLog.completedAt, to: .now).day ?? 0
+        return min(1.0, Double(elapsed) / Double(totalDays))
+    }
+
+    private var gaugeColor: Color {
+        if dirtyProgress >= 1.0 { return .red }
+        if dirtyProgress >= 0.7 { return .orange }
+        return .teal
+    }
+
+    private var gaugeLabel: String {
+        let isJP = LocalizationManager.shared.language == .japanese
+        if let lastLog = task.logs.sorted(by: { $0.completedAt > $1.completedAt }).first {
+            let days = Calendar.current.dateComponents([.day], from: lastLog.completedAt, to: .now).day ?? 0
+            if days == 0 { return isJP ? "今日掃除済み ✓" : "Cleaned today ✓" }
+            if dirtyProgress >= 1.0 { return isJP ? "そろそろ掃除の時間です" : "Time to clean!" }
+            return isJP ? "前回から\(days)日経過" : "\(days)d since last clean"
+        }
+        return isJP ? "まだ掃除記録がありません" : "No cleaning record yet"
+    }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Button { showComplete = true } label: {
-                Circle().stroke(Color.teal.opacity(0.6), lineWidth: 1.5)
-                    .frame(width: 24, height: 24)
-                    .overlay(Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(.teal).opacity(0.4))
-            }
-            .buttonStyle(.plain)
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(task.room?.name ?? "").font(.caption).foregroundStyle(.secondary)
-                    Spacer()
-                    StatusBadge(task: task)
+        ZStack {
+            // スワイプ背景（完了ボタン）
+            HStack {
+                Spacer()
+                VStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill").font(.title2)
+                    Text(L(.done)).font(.caption2).fontWeight(.semibold)
                 }
-                Text(task.title).font(.subheadline).fontWeight(.medium)
+                .foregroundStyle(.white)
+                .frame(width: 72)
+                .frame(maxHeight: .infinity)
+                .background(Color.teal)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .opacity(swipeOffset < -20 ? 1 : 0)
+            }
 
-                if !task.fixtures.isEmpty || !task.supplies.isEmpty {
-                    HStack(spacing: 4) {
-                        ForEach(Array(task.fixtures.prefix(2))) { fixture in
-                            Label(fixture.name, systemImage: fixture.icon)
-                                .font(.caption2)
-                                .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(Color.teal.opacity(0.1))
-                                .clipShape(RoundedRectangle(cornerRadius: 4))
-                                .foregroundStyle(.teal)
-                        }
-                        ForEach(Array(task.supplies.prefix(2))) { supply in
-                            Text(supply.name)
-                                .font(.caption2)
-                                .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(Color(.systemGray5))
-                                .clipShape(RoundedRectangle(cornerRadius: 4))
+            // メインカード
+            HStack(alignment: .top, spacing: 12) {
+                // 完了ボタン（タップ）
+                Button { showComplete = true } label: {
+                    Circle().stroke(Color.teal.opacity(0.6), lineWidth: 1.5)
+                        .frame(width: 24, height: 24)
+                        .overlay(Image(systemName: "checkmark")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.teal).opacity(0.4))
+                }
+                .buttonStyle(.plain)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(task.room?.name ?? "").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        StatusBadge(task: task)
+                        // 延期メニュー
+                        Button { showSkipMenu = true } label: {
+                            Image(systemName: "ellipsis")
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
+                                .padding(4)
+                        }
+                        .buttonStyle(.plain)
+                        .confirmationDialog(
+                            LocalizationManager.shared.language == .japanese ? "タスクを延期" : "Postpone Task",
+                            isPresented: $showSkipMenu
+                        ) {
+                            Button(LocalizationManager.shared.language == .japanese ? "明日に延期" : "Postpone to Tomorrow") { skipTask(days: 1) }
+                            Button(LocalizationManager.shared.language == .japanese ? "3日後に延期" : "Postpone 3 Days") { skipTask(days: 3) }
+                            Button(LocalizationManager.shared.language == .japanese ? "1週間後に延期" : "Postpone 1 Week") { skipTask(days: 7) }
+                            Button(LocalizationManager.shared.language == .japanese ? "キャンセル" : "Cancel", role: .cancel) {}
+                        }
+                    }
+
+                    Text(task.title).font(.subheadline).fontWeight(.medium)
+
+                    // 汚れゲージ
+                    VStack(alignment: .leading, spacing: 2) {
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Color(.systemGray5))
+                                    .frame(height: 5)
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(gaugeColor)
+                                    .frame(width: geo.size.width * dirtyProgress, height: 5)
+                                    .animation(.easeInOut(duration: 0.3), value: dirtyProgress)
+                            }
+                        }
+                        .frame(height: 5)
+                        Text(gaugeLabel)
+                            .font(.caption2)
+                            .foregroundStyle(gaugeColor)
+                    }
+
+                    if !task.fixtures.isEmpty || !task.supplies.isEmpty {
+                        HStack(spacing: 4) {
+                            ForEach(Array(task.fixtures.prefix(2))) { fixture in
+                                Label(fixture.name, systemImage: fixture.icon)
+                                    .font(.caption2)
+                                    .padding(.horizontal, 6).padding(.vertical, 2)
+                                    .background(Color.teal.opacity(0.1))
+                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                    .foregroundStyle(.teal)
+                            }
+                            ForEach(Array(task.supplies.prefix(2))) { supply in
+                                Text(supply.name)
+                                    .font(.caption2)
+                                    .padding(.horizontal, 6).padding(.vertical, 2)
+                                    .background(Color(.systemGray5))
+                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
             }
+            .padding(12)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray5), lineWidth: 0.5))
+            .offset(x: swipeOffset)
+            .gesture(
+                DragGesture()
+                    .onChanged { v in
+                        if v.translation.width < 0 {
+                            swipeOffset = max(v.translation.width, -(swipeThreshold + 20))
+                        }
+                    }
+                    .onEnded { v in
+                        if v.translation.width < -swipeThreshold {
+                            withAnimation(.spring()) { swipeOffset = -100 }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                showComplete = true
+                                withAnimation { swipeOffset = 0 }
+                            }
+                        } else {
+                            withAnimation(.spring()) { swipeOffset = 0 }
+                        }
+                    }
+            )
         }
-        .padding(12)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray5), lineWidth: 0.5))
         .sheet(isPresented: $showComplete) { CompleteTaskSheet(task: task) }
+    }
+
+    private func skipTask(days: Int) {
+        task.nextDueDate = Calendar.current.date(byAdding: .day, value: days, to: .now) ?? .now
+        try? context.save()
     }
 }
 
