@@ -113,6 +113,8 @@ enum L10nKey {
     case today, upcoming, overdue, daysOverdue, daysLater, tomorrow
     case recordCompletion, duplicateWarning, duplicateMessage, recordAnyway
     case partsUsed, partsUsedFooter, stockCount, noTasks, noTasksHint, all
+    // 完了・延期
+    case done, postpone, postponeTomorrow, postpone3days, postpone1week
     // カレンダー追加
     case noSchedule
     // レポート追加
@@ -277,6 +279,11 @@ extension L10nKey {
         case .noTasks: return "タスクがありません"
         case .noTasksHint: return "右上の＋ボタンでタスクを追加しましょう"
         case .all: return "すべて"
+        case .done: return "完了"
+        case .postpone: return "延期"
+        case .postponeTomorrow: return "明日に延期"
+        case .postpone3days: return "3日後に延期"
+        case .postpone1week: return "1週間後に延期"
         case .noSchedule: return "この日の予定・記録はありません"
         case .noData: return "データがありません"
         case .completedOn: return "完了日時"
@@ -474,6 +481,11 @@ extension L10nKey {
         case .noTasks: return "No Tasks"
         case .noTasksHint: return "Tap + to add your first task"
         case .all: return "All"
+        case .done: return "Done"
+        case .postpone: return "Postpone"
+        case .postponeTomorrow: return "Postpone to Tomorrow"
+        case .postpone3days: return "Postpone 3 Days"
+        case .postpone1week: return "Postpone 1 Week"
         case .noSchedule: return "No tasks or records for this day"
         case .noData: return "No data available"
         case .completedOn: return "Completed At"
