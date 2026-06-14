@@ -263,6 +263,8 @@ struct AddRoomSheet: View {
     }
 }
 
+// MARK: - AddTaskSheet（プリセットライブラリ追加）
+
 struct AddTaskSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -277,6 +279,7 @@ struct AddTaskSheet: View {
     @State private var nextDueDate = Date.now
     @State private var estimatedMinutes = 15
     @State private var notes = ""
+    @State private var showPresetPicker = false
 
     @Query private var allSupplies: [Supply]
     @State private var selectedSupplyIDs: Set<UUID> = []
@@ -289,7 +292,28 @@ struct AddTaskSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(L(.taskName)) { TextField(LocalizationManager.shared.language == .japanese ? "例: フィルター清掃" : "e.g. Filter cleaning", text: $title) }
+                // プリセットから選ぶ
+                Section {
+                    Button {
+                        showPresetPicker = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "list.bullet.rectangle")
+                                .foregroundStyle(.teal)
+                            Text(LocalizationManager.shared.language == .japanese ? "よくある掃除タスクから選ぶ" : "Choose from common tasks")
+                                .foregroundStyle(.teal)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Section(L(.taskName)) {
+                    TextField(LocalizationManager.shared.language == .japanese ? "例: フィルター清掃" : "e.g. Filter cleaning", text: $title)
+                }
                 Section(LocalizationManager.shared.language == .japanese ? "設定" : "Settings") {
                     Picker(L(.room), selection: $selectedRoom) {
                         Text(LocalizationManager.shared.language == .japanese ? "選択してください" : "Select...").tag(Optional<Room>.none)
@@ -366,6 +390,14 @@ struct AddTaskSheet: View {
                 }
             }
             .onAppear { selectedRoom = preselectedRoom ?? home.rooms.first }
+            .sheet(isPresented: $showPresetPicker) {
+                TaskPresetPickerSheet { preset in
+                    title = preset.name
+                    frequency = preset.frequency
+                    estimatedMinutes = preset.estimatedMinutes
+                    showPresetPicker = false
+                }
+            }
         }
     }
 
@@ -380,6 +412,85 @@ struct AddTaskSheet: View {
         context.insert(task)
         try? context.save()
         dismiss()
+    }
+}
+
+// MARK: - タスクプリセット選択シート
+
+struct TaskPresetPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let onSelect: (TaskPreset) -> Void
+    @State private var searchText = ""
+    @State private var localization = LocalizationManager.shared
+
+    private var isJP: Bool { LocalizationManager.shared.language == .japanese }
+
+    private var filteredCategories: [(nameJA: String, nameEN: String, icon: String, presets: [TaskPreset])] {
+        if searchText.isEmpty { return TaskPreset.allCategories }
+        return TaskPreset.allCategories.compactMap { cat in
+            let filtered = cat.presets.filter {
+                $0.nameJA.contains(searchText) || $0.nameEN.localizedCaseInsensitiveContains(searchText)
+            }
+            return filtered.isEmpty ? nil : (cat.nameJA, cat.nameEN, cat.icon, filtered)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(filteredCategories, id: \.nameJA) { cat in
+                    Section {
+                        ForEach(cat.presets) { preset in
+                            Button {
+                                onSelect(preset)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: preset.icon)
+                                        .font(.title3)
+                                        .foregroundStyle(.teal)
+                                        .frame(width: 32)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(preset.name)
+                                            .font(.subheadline)
+                                            .fontWeight(.medium)
+                                            .foregroundStyle(.primary)
+                                        HStack(spacing: 6) {
+                                            Text(preset.frequency.label)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                            Text("·")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                            Text(isJP ? "約\(preset.estimatedMinutes)分" : "~\(preset.estimatedMinutes)min")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    Spacer()
+                                    Image(systemName: "plus.circle")
+                                        .foregroundStyle(.teal)
+                                        .font(.title3)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } header: {
+                        Label(isJP ? cat.nameJA : cat.nameEN, systemImage: cat.icon)
+                    }
+                }
+            }
+            .searchable(
+                text: $searchText,
+                prompt: isJP ? "タスクを検索" : "Search tasks"
+            )
+            .navigationTitle(isJP ? "よくある掃除タスク" : "Common Cleaning Tasks")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L(.cancel)) { dismiss() }
+                }
+            }
+        }
     }
 }
 
