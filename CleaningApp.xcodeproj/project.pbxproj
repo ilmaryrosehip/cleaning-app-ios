@@ -36,6 +36,7 @@
 		B021 /* MyPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A022 /* MyPageView.swift */; };
 		B022 /* LanguageSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023 /* LanguageSelectView.swift */; };
 		B023 /* LegalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A024 /* LegalView.swift */; };
+		B024 /* TaskPresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A025 /* TaskPresets.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +102,7 @@
 		A022 /* MyPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageView.swift; sourceTree = "<group>"; };
 		A023 /* LanguageSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectView.swift; sourceTree = "<group>"; };
 		A024 /* LegalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalView.swift; sourceTree = "<group>"; };
+		A025 /* TaskPresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskPresets.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -160,6 +162,7 @@
 				769B89752FB29EA20001CCB2 /* WidgetSharedData.swift */,
 				A001 /* CleaningApp.swift */,
 				A002 /* CleaningModels.swift */,
+				A025 /* TaskPresets.swift */,
 				A003 /* ContentView.swift */,
 				A014 /* NotificationManager.swift */,
 				A017 /* PremiumManager.swift */,
@@ -360,6 +363,7 @@
 			files = (
 				B001 /* CleaningApp.swift in Sources */,
 				B002 /* CleaningModels.swift in Sources */,
+				B024 /* TaskPresets.swift in Sources */,
 				B003 /* ContentView.swift in Sources */,
 				B004 /* OnboardingView.swift in Sources */,
 				B005 /* HomeView.swift in Sources */,
