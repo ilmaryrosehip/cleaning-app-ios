@@ -113,7 +113,6 @@ struct HomeView: View {
             .sorted { $0.nextDueDate < $1.nextDueDate }
             .first.map { toWidgetEntry($0) }
 
-        // 在庫不足パーツ
         let lowStock: [WidgetPartEntry] = home.rooms
             .flatMap { $0.fixtures }
             .flatMap { $0.parts }
@@ -121,7 +120,6 @@ struct HomeView: View {
             .sorted { $0.stockCount < $1.stockCount }
             .map { WidgetPartEntry(id: $0.id, name: $0.name, fixtureName: $0.fixture?.name ?? "", stockCount: $0.stockCount) }
 
-        // 週間達成数
         let weeklyDone = allTasks.flatMap { $0.logs }.filter { $0.completedAt >= weekAgo }.count
 
         let data = WidgetSharedData(
@@ -208,14 +206,35 @@ struct TaskCardView: View {
     @State private var swipeOffset: CGFloat = 0
     private let swipeThreshold: CGFloat = 80
 
-    // 汚れゲージ：前回の掃除からどれだけ経過したか（0.0〜1.0）
+    // MARK: 汚れゲージ
+    // nextDueDateを基準に計算する：
+    // - 期限超過（overdue）→ 1.0（赤）
+    // - 今日が期限（today）→ 0.85〜1.0（オレンジ〜赤）
+    // - 期限まで余裕あり → 経過割合（緑〜オレンジ）
     private var dirtyProgress: Double {
-        guard let lastLog = task.logs.sorted(by: { $0.completedAt > $1.completedAt }).first else {
-            return 1.0 // 未掃除 → 最大
+        let cal = Calendar.current
+        let now = Date.now
+
+        if task.isOverdue {
+            // 超過日数に応じて1.0以上にはしないが最大を返す
+            return 1.0
         }
-        let totalDays = max(1, task.intervalDays > 0 ? task.intervalDays : 7)
-        let elapsed = Calendar.current.dateComponents([.day], from: lastLog.completedAt, to: .now).day ?? 0
-        return min(1.0, Double(elapsed) / Double(totalDays))
+
+        // 前回完了日（ログがある場合）または nextDueDate からインターバルを引いた日
+        let cycleStart: Date
+        if let lastLog = task.logs.sorted(by: { $0.completedAt > $1.completedAt }).first {
+            cycleStart = lastLog.completedAt
+        } else {
+            // 完了ログなし → nextDueDateからintervalDays分遡った日をスタートとする
+            let interval = max(1, task.intervalDays > 0 ? task.intervalDays : 7)
+            cycleStart = cal.date(byAdding: .day, value: -interval, to: task.nextDueDate) ?? task.nextDueDate
+        }
+
+        let totalSeconds = task.nextDueDate.timeIntervalSince(cycleStart)
+        let elapsedSeconds = now.timeIntervalSince(cycleStart)
+
+        guard totalSeconds > 0 else { return 1.0 }
+        return min(1.0, max(0.0, elapsedSeconds / totalSeconds))
     }
 
     private var gaugeColor: Color {
@@ -226,13 +245,23 @@ struct TaskCardView: View {
 
     private var gaugeLabel: String {
         let isJP = LocalizationManager.shared.language == .japanese
-        if let lastLog = task.logs.sorted(by: { $0.completedAt > $1.completedAt }).first {
-            let days = Calendar.current.dateComponents([.day], from: lastLog.completedAt, to: .now).day ?? 0
-            if days == 0 { return isJP ? "今日掃除済み ✓" : "Cleaned today ✓" }
-            if dirtyProgress >= 1.0 { return isJP ? "そろそろ掃除の時間です" : "Time to clean!" }
-            return isJP ? "前回から\(days)日経過" : "\(days)d since last clean"
+        let cal = Calendar.current
+
+        if task.isOverdue {
+            let days = cal.dateComponents([.day], from: task.nextDueDate, to: .now).day ?? 0
+            return isJP ? "\(days)日超過しています" : "\(days) days overdue"
         }
-        return isJP ? "まだ掃除記録がありません" : "No cleaning record yet"
+        if task.isDueToday {
+            return isJP ? "今日が掃除の日です" : "Clean today!"
+        }
+        if let lastLog = task.logs.sorted(by: { $0.completedAt > $1.completedAt }).first {
+            let days = cal.dateComponents([.day], from: lastLog.completedAt, to: .now).day ?? 0
+            if days == 0 { return isJP ? "今日掃除済み ✓" : "Cleaned today ✓" }
+            let remaining = cal.dateComponents([.day], from: .now, to: task.nextDueDate).day ?? 0
+            return isJP ? "前回から\(days)日経過（あと\(remaining)日）" : "\(days)d since last clean (\(remaining)d left)"
+        }
+        let remaining = cal.dateComponents([.day], from: .now, to: task.nextDueDate).day ?? 0
+        return isJP ? "あと\(remaining)日" : "\(remaining) days left"
     }
 
     var body: some View {
@@ -254,7 +283,6 @@ struct TaskCardView: View {
 
             // メインカード
             HStack(alignment: .top, spacing: 12) {
-                // 完了ボタン（タップ）
                 Button { showComplete = true } label: {
                     Circle().stroke(Color.teal.opacity(0.6), lineWidth: 1.5)
                         .frame(width: 24, height: 24)
@@ -269,7 +297,6 @@ struct TaskCardView: View {
                         Text(task.room?.name ?? "").font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         StatusBadge(task: task)
-                        // 延期メニュー
                         Button { showSkipMenu = true } label: {
                             Image(systemName: "ellipsis")
                                 .font(.caption)
