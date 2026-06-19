@@ -395,6 +395,11 @@ struct AddTaskSheet: View {
                     title = preset.name
                     frequency = preset.frequency
                     estimatedMinutes = preset.estimatedMinutes
+                    // プリセットのカテゴリから部屋を自動マッチング
+                    // preselectedRoom がある場合はそちらを優先しない（プリセットの部屋を優先）
+                    if let matched = preset.bestMatchRoom(in: home.rooms) {
+                        selectedRoom = matched
+                    }
                     showPresetPicker = false
                 }
             }
